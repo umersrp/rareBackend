@@ -608,6 +608,9 @@ const getAdvanceSearch = asyncHandler(async (req, res) => {
          
             if (availableId) {
                  const avaiability  = avaiabilityData.find(avaiability =>avaiability?.porpertyid === _id.toString());
+
+
+                 
                 // updatedProperty.multivaluation = avaiability?.multivaluation;
                 // updatedProperty.propertystatus = avaiability?.propertystatus;
                 // updatedProperty.unlisted = avaiability?.unlisted;
