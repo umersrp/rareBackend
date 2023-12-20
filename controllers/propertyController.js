@@ -39,17 +39,8 @@ const getAllPropertyConnect = async (req, res) => {
    
     const skip = (offset - 1) * limit 
     try{
-       
-        // const allProperties = await AddProperty.find({
-        //     $and: [
-        //         { softdelete: { $ne: true } },
-        //         { owner_changed: { $ne: true } } // Filter out softdeleted bookings
-        //     ]
-        // }).limit(limit).skip(skip)
-
         const allProperties = await AddProperty.find({
             $and: [
-                { unitnumber : req.query.unitnumber },
                 { softdelete: { $ne: true } },
                 { owner_changed: { $ne: true } } // Filter out softdeleted bookings
             ]
@@ -610,7 +601,7 @@ const getAdvanceSearch = asyncHandler(async (req, res) => {
                  const avaiability  = avaiabilityData.find(avaiability =>avaiability?.porpertyid === _id.toString());
 
 
-                 
+
                 // updatedProperty.multivaluation = avaiability?.multivaluation;
                 // updatedProperty.propertystatus = avaiability?.propertystatus;
                 // updatedProperty.unlisted = avaiability?.unlisted;
