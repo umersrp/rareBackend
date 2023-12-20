@@ -1,0 +1,26 @@
+const express = require('express')
+const router = express.Router()
+const employeeController = require('../controllers/employeeController')
+
+router.route("/:id").get(employeeController.getEmployee)
+router.route('/:id/verify/:token').get(employeeController.verifyEmail)
+router.route("/login").post(employeeController.logInRole)
+router.route("/pagination/pages").get(employeeController.getPaginationEmployee)
+router.route("/api/search/:key").get(employeeController.getSearchEmployee)
+router.route("/api/withdate").get(employeeController.getPaginationEmployeeWithDate)
+router.route("/api/erpemployee").post(employeeController.createNewEmployeeFromERP)
+router.route("/api/erpemployee/app").post(employeeController.createNewEmployeeFromERPApp)
+router.route("/api/erpemployee/app").patch(employeeController.employeeUpdateErpApp)
+router.route("/api/erpemployee").put(employeeController.employeeUpdateErp)
+router.route("/api/erpemployee").get(employeeController.getAllEmployeesWithErpId)
+router.route("/api/rolesdatacheck").get(employeeController.getRolesForEmployee)
+router.route("/api/search/mobile/:key").get(employeeController.getEmployeeSearhed)
+router.route('/api/employeedelete').patch(employeeController.updateEmployeeCancel)
+
+router.route('/')
+    .get(employeeController.getAllEmployees)
+    .post(employeeController.createNewEmployee)
+    .patch(employeeController.employeeUpdate)
+    .delete(employeeController.deleteEmployee)
+
+module.exports = router
