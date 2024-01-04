@@ -4,14 +4,17 @@ module.exports = {
     script: 'yarn start',
     env: {
       PORT: 8080,
-      DATABASE_URI: "mongodb+srv://taha:1Pakistan23@dev-rare-db.jabkunr.mongodb.net/?retryWrites=true&w=majority",
-      BASE_URL: "http://dev.srp.ai/",
-      HOST: "smtp.gmail.com",
-      SERVICE: "gmail",
-      EMAIL_PORT: 587,
-      SECURE: true,
-      USER: "staha381@gmail.com",
-      PASS: "jsvrgdxfnxxbzzgz",
+      DATABASE_URI:"mongodb+srv://taha:2VRG2CbfDvxUDzpn@dev-rare-db.jabkunr.mongodb.net/",
+      OWN_SERVER:"http://localhost:3600",
+      HOST:"srp.ai",
+      SERVICE:"gmail",
+      EMAIL_PORT:465,
+      SECURE:true,
+      USER:"rare@srca.com.pk",
+      PASS:"1Pakistan23@",
+      USER_RARE:"notification@rarehomes.ae",
+      ERP_URL:"https://rare-staging.srp.ai/api/resource",
+      ERP_TOKEN:"Token 66d237a05bf1789:bf553d9a4de7d8d",
     }
   }
   ]
