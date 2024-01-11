@@ -1,0 +1,16 @@
+#DATABASE_URI=mongodb+srv://taha:1Pakistan23@dev-rare-db.jabkunr.mongodb.net/?retryWrites=true&w=majority
+DATABASE_URI=mongodb+srv://rare_user:LGT7pWdZ3Tv4Y7PX@rare-db.ecj5aq5.mongodb.net/test
+OWN_SERVER=http://localhost:3600
+BASE_URL=http://localhost:5173/
+# OWN_SERVER=http://stg.srp.ai
+# BASE_URL=http://stg.srp.ai/
+HOST=srp.ai
+SERVICE=gmail
+EMAIL_PORT=465,
+SECURE=true,
+USER=rare@srca.com.pk
+PASS=1Pakistan23@
+USER_RARE=notification@rarehomes.ae
+# PASS=Rarehomes#611
+ERP_URL=https://rare-staging.srp.ai/api/resource
+ERP_TOKEN=Token 66d237a05bf1789:bf553d9a4de7d8d
