@@ -50,10 +50,11 @@ app.use('/powerattorney', require('./routes/PowerAttorneyRoute'))
 app.use('/bankdetails', require('./routes/BankDetailsRoute'))
 
 app.use(express.static(path.join(__dirname, "./build")));
-app.use('/public', express.static(path.join('public')))
+app.use('/public', express.static(path.join('public')));
 app.get('/*', function (req, res) {
     return res.sendFile(path.resolve(__dirname, './build', 'index.html'));
 });
+
 // app.use(() => (err, req, res, next) => {
 //     if (err instanceof multer.MulterError) {
 //         return res.status(418).send(err.code);
