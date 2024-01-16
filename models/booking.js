@@ -5,7 +5,7 @@ const bookingSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         // type: String,
         require: true,
-        ref: 'addProperty'
+        ref: 'AddProperty'
     },
     unitnumber: {
         type: String,
@@ -20,6 +20,10 @@ const bookingSchema = new mongoose.Schema({
         require: true
     },
     buildingnumber: {
+        type: String,
+        require: true
+    },
+    propertylocation: {
         type: String,
         require: true
     },

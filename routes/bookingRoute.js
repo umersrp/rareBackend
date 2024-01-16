@@ -22,6 +22,8 @@ router.route('/api/withdate').get(bookingController.getPaginationBookingWithDate
 router.route('/api/search/:key').get(bookingController.getSearchBooking)
 router.route('/api/searchforcustomer/:key').get(bookingController.getSearchBookingByCustomer)
 router.route('/api/reservationdate').get(bookingController.getBookingReservation)
+router.route('/summary/:propertyid').get(bookingController.getSummaryOfProperty)
+router.route('/summarybyDates/:propertyid').get(bookingController.getSummaryOfPropertyByDates)
 router.route('/api/joindata').get(bookingController.getAllBookingData)
 router.route('/api/convertkrde').patch(bookingController.convertCustomerIdToObjectId)
 router.route('/api/yearly').get(bookingController.getBookingYearly)

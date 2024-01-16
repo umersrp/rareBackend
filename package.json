@@ -31,14 +31,12 @@
     "node-cron": "^3.0.2",
     "nodemailer": "^6.8.0",
     "nodemailer-express-handlebars": "^6.0.0",
+    "nodemon": "^2.0.22",
     "pdfkit": "^0.13.0",
     "puppeteer": "^21.4.1",
     "redis": "^4.6.7",
     "text-encoding": "^0.7.0",
     "text-encoding-utf-8": "^1.0.2",
     "uuid": "^9.0.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.2"
   }
 }

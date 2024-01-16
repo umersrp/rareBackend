@@ -100,12 +100,19 @@ const getAllSaleRegister = asyncHandler(async (req, res) => {
 })
 
 const getSaleRegisterById = asyncHandler(async (req, res) => {
-    const SaleRegisterById = await SaleRegister.findById(req.params.id)
+    const id = req.params.id
+    const SaleRegisterById = await SaleRegister.findOne({ _id : id}).populate('seller_id')
+   // console.log("SaleRegisterById",SaleRegisterById)
     if (!SaleRegisterById) {
         return res.status(400).json({ message: "No Sale Register found" })
     }
 
-    const UserData = await User.findById(SaleRegisterById.buyer_id);
+    const UserData = await User.findOne({ buyer_id : SaleRegisterById.buyer_id });
+
+    if(UserData == ''){
+        return res.status(400).json({ message: "No Buyers data found" })
+    }
+
     const updatedSaleRegisterById = {
         ...SaleRegisterById.toObject(),
         buyer_name: UserData?.firstname + " " + UserData?.lastname,

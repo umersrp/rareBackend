@@ -9,15 +9,13 @@ const dotenv = require('dotenv')
 const bodyParser = require('body-parser')
 const multer = require('multer')
 const upload = multer();
-
 const app = express()
-dotenv.config()
+
 const PORT = process.env.PORT || 3600
 
+dotenv.config()
 
 connectDB()
-.then((res) => console.log(`database connected successfully`))
-.catch((err)=> console.log(`database not connected`))
 
 app.use(cors({ origin: "*" }))
 
@@ -53,15 +51,16 @@ app.use('/bankdetails', require('./routes/BankDetailsRoute'))
 
 app.use(express.static(path.join(__dirname, "./build")));
 app.use('/public', express.static(path.join('public')))
-// app.get('/', function (req, res) {
-//     return res.sendFile(path.resolve(__dirname, './build', 'index.html'));
-// });
+app.get('/*', function (req, res) {
+    return res.sendFile(path.resolve(__dirname, './build', 'index.html'));
+});
 // app.use(() => (err, req, res, next) => {
 //     if (err instanceof multer.MulterError) {
 //         return res.status(418).send(err.code);
 //     }
 // });
 
-
-    app
-    .listen(PORT, () => console.log(`Server is running on PORT ${PORT}`))
+mongoose.connection.once('open', () => {
+    console.log('Connected to mongoDB')
+    app.listen(PORT, () => console.log(`Srerver is running on PORT ${PORT}`))
+})
