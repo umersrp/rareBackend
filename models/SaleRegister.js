@@ -10,8 +10,9 @@ const SaleRegisterSchema = new mongoose.Schema({
         require: true,
     },
     seller_id: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         require: true,
+        ref: 'User'
     },
     property_new: {
         type: Boolean,

@@ -9,15 +9,13 @@ const dotenv = require('dotenv')
 const bodyParser = require('body-parser')
 const multer = require('multer')
 const upload = multer();
-
 const app = express()
 dotenv.config()
+
 const PORT = process.env.PORT || 3600
 
 
 connectDB()
-.then((res) => console.log(`database connected successfully`))
-.catch((err)=> console.log(`database not connected`))
 
 app.use(cors({ origin: "*" }))
 
@@ -63,6 +61,7 @@ app.get('/*', function (req, res) {
 //     }
 // });
 
-
-    app
-    .listen(PORT, () => console.log(`Server is running on PORT ${PORT}`))
+mongoose.connection.once('open', () => {
+    console.log('Connected to mongoDB')
+    app.listen(PORT, () => console.log(`Srerver is running on PORT ${PORT}`))
+})

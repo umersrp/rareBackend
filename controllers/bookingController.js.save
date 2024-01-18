@@ -1,0 +1,1215 @@
+const Booking = require('../models/booking')
+const asyncHandler = require('express-async-handler')
+const mongoose = require('mongoose')
+const AddProperty = require('../models/addProperty')
+const BuildingName = require('../models/buildingName')
+const ProjectName = require('../models/projectName')
+const CommunityName = require('../models/communityname')
+const SubType = require('../models/subType')
+const User = require('../models/User')
+const Employee = require('../models/employee')
+const sendEmail = require('../utils/sendEmail')
+const moment = require('moment-timezone');
+
+const getAllBooking = asyncHandler(async (req, res) => {
+    const allbooking = await Booking.find({
+        $and: [
+            { softdelete: { $ne: true } } // Filter out softdeleted bookings
+        ]
+    })
+        .sort({ _id: "descending" })
+    if (!allbooking?.length) {
+        return res.status(400).json({ message: "No Booking found" })
+    }
+
+    const propertyIds = allbooking.map(property => property?.propertyid);
+    // const customerIds = allbooking.map(customer => customer?.customerid);
+    const employeeIds = allbooking.map(employee => employee.createdBy);
+    const employeeIdsUpdatedBy = allbooking.map(employee => employee.updatedBy);
+
+    try {
+        const properties = await AddProperty.find({ _id: { $in: propertyIds } });
+        const buildingIds = properties.map(property => property?.buildingid);
+        const projectnameId = properties.map(property => property?.projectnameid);
+        const communityId = properties.map(property => property?.communityid);
+        const subtypeId = properties.map(property => property?.subtypeid);
+        const customerId = properties.map(property => property?.customerid);
+
+        const buildings = await BuildingName.find({ _id: { $in: buildingIds } });
+        const projectnames = await ProjectName.find({ _id: { $in: projectnameId } });
+        const communityData = await CommunityName.find({ _id: { $in: communityId } });
+        const subtypeData = await SubType.find({ _id: { $in: subtypeId } });
+        const userData = await User.find({ _id: { $in: customerId } });
+        const employeeData = await Employee.find({ _id: { $in: employeeIds } });
+        const employeeDataUpdatedBy = await Employee.find({ _id: { $in: employeeIdsUpdatedBy } });
+        // const customerData = await User.find({ _id: { $in: customerIds } });
+
+
+        const bookingWithAllData = allbooking.map(propertyData => {
+            const propertyObject = propertyData.toObject();
+            const { _id, bookingnumber, cancelled, propertyid, ownerid, guestname, checkintype, nationality, passportnumber, mobilenumber, email, noadults, nochildern, totaloccupants, confirmationcode, reservationdate, bookingagent, modepayment, checkindate, checkoutdate, nonight, tourismfee, securitydeposit, totalpayout, hostservicefee, totalcollectall, cleaningfee, totaladditionalfee, roomrentamount, guestservicefee, guestmanagementfee, vatperbookingrent, vatperservicefee, vatpercleaningfee, vatperguestmanagementfee, vatperhostmanagementfee, totalvatper, totalroomrent, hostmanagementfee, roomrenthostpayable, auditdiff, createdAt, guestservicepercent, createdBy, updatedAt, updatedBy, softdelete } = propertyObject;
+            const updatedBooking = { _id, bookingnumber, cancelled, propertyid, ownerid, guestname, checkintype, nationality, passportnumber, mobilenumber, email, noadults, nochildern, totaloccupants, confirmationcode, reservationdate, bookingagent, modepayment, checkindate, checkoutdate, nonight, tourismfee, securitydeposit, totalpayout, hostservicefee, totalcollectall, cleaningfee, totaladditionalfee, roomrentamount, guestservicefee, guestmanagementfee, vatperbookingrent, vatperservicefee, vatpercleaningfee, vatperguestmanagementfee, vatperhostmanagementfee, totalvatper, totalroomrent, hostmanagementfee, roomrenthostpayable, auditdiff, createdAt, guestservicepercent, createdBy, updatedAt, updatedBy, softdelete };
+            if (propertyid) {
+                const property = properties.find(property => String(property._id) === String(propertyData.propertyid));
+                if (property) {
+                    updatedBooking.unitnumber = property.unitnumber;
+                    updatedBooking.floor = property.floor;
+
+                    const building = buildings.find(building => String(building._id) === String(property.buildingid));
+                    if (building) {
+                        updatedBooking.building_name = building.buildingname;
+                        updatedBooking.buildingid = building._id;
+                    }
+
+                    const projectname = projectnames.find(project => String(project._id) === String(property.projectnameid));
+                    if (projectname) {
+                        updatedBooking.project_name = projectname.projectName;
+                        updatedBooking.projectnameid = projectname._id;
+                    }
+
+                    const community = communityData.find(community => String(community._id) === String(property.communityid));
+                    if (community) {
+                        updatedBooking.community_name = community.communityname;
+                        updatedBooking.communityid = community._id;
+                    }
+
+                    const subtype = subtypeData.find(subtype => String(subtype._id) === String(property.subtypeid));
+                    if (subtype) {
+                        updatedBooking.subtype_name = subtype.subtypename;
+                    }
+
+                    const user = userData.find(userData => String(userData._id) === String(property.customerid));
+                    if (user) {
+                        updatedBooking.owner_name = user?.firstname + " " + user?.lastname;
+                        updatedBooking.customerid = user?._id;
+                    }
+
+                }
+            }
+            const employee = employeeData.find(employee => String(employee._id) === String(createdBy));
+            if (employee) {
+                updatedBooking.employee_email_createdBy = employee?.email;
+            }
+            const employeeUpdatedBy = employeeDataUpdatedBy.find(employee => String(employee._id) === String(updatedBy));
+            if (employeeUpdatedBy) {
+                updatedBooking.employee_email_updatedBy = employeeUpdatedBy?.email;
+            }
+
+            // if(customerData) {
+            //     const user = customerData.find(user => String(user._id) === String(propertyData.customerid));
+            //     if(user) {
+            //         updatedBooking.guest_name = user?.firstname + " " + user?.lastname;
+            //     }
+            // }
+
+            return updatedBooking;
+        });
+
+        const formattedDate = bookingWithAllData?.map(bookingDateSet => {
+            const additionalDate = moment().tz('Asia/Dubai').add(1, 'day').format('DD MMM YYYY');
+            const formattedreservationdate = bookingDateSet.reservationd
+            const formattedcheckindate = bookingDateSet.checkindate ? new Date(bookingDateSet.checkindate).toDateString() : ''
+            const formattedcheckoutdate = bookingDateSet.checkoutdate ? new Date(bookingDateSet.checkoutdate).toDateString() : ''
+            // const formattedCreatedAt = bookingDateSet.createdAt ? new Date(bookingDateSet.createdAt).toDateString() : ''
+            // const formattedreservationdate = bookingDateSet.reservationdate ? moment(bookingDateSet.reservationdate).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+            // const formattedcheckindate = bookingDateSet.checkindate ? moment(bookingDateSet.checkindate).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+            // const formattedcheckoutdate = bookingDateSet.checkoutdate ? moment(bookingDateSet.checkoutdate).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+            // const formattedreservationdate = bookingDateSet.reservationdate ? moment(bookingDateSet.reservationdate).tz('Asia/Dubai').subtract(1, 'day').format('DD MMM YYYY') : '';
+            // const formattedcheckindate = bookingDateSet.checkindate ? moment(bookingDateSet.checkindate).tz('Asia/Dubai').add(1, 'day').format('DD MMM YYYY') : '';
+            // const formattedcheckoutdate = bookingDateSet.checkoutdate ? moment(bookingDateSet.checkoutdate).tz('Asia/Dubai').add(1, 'day').format('DD MMM YYYY') : '';
+            // const formattedCreatedAt = bookingDateSet.createdAt ? moment(bookingDateSet.createdAt).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+            // const formattedupdatedAt = bookingDateSet.updatedAt ? moment(bookingDateSet.updatedAt).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+            // const formattedreservationdate = bookingDateSet.reservationdate ? moment.tz(bookingDateSet.reservationdate, 'Asia/Dubai').format('DD MMM YYYY') : '';
+            // const formattedcheckindate = bookingDateSet.checkindate ? moment.tz(bookingDateSet.checkindate, 'Asia/Dubai').format('DD MMM YYYY') : '';
+            // const formattedcheckoutdate = bookingDateSet.checkoutdate ? moment.tz(bookingDateSet.checkoutdate, 'Asia/Dubai').format('DD MMM YYYY') : '';
+            const formattedCreatedAt = bookingDateSet.createdAt ? moment.tz(bookingDateSet.createdAt, 'Asia/Dubai').format('DD MMM YYYY') : '';
+            const formattedupdatedAt = bookingDateSet.updatedAt ? moment.tz(bookingDateSet.updatedAt, 'Asia/Dubai').format('DD MMM YYYY') : '';
+            // const bookingDateSet_age = bookingDateSet.datebirth ? calculateAge(bookingDateSet.datebirth) : ""
+            return { ...bookingDateSet, reservation_date: formattedreservationdate, checkout_date: formattedcheckoutdate, Created_At: formattedCreatedAt, checkin_date: formattedcheckindate, updated_At: formattedupdatedAt, reservationdate: formattedreservationdate, createdAt: formattedCreatedAt, checkindate: formattedcheckindate, updatedAt: formattedupdatedAt, checkoutdate: formattedcheckoutdate }
+        })
+
+
+        res.json(formattedDate);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server Error" });
+    }
+
+    // return res.json(allbooking)
+})
+
+const getAllBookingWithoutSoftdelete = asyncHandler(async (req, res) => {
+    const allbooking = await Booking.find()
+        .sort({ _id: "descending" })
+    if (!allbooking?.length) {
+        return res.status(400).json({ message: "No Booking found" })
+    }
+
+    const propertyIds = allbooking.map(property => property?.propertyid);
+    // const customerIds = allbooking.map(customer => customer?.customerid);
+    const employeeIds = allbooking.map(employee => employee.createdBy);
+    const employeeIdsUpdatedBy = allbooking.map(employee => employee.updatedBy);
+    try {
+        const properties = await AddProperty.find({ _id: { $in: propertyIds } });
+        const buildingIds = properties.map(property => property?.buildingid);
+        const projectnameId = properties.map(property => property?.projectnameid);
+        const communityId = properties.map(property => property?.communityid);
+        const subtypeId = properties.map(property => property?.subtypeid);
+        const customerId = properties.map(property => property?.customerid);
+
+        const buildings = await BuildingName.find({ _id: { $in: buildingIds } });
+        const projectnames = await ProjectName.find({ _id: { $in: projectnameId } });
+        const communityData = await CommunityName.find({ _id: { $in: communityId } });
+        const subtypeData = await SubType.find({ _id: { $in: subtypeId } });
+        const userData = await User.find({ _id: { $in: customerId } });
+        const employeeData = await Employee.find({ _id: { $in: employeeIds } });
+        const employeeDataUpdatedBy = await Employee.find({ _id: { $in: employeeIdsUpdatedBy } });
+
+        // const customerData = await User.find({ _id: { $in: customerIds } });
+
+
+        const bookingWithAllData = allbooking.map(propertyData => {
+            const propertyObject = propertyData.toObject();
+            const { _id, bookingnumber, cancelled, propertyid, ownerid, guestname, checkintype, nationality, passportnumber, mobilenumber, email, noadults, nochildern, totaloccupants, confirmationcode, reservationdate, bookingagent, modepayment, checkindate, checkoutdate, nonight, tourismfee, securitydeposit, totalpayout, hostservicefee, totalcollectall, cleaningfee, totaladditionalfee, roomrentamount, guestservicefee, guestmanagementfee, vatperbookingrent, vatperservicefee, vatpercleaningfee, vatperguestmanagementfee, vatperhostmanagementfee, totalvatper, totalroomrent, hostmanagementfee, roomrenthostpayable, auditdiff, createdAt, guestservicepercent, createdBy, updatedBy, softdelete } = propertyObject;
+            const updatedBooking = { _id, bookingnumber, cancelled, propertyid, ownerid, guestname, checkintype, nationality, passportnumber, mobilenumber, email, noadults, nochildern, totaloccupants, confirmationcode, reservationdate, bookingagent, modepayment, checkindate, checkoutdate, nonight, tourismfee, securitydeposit, totalpayout, hostservicefee, totalcollectall, cleaningfee, totaladditionalfee, roomrentamount, guestservicefee, guestmanagementfee, vatperbookingrent, vatperservicefee, vatpercleaningfee, vatperguestmanagementfee, vatperhostmanagementfee, totalvatper, totalroomrent, hostmanagementfee, roomrenthostpayable, auditdiff, createdAt, guestservicepercent, createdBy, updatedBy, softdelete };
+            if (propertyid) {
+                const property = properties.find(property => String(property._id) === String(propertyData.propertyid));
+                if (property) {
+                    updatedBooking.unitnumber = property.unitnumber;
+                    updatedBooking.floor = property.floor;
+
+                    const building = buildings.find(building => String(building._id) === String(property.buildingid));
+                    if (building) {
+                        updatedBooking.building_name = building.buildingname;
+                    }
+
+                    const projectname = projectnames.find(project => String(project._id) === String(property.projectnameid));
+                    if (projectname) {
+                        updatedBooking.project_name = projectname.projectName;
+                    }
+
+                    const community = communityData.find(community => String(community._id) === String(property.communityid));
+                    if (community) {
+                        updatedBooking.community_name = community.communityname;
+                    }
+
+                    const subtype = subtypeData.find(subtype => String(subtype._id) === String(property.subtypeid));
+                    if (subtype) {
+                        updatedBooking.subtype_name = subtype.subtypename;
+                    }
+
+                    const user = userData.find(userData => String(userData._id) === String(property.customerid));
+                    if (user) {
+                        updatedBooking.owner_name = user?.firstname + " " + user?.lastname;
+                    }
+                }
+            }
+            const employee = employeeData.find(employee => String(employee._id) === String(createdBy));
+            if (employee) {
+                updatedBooking.employee_email_createdBy = employee?.email;
+            }
+            const employeeUpdatedBy = employeeDataUpdatedBy.find(employee => String(employee._id) === String(updatedBy));
+            if (employeeUpdatedBy) {
+                updatedBooking.employee_email_updatedBy = employeeUpdatedBy?.email;
+            }
+            // if(customerData) {
+            //     const user = customerData.find(user => String(user._id) === String(propertyData.customerid));
+            //     if(user) {
+            //         updatedBooking.guest_name = user?.firstname + " " + user?.lastname;
+            //     }
+            // }
+
+            return updatedBooking;
+        });
+
+        const formattedDate = bookingWithAllData?.map(bookingDateSet => {
+            // const formattedreservationdate = bookingDateSet.reservationdate ? new Date(bookingDateSet.reservationdate).toDateString() : ''
+            // const formattedcheckindate = bookingDateSet.checkindate ? new Date(bookingDateSet.checkindate).toDateString() : ''
+            // const formattedcheckoutdate = bookingDateSet.checkoutdate ? new Date(bookingDateSet.checkoutdate).toDateString() : ''
+            // const formattedCreatedAt = bookingDateSet.createdAt ? new Date(bookingDateSet.createdAt).toDateString() : ''
+            const formattedreservationdate = bookingDateSet.reservationdate ? moment(bookingDateSet.reservationdate).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+            const formattedcheckindate = bookingDateSet.checkindate ? moment(bookingDateSet.checkindate).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+            const formattedcheckoutdate = bookingDateSet.checkoutdate ? moment(bookingDateSet.checkoutdate).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+            const formattedCreatedAt = bookingDateSet.createdAt ? moment(bookingDateSet.createdAt).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+            const formattedupdatedAt = bookingDateSet.updatedAt ? moment(bookingDateSet.updatedAt).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+            // const bookingDateSet_age = bookingDateSet.datebirth ? calculateAge(bookingDateSet.datebirth) : ""
+            return { ...bookingDateSet, reservation_date: formattedreservationdate, checkout_date: formattedcheckoutdate, Created_At: formattedCreatedAt, checkin_date: formattedcheckindate, updated_At: formattedupdatedAt, reservationdate: formattedreservationdate, createdAt: formattedCreatedAt, checkindate: formattedcheckindate, updatedAt: formattedupdatedAt, checkoutdate: formattedcheckoutdate }
+        })
+
+        res.json(formattedDate);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server Error" });
+    }
+
+    // return res.json(allbooking)
+})
+
+const convertCustomerIdToObjectId = asyncHandler(async (req, res) => {
+    // const bookings = await Booking.find({});
+    // bookings.forEach(async (booking) => {
+    //     if (typeof booking.customerid === 'string') {
+    //         booking.customerid = mongoose.Types.ObjectId(booking.customerid);
+    //         await booking.save();
+    //     }
+    // });
+    // return res.json({ message: 'Conversion complete' });
+    // console.log("isme araha hai?")
+    const bookings = await Booking.find();
+    for (const booking of bookings) {
+        // console.log("loop me araha hai?")
+        // console.log(booking?.customerid)
+        // console.log(typeof booking?.customerid === String)
+        // if (typeof booking.customerid === 'string') {
+        //     console.log("condition me araha hai?")
+        // booking.reservationdate = new Date(booking.reservationdate);
+        booking.customerid = mongoose.Types.ObjectId(booking.customerid);
+        // booking.reservationdate = new Date(booking.reservationdate).toISOString()
+        // if (booking.reservationdate) {
+        //     // throw new Error(`Invalid date value: ${booking.reservationdate}`);
+
+        //     const date = new Date(booking.reservationdate);
+        //     if (isNaN(date.getTime())) {
+        //         throw new Error(`Invalid date value: ${booking.reservationdate}`);
+        //     }
+        //     if (date.getFullYear() < 1000 || date.getFullYear() > 9999) {
+        //         throw new Error(`Invalid year value: ${date.getFullYear()}`);
+        //     }
+        // }
+        await booking.save();
+        // }
+    }
+    return res.json({ message: 'Conversion complete' });
+});
+
+const getAllBookingData = asyncHandler(async (req, res) => {
+    const allbooking = await Booking.aggregate([
+        {
+            $lookup: {
+                from: "users",
+                localField: "customerid",
+                foreignField: "_id",
+                as: "user",
+            }
+        },
+        {
+            $lookup: {
+                from: "addproperties",
+                localField: "propertyid",
+                foreignField: "_id",
+                as: "property"
+            },
+        }
+    ])
+        .sort({ _id: "descending" })
+    if (!allbooking?.length) {
+        return res.status(400).json({ message: "No Booking found" })
+    }
+    return res.json(allbooking)
+})
+
+const getPaginationBooking = asyncHandler(async (req, res) => {
+    const page = parseInt(req.query.page || 0)
+    const perPage = req.query.perPage || 10
+    const sort = req.query.sort
+    // console.log(req.query)
+    try {
+        const count = await Booking.countDocuments(req.query)
+        const booking = await Booking.find({
+            $and: [
+                req.query,
+                { softdelete: { $ne: true } } // Filter out softdeleted bookings
+            ]
+            // propertyid: req.query.propertyid
+        })
+            .sort({ _id: "descending" })
+            .skip(perPage * page)
+            .limit(parseInt(perPage))
+        return res.status(200).json(
+            {
+                count: Math.ceil(count / perPage),
+                booking
+            }
+        )
+    } catch (err) {
+        res.status(400).json({
+            err: `Error getting data: ${err.message}`
+        })
+    }
+})
+
+const getBookingProperty = asyncHandler(async (req, res) => {
+    // console.log(req.query)
+    try {
+        const booking = await Booking.find({
+            $and: [
+                req.query,
+                { softdelete: { $ne: true } } // Filter out softdeleted bookings
+            ]
+            // propertyid: req.query.propertyid
+        })
+        return res.status(200).json(booking)
+    } catch (err) {
+        res.status(400).json({
+            err: `Error getting data: ${err.message}`
+        })
+    }
+})
+
+const getPaginationBookingOwnerRep = asyncHandler(async (req, res) => {
+    const page = parseInt(req.query.page || 0)
+    const perPage = req.query.perPage || 10
+    const sort = req.query.sort
+    // console.log(req.query)
+    try {
+        const count = await Booking.countDocuments(req.query)
+        const booking = await Booking.find({
+            $and: [
+                req.query,
+                { softdelete: { $ne: true } } // Filter out softdeleted bookings
+            ]
+            // propertyid: req.query.propertyid
+        })
+            .sort({ _id: "descending" })
+            .skip(perPage * page)
+            .limit(parseInt(perPage))
+        return res.status(200).json(
+            // {
+            // count: Math.ceil(count / perPage),
+            booking
+            // }
+        )
+    } catch (err) {
+        res.status(400).json({
+            err: `Error getting data: ${err.message}`
+        })
+    }
+})
+
+const getPaginationBookingWithDate = asyncHandler(async (req, res) => {
+    const page = parseInt(req.query.page || 0)
+    const perPage = req.query.perPage || 10
+    const sort = req.query.sort
+    const fromDate = req.query.fromDate
+    const toDate = req.query.toDate
+    try {
+        const booking = await Booking.find({
+            $and: [
+                req.query,
+                { softdelete: { $ne: true } } // Filter out softdeleted bookings
+            ]
+        })
+            .find({
+                createdAt: { '$gte': new Date(fromDate), "$lte": new Date(toDate) },
+            })
+            .sort({ _id: "descending" })
+            .skip(perPage * page)
+            .limit(parseInt(perPage))
+        const count = await Booking.countDocuments(booking)
+        // console.log(count, "count")
+        return res.status(200).json({
+            count: Math.ceil(count / perPage),
+            booking
+        })
+    } catch (err) {
+        res.status(400).json({
+            err: `Error getting data: ${err.message}`
+        })
+    }
+})
+
+const getAllBookingCancelled = asyncHandler(async (req, res) => {
+    const allbooking = await Booking.find({
+        $and: [
+            req.query,
+            { softdelete: { $ne: true } } // Filter out softdeleted bookings
+        ]
+    })
+    if (!allbooking?.length) {
+        return res.status(400).json({ message: "No Booking found" })
+    }
+
+    const propertyIds = allbooking.map(property => property?.propertyid);
+    // const customerIds = allbooking.map(customer => customer?.customerid);
+    const employeeIds = allbooking.map(employee => employee.createdBy);
+    const employeeIdsUpdatedBy = allbooking.map(employee => employee.updatedBy);
+
+    try {
+        const properties = await AddProperty.find({ _id: { $in: propertyIds } });
+        const buildingIds = properties.map(property => property?.buildingid);
+        const projectnameId = properties.map(property => property?.projectnameid);
+        const communityId = properties.map(property => property?.communityid);
+        const subtypeId = properties.map(property => property?.subtypeid);
+        const customerId = properties.map(property => property?.customerid);
+
+        const buildings = await BuildingName.find({ _id: { $in: buildingIds } });
+        const projectnames = await ProjectName.find({ _id: { $in: projectnameId } });
+        const communityData = await CommunityName.find({ _id: { $in: communityId } });
+        const subtypeData = await SubType.find({ _id: { $in: subtypeId } });
+        const userData = await User.find({ _id: { $in: customerId } });
+        // const customerData = await User.find({ _id: { $in: customerIds } });
+        const employeeData = await Employee.find({ _id: { $in: employeeIds } });
+        const employeeDataUpdatedBy = await Employee.find({ _id: { $in: employeeIdsUpdatedBy } });
+
+        const bookingWithAllData = allbooking.map(propertyData => {
+            const propertyObject = propertyData.toObject();
+            const { _id, bookingnumber, cancelled, propertyid, ownerid, guestname, checkintype, nationality, passportnumber, mobilenumber, email, noadults, nochildern, totaloccupants, confirmationcode, reservationdate, bookingagent, modepayment, checkindate, checkoutdate, nonight, tourismfee, securitydeposit, totalpayout, hostservicefee, totalcollectall, cleaningfee, totaladditionalfee, roomrentamount, guestservicefee, guestmanagementfee, vatperbookingrent, vatperservicefee, vatpercleaningfee, vatperguestmanagementfee, totalvatper, totalroomrent, hostmanagementfee, roomrenthostpayable, auditdiff, createdAt, guestservicepercent, createdBy, updatedBy, softdelete } = propertyObject;
+            const updatedBooking = { _id, bookingnumber, cancelled, propertyid, ownerid, guestname, checkintype, nationality, passportnumber, mobilenumber, email, noadults, nochildern, totaloccupants, confirmationcode, reservationdate, bookingagent, modepayment, checkindate, checkoutdate, nonight, tourismfee, securitydeposit, totalpayout, hostservicefee, totalcollectall, cleaningfee, totaladditionalfee, roomrentamount, guestservicefee, guestmanagementfee, vatperbookingrent, vatperservicefee, vatpercleaningfee, vatperguestmanagementfee, totalvatper, totalroomrent, hostmanagementfee, roomrenthostpayable, auditdiff, createdAt, guestservicepercent, createdBy, updatedBy, softdelete };
+            if (propertyid) {
+                const property = properties.find(property => String(property._id) === String(propertyData.propertyid));
+                if (property) {
+                    updatedBooking.unitnumber = property.unitnumber;
+                    updatedBooking.floor = property.floor;
+
+                    const building = buildings.find(building => String(building._id) === String(property.buildingid));
+                    if (building) {
+                        updatedBooking.building_name = building.buildingname;
+                    }
+
+                    const projectname = projectnames.find(project => String(project._id) === String(property.projectnameid));
+                    if (projectname) {
+                        updatedBooking.project_name = projectname.projectName;
+                    }
+
+                    const community = communityData.find(community => String(community._id) === String(property.communityid));
+                    if (community) {
+                        updatedBooking.community_name = community.communityname;
+                    }
+
+                    const subtype = subtypeData.find(subtype => String(subtype._id) === String(property.subtypeid));
+                    if (subtype) {
+                        updatedBooking.subtype_name = subtype.subtypename;
+                    }
+
+                    const user = userData.find(userData => String(userData._id) === String(property.customerid));
+                    if (user) {
+                        updatedBooking.owner_name = user?.firstname + " " + user?.lastname;
+                    }
+                }
+            }
+            const employee = employeeData.find(employee => String(employee._id) === String(createdBy));
+            if (employee) {
+                updatedBooking.employee_email_createdBy = employee?.email;
+            }
+            const employeeUpdatedBy = employeeDataUpdatedBy.find(employee => String(employee._id) === String(updatedBy));
+            if (employeeUpdatedBy) {
+                updatedBooking.employee_email_updatedBy = employeeUpdatedBy?.email;
+            }
+            // if(customerData) {
+            //     const user = customerData.find(user => String(user._id) === String(propertyData.customerid));
+            //     if(user) {
+            //         updatedBooking.guest_name = user?.firstname + " " + user?.lastname;
+            //     }
+            // }
+
+            return updatedBooking;
+        });
+
+        const formattedDate = bookingWithAllData?.map(bookingDateSet => {
+            // const formattedreservationdate = bookingDateSet.reservationdate ? new Date(bookingDateSet.reservationdate).toDateString() : ''
+            // const formattedcheckindate = bookingDateSet.checkindate ? new Date(bookingDateSet.checkindate).toDateString() : ''
+            // const formattedcheckoutdate = bookingDateSet.checkoutdate ? new Date(bookingDateSet.checkoutdate).toDateString() : ''
+            // const formattedCreatedAt = bookingDateSet.createdAt ? new Date(bookingDateSet.createdAt).toDateString() : ''
+            const formattedreservationdate = bookingDateSet.reservationdate ? moment(bookingDateSet.reservationdate).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+            const formattedcheckindate = bookingDateSet.checkindate ? moment(bookingDateSet.checkindate).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+            const formattedcheckoutdate = bookingDateSet.checkoutdate ? moment(bookingDateSet.checkoutdate).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+            const formattedCreatedAt = bookingDateSet.createdAt ? moment(bookingDateSet.createdAt).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+            const formattedupdatedAt = bookingDateSet.updatedAt ? moment(bookingDateSet.updatedAt).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+            // const bookingDateSet_age = bookingDateSet.datebirth ? calculateAge(bookingDateSet.datebirth) : ""
+            return { ...bookingDateSet, reservation_date: formattedreservationdate, checkout_date: formattedcheckoutdate, Created_At: formattedCreatedAt, checkin_date: formattedcheckindate, updated_At: formattedupdatedAt, reservationdate: formattedreservationdate, createdAt: formattedCreatedAt, checkindate: formattedcheckindate, updatedAt: formattedupdatedAt, checkoutdate: formattedcheckoutdate }
+        })
+        res.json(formattedDate);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server Error" });
+    }
+
+    // return res.json(allbooking)
+})
+
+// const getBookingReservation = asyncHandler(async (req, res) => {
+//     const page = parseInt(req.query.page || 0)
+//     const perPage = req.query.perPage || 10
+//     const sort = req.query.sort
+//     // const fromDate = new Date('2023-01-01');
+//     const ownerid = req.query.ownerid
+//     const toDate = new Date('2023-01-31').toUTCString();
+//     const fromDate = req.query.fromDate
+//     console.log(fromDate, "fromDate")
+//     console.log(toDate, "toDate")
+//     // const toDate = req.query.toDate
+//     console.log(req.query)
+//     console.log(new Date(fromDate), "req.query.fromDate")
+//     console.log(new Date(toDate), "req.query.toDate")
+//     try {
+//         const booking = await Booking
+//             .find({
+//                 "$or": [
+//                     { "ownerid": { $regex: req.query.ownerid} },
+//                 ],
+//             })
+//             // .find({ reservationdate: { '$gte': fromDate } })
+//             .find({
+//                 "reservationdate": { $gte: fromDate },
+//                 // "reservationdate": { $gte: fromDate, $lte: toDate },
+//             })
+//         // .toArray(function (err, docs) {
+//         //     if (err) throw err;
+//         //     console.log(docs);
+//         //     // client.close();
+//         // });
+//         return res.json(booking)
+//         // .sort({ _id: "descending" })
+//         // .skip(perPage * page)
+//         // .limit(parseInt(perPage))
+//         // const count = await Booking.countDocuments(booking)
+//         // console.log(count, "count")
+//         // return res.status(200).json({
+//         //     // count: Math.ceil(count / perPage),
+//         //     booking
+//         // })
+//         // return res.json(booking)
+//     } catch (err) {
+//         res.status(400).json({
+//             err: `Error getting data: ${err.message}`
+//         })
+//     }
+// })
+
+const getBookingReservation = asyncHandler(async (req, res) => {
+    const fromDate = new Date(req.query.fromDate) // convert to Date object
+    const toDate = new Date(req.query.toDate) // use hardcoded date for now
+
+    try {
+        const booking = await Booking
+            .find({
+                "$or": [
+                    req.query
+                ],
+                // ownerid: req.query.ownerid,
+                "$or": [
+                    // { ownerid: { $regex: req.query.ownerid } },
+                    { reservationdate: { $gte: fromDate, $lte: toDate } }
+                ]// query by date range
+            }).sort({ _id: "descending" }).exec() // execute the query
+        if (booking.length === 0) {
+            return res.status(404).json({
+                message: 'No bookings found',
+            });
+        }
+        return res.status(200).json({
+            booking
+        })
+    } catch (err) {
+        res.status(400).json({
+            err: `Error getting data: ${err.message}`
+        })
+    }
+})
+
+const getBookingCheckIn = asyncHandler(async (req, res) => {
+    const fromdate = req.query.fromdate
+    const toDate = req.query.toDate
+    // const fromdate = new Date(req.query.fromdate)
+    // const toDate = new Date(req.query.toDate)
+
+    // console.log(req.query)
+    // console.log(fromdate, "fromdate")
+    // console.log(toDate, "toDate")
+    try {
+        const booking = await Booking.find({
+            $and: [
+                { checkindate: { $gte: fromdate, $lte: toDate } },
+                { softdelete: { $ne: true } }
+            ]
+        }).sort({ _id: "descending" }).exec()
+
+        if (booking.length === 0) {
+            return res.status(404).json({
+                message: 'No bookings found',
+            });
+        }
+        if (!booking?.length) {
+            return res.status(400).json({ message: "No Booking found" })
+        }
+
+        const propertyIds = booking.map(property => property?.propertyid);
+        // const customerIds = booking.map(customer => customer?.customerid);
+
+        try {
+            const properties = await AddProperty.find({ _id: { $in: propertyIds } });
+            const buildingIds = properties.map(property => property?.buildingid);
+            const projectnameId = properties.map(property => property?.projectnameid);
+            const communityId = properties.map(property => property?.communityid);
+            const subtypeId = properties.map(property => property?.subtypeid);
+            const customerId = properties.map(property => property?.customerid);
+
+            const buildings = await BuildingName.find({ _id: { $in: buildingIds } });
+            const projectnames = await ProjectName.find({ _id: { $in: projectnameId } });
+            const communityData = await CommunityName.find({ _id: { $in: communityId } });
+            const subtypeData = await SubType.find({ _id: { $in: subtypeId } });
+            const userData = await User.find({ _id: { $in: customerId } });
+            // const customerData = await User.find({ _id: { $in: customerIds } });
+
+
+            const bookingWithAllData = booking.map(propertyData => {
+                const propertyObject = propertyData.toObject();
+                const { _id, bookingnumber, cancelled, propertyid, ownerid, guestname, checkintype, nationality, passportnumber, mobilenumber, email, noadults, nochildern, totaloccupants, confirmationcode, reservationdate, bookingagent, modepayment, checkindate, checkoutdate, nonight, tourismfee, securitydeposit, totalpayout, hostservicefee, totalcollectall, cleaningfee, totaladditionalfee, roomrentamount, guestservicefee, guestmanagementfee, vatperbookingrent, vatperservicefee, vatpercleaningfee, vatperguestmanagementfee, vatperhostmanagementfee, totalvatper, totalroomrent, hostmanagementfee, roomrenthostpayable, auditdiff, createdAt, guestservicepercent, createdBy, updatedBy, softdelete } = propertyObject;
+                const updatedBooking = { _id, bookingnumber, cancelled, propertyid, ownerid, guestname, checkintype, nationality, passportnumber, mobilenumber, email, noadults, nochildern, totaloccupants, confirmationcode, reservationdate, bookingagent, modepayment, checkindate, checkoutdate, nonight, tourismfee, securitydeposit, totalpayout, hostservicefee, totalcollectall, cleaningfee, totaladditionalfee, roomrentamount, guestservicefee, guestmanagementfee, vatperbookingrent, vatperservicefee, vatpercleaningfee, vatperguestmanagementfee, vatperhostmanagementfee, totalvatper, totalroomrent, hostmanagementfee, roomrenthostpayable, auditdiff, createdAt, guestservicepercent, createdBy, updatedBy, softdelete };
+                if (propertyid) {
+                    const property = properties.find(property => String(property._id) === String(propertyData.propertyid));
+                    if (property) {
+                        updatedBooking.unitnumber = property.unitnumber;
+                        updatedBooking.floor = property.floor;
+
+                        const building = buildings.find(building => String(building._id) === String(property.buildingid));
+                        if (building) {
+                            updatedBooking.building_name = building.buildingname;
+                        }
+
+                        const projectname = projectnames.find(project => String(project._id) === String(property.projectnameid));
+                        if (projectname) {
+                            updatedBooking.project_name = projectname.projectName;
+                        }
+
+                        const community = communityData.find(community => String(community._id) === String(property.communityid));
+                        if (community) {
+                            updatedBooking.community_name = community.communityname;
+                        }
+
+                        const subtype = subtypeData.find(subtype => String(subtype._id) === String(property.subtypeid));
+                        if (subtype) {
+                            updatedBooking.subtype_name = subtype.subtypename;
+                        }
+
+                        const user = userData.find(userData => String(userData._id) === String(property.customerid));
+                        if (user) {
+                            updatedBooking.owner_name = user?.firstname + " " + user?.lastname;
+                        }
+                    }
+                }
+
+                // if(customerData) {
+                //     const user = customerData.find(user => String(user._id) === String(propertyData.customerid));
+                //     if(user) {
+                //         updatedBooking.guest_name = user?.firstname + " " + user?.lastname;
+                //     }
+                // }
+
+                return updatedBooking;
+            });
+
+            const formattedDate = bookingWithAllData?.map(bookingDateSet => {
+                // const formattedreservationdate = bookingDateSet.reservationdate ? new Date(bookingDateSet.reservationdate).toDateString() : ''
+                // const formattedcheckindate = bookingDateSet.checkindate ? new Date(bookingDateSet.checkindate).toDateString() : ''
+                // const formattedcheckoutdate = bookingDateSet.checkoutdate ? new Date(bookingDateSet.checkoutdate).toDateString() : ''
+                // const formattedCreatedAt = bookingDateSet.createdAt ? new Date(bookingDateSet.createdAt).toDateString() : ''
+                const formattedreservationdate = bookingDateSet.reservationdate ? moment(bookingDateSet.reservationdate).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+                const formattedcheckindate = bookingDateSet.checkindate ? moment(bookingDateSet.checkindate).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+                const formattedcheckoutdate = bookingDateSet.checkoutdate ? moment(bookingDateSet.checkoutdate).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+                const formattedCreatedAt = bookingDateSet.createdAt ? moment(bookingDateSet.createdAt).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+                const formattedupdatedAt = bookingDateSet.updatedAt ? moment(bookingDateSet.updatedAt).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+                // const bookingDateSet_age = bookingDateSet.datebirth ? calculateAge(bookingDateSet.datebirth) : ""
+                return { ...bookingDateSet, reservation_date: formattedreservationdate, checkout_date: formattedcheckoutdate, Created_At: formattedCreatedAt, checkin_date: formattedcheckindate, updated_At: formattedupdatedAt, reservationdate: formattedreservationdate, createdAt: formattedCreatedAt, checkindate: formattedcheckindate, updatedAt: formattedupdatedAt, checkoutdate: formattedcheckoutdate }
+            })
+            res.json(formattedDate);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Server Error" });
+        }
+    } catch (error) {
+        res.status(400).json({
+            err: `Error getting data: ${err.message}`
+        })
+    }
+})
+
+const getBookingCheckOut = asyncHandler(async (req, res) => {
+    const fromdate = new Date(req.query.fromdate)
+    const toDate = new Date(req.query.toDate)
+
+    try {
+        const booking = await Booking.find({
+            "$or": [
+                { checkoutdate: { $gte: fromdate, $lte: toDate } }
+            ]
+        }).sort({ _id: "descending" }).exec()
+
+        if (booking.length === 0) {
+            return res.status(404).json({
+                message: 'No bookings found',
+            });
+        }
+        return res.status(200).json({
+            booking
+        })
+    } catch (error) {
+        res.status(400).json({
+            err: `Error getting data: ${err.message}`
+        })
+    }
+})
+
+const getBookingYearly = asyncHandler(async (req, res) => {
+    const year = parseInt(req.query.year);
+    const fromDate = new Date(`${year}-01-01`) // convert to Date object
+    const toDate = new Date(`${year}-12-31`) // use hardcoded date for now
+    try {
+        const booking = await Booking.find({
+            "$or": [{
+                checkindate: { $gte: fromDate, $lte: toDate },
+                checkoutdate: { $gte: fromDate, $lte: toDate }
+            },
+            { softdelete: { $ne: true } } // Filter out softdeleted bookings
+            ],
+
+        }).sort({ _id: "descending" }).exec() // execute the query
+        if (booking.length === 0) {
+            return res.status(404).json({
+                message: 'No bookings found',
+            });
+        }
+        return res.status(200).json({
+            booking
+        })
+    } catch (err) {
+        res.status(400).json({
+            err: `Error getting data: ${err.message}`
+        })
+    }
+})
+
+// Booking.updateMany(
+//     { reservationdate: { $type: "Date" } },
+//     { $set: { reservationdate: { $dateString: "reservationdate" } } },
+//     (err, result) => {
+//         if (err) throw err;
+//         console.log(`${result.modifiedCount} documents updated`);
+//     }
+// );
+
+// Booking.collection.updateMany(
+//     { reservationdate: { $type: "string" } },
+//     { $set: { reservationdate: { $dateFromString: { dateString: "$reservationdate" } } } }
+// )
+
+const getSearchBookingByCustomer = asyncHandler(async (req, res) => {
+    const page = parseInt(req.query.page || 0)
+    const perPage = req.query.perPage || 10
+    const sort = req.query.sort
+    try {
+        const count = await Booking.countDocuments()
+        const booking = await Booking.find({
+            "$or": [
+                { "confirmationcode": { $regex: req.params.key, $options: 'i' } },
+                { "unitnumber": { $regex: req.params.key, $options: 'i' } },
+                { "bookingnumber": { $regex: req.params.key, $options: 'i' } },
+                { "guestname": { $regex: req.params.key, $options: 'i' } },
+                { "buildingname": { $regex: req.params.key, $options: 'i' } },
+                { "email": { $regex: req.params.key, $options: 'i' } },
+                { "bookingagent": { $regex: req.params.key, $options: 'i' } },
+                { "propertyid": { $regex: req.params.key, $options: 'i' } },
+            ]
+        })
+            .find(({ customerid: req.query.customerid }))
+            .sort({ _id: "descending" })
+            .skip(perPage * page)
+            .limit(parseInt(perPage))
+        return res.status(200).json({
+            count: Math.ceil(booking / perPage),
+            booking
+        })
+    } catch (err) {
+        res.status(400).json({
+            err: `Error getting data: ${err.message}`
+        })
+    }
+})
+
+const getSearchBooking = asyncHandler(async (req, res) => {
+    console.log(req.query.propertyid, "req.query.propertyid");
+    const page = parseInt(req.query.page || 0)
+    const perPage = req.query.perPage || 10
+    const sort = req.query.sort
+    try {
+        const count = await Booking.countDocuments()
+        const booking = await Booking.find({
+            "$or": [
+                { "confirmationcode": { $regex: req.params.key, $options: 'i' } },
+                { "unitnumber": { $regex: req.params.key, $options: 'i' } },
+                { "bookingnumber": { $regex: req.params.key, $options: 'i' } },
+                { "guestname": { $regex: req.params.key, $options: 'i' } },
+                { "buildingname": { $regex: req.params.key, $options: 'i' } },
+                { "email": { $regex: req.params.key, $options: 'i' } },
+                { "bookingagent": { $regex: req.params.key, $options: 'i' } },
+                { "propertyid": { $regex: req.params.key, $options: 'i' } },
+            ]
+        })
+            .find(({ propertyid: req.query.propertyid }))
+            .sort({ _id: "descending" })
+            .skip(perPage * page)
+            .limit(parseInt(perPage))
+        return res.status(200).json({
+            count: Math.ceil(booking / perPage),
+            booking
+        })
+    } catch (err) {
+        res.status(400).json({
+            err: `Error getting data: ${err.message}`
+        })
+    }
+})
+
+const getBookingById = asyncHandler(async (req, res) => {
+    const bookingById = await Booking.findById(req.params.id)
+    if (!bookingById) {
+        return res.status(400).json({ message: "No Booking found" })
+    }
+    return res.json(bookingById)
+})
+
+// const getBookingByPropertyId = asyncHandler(async (req, res) => {
+//     const bookingById = await Booking.find({
+//         "$or": [
+//             { "propertyid": { $regex: req.params.key, $options: 'i' } },
+//         ]
+//     })
+//     if (!bookingById) {
+//         return res.status(400).json({ message: "No Booking found" })
+//     }
+//     return res.json(bookingById)
+// })
+
+const getBookingByPropertyId = asyncHandler(async (req, res) => {
+    // const { propertyId } = req.params;
+    // console.log(propertyId, 'propertyId')
+    // console.log(req.params, 'req.params')
+    const bookingById = await Booking.find({
+        propertyid: req.params.key
+    });
+
+    if (bookingById.length === 0) {
+        return res.status(400).json({ message: "No Booking found" });
+    }
+
+    return res.json(bookingById);
+});
+
+const createBooking = asyncHandler(async (req, res) => {
+    let { propertyid, unitnumber, buildingname, floor, buildingnumber, communityname, city, customerid, guestname, passportnumber, nationality, mobilenumber, email, checkintype, nooccupants, noadults, totaloccupants, nochildern, confirmationcode, bookingagent, checkindate, nonight, reservationdate, modepayment, checkoutdate, tourismfee, totalpayout, securitydeposit, hostservicefee, cleaningfee, tourismfeetillmonth, tourismfeeacceleratedmonth, totaladditionalfee, totalcollectall, totalroomrent, roomrentamount, guestservicefee, guestmanagementfee, totalguestservices, vatperbookingrent, vatperservicefee, vatpercleaningfee, vatperguestmanagementfee, totalvatper, totalcollectallincl, totalroomrentvat, auditdiff, customertype, passportpdf, ownerid, guestpercentage, hostmanagementfee, vatperhostmanagementfee, firstdays, moremonths, cancelled, hostmanagementpercent, roomrenthostpayable, guestservicepercent, createdBy, updatedBy, softdelete } = req.body
+    if (!propertyid || !checkindate || !checkoutdate) {
+        return res.status(400).json({ message: 'All fields are required' })
+    }
+    // let duplicate = await Booking.findOne({ unitnumber }).lean().exec()
+
+    // if (duplicate) {
+    //     return res.status(409).json({ message: "Duplicate unitnumber" })
+    // }
+
+    // Check for overlapping bookings
+    const existingBooking = await Booking.findOne({
+        propertyid,
+        cancelled: false,
+        softdelete: false,
+        $or: [
+            {
+                checkindate: {
+                    $lt: new Date(checkoutdate),
+                },
+                checkoutdate: {
+                    $gt: new Date(checkindate),
+                },
+            },
+        ],
+    });
+
+    // If a duplicate booking already exists, return an error response
+    if (existingBooking) {
+        return res.status(409).json({ message: 'Property is already booked for these dates' });
+    }
+
+
+    let parsedFirstDays = [];
+    if (firstdays.length) {
+        parsedFirstDays = JSON.parse(firstdays);
+    }
+    firstdays = parsedFirstDays
+
+    let parsedMoreMonths = [];
+    if (moremonths.length) {
+        parsedMoreMonths = JSON.parse(moremonths);
+    }
+    moremonths = parsedMoreMonths
+
+    const bookingObject = { propertyid, unitnumber, buildingname, floor, buildingnumber, communityname, city, customerid, guestname, passportnumber, nationality, mobilenumber, email, checkintype, nooccupants, noadults, totaloccupants, nochildern, confirmationcode, bookingagent, checkindate, nonight, reservationdate, modepayment, checkoutdate, tourismfee, totalpayout, securitydeposit, hostservicefee, cleaningfee, tourismfeetillmonth, tourismfeeacceleratedmonth, totaladditionalfee, totalcollectall, totalroomrent, roomrentamount, guestservicefee, guestmanagementfee, totalguestservices, vatperbookingrent, vatperservicefee, vatpercleaningfee, vatperguestmanagementfee, totalvatper, totalcollectallincl, totalroomrentvat, auditdiff, customertype, passportpdf, ownerid, guestpercentage, hostmanagementfee, vatperhostmanagementfee, parsedFirstDays, parsedMoreMonths, firstdays, moremonths, cancelled, hostmanagementpercent, roomrenthostpayable, guestservicepercent, createdBy, updatedBy, softdelete }
+    const bookingProperty = await Booking.create(bookingObject)
+
+    const currentYear = new Date().getFullYear()
+    const lastDigit = currentYear.toString().split(0)
+    const generateCode = (new Date()).getTime().toString(36)
+    let bookingNumber = "BN-" + lastDigit[1] + "-" + generateCode
+    // console.log(bookingNumber, "bookingNumber")
+    await bookingProperty.updateOne({ bookingnumber: bookingNumber })
+
+    if (bookingProperty) {
+        if (bookingProperty?.propertyid) {
+            // console.log(bookingProperty?.propertyid, 'bookingProperty?.propertyid')
+            // const properties = await AddProperty.find({ _id: { $in: bookingProperty?.propertyid } });
+            const properties = await AddProperty.find({ _id: { $in: bookingProperty?.propertyid } });
+            const property = properties.find(property => property._id.toHexString() === bookingProperty?.propertyid?.toHexString());
+            // console.log(properties, "properties")
+            // console.log(property, "property")
+            // const customerId = properties.map(property => property?.customerid);
+            // const userData = await User.find({ _id: { $in: customerId } });
+            const userData = await User.find({ _id: { $in: property?.customerid } });
+            const user = userData.find(owner => owner._id.toHexString() === property?.customerid?.toHexString());
+            // console.log(userData, "userData")
+            // const user = userData.find(owner => owner._id.toHexString() === userData?._id?.toHexString());
+            // const user = userData.find(userData => String(userData._id) === String(properties.customerid));
+
+            // console.log(user, "user")
+            const owner_email = user?.email
+            // console.log(owner_email, "owner_email"),
+            // console.log(bookingNumber, "bookingNumber under")
+            let contentPara = `We would like to inform you that a new booking with the Booking Number "${bookingNumber}" has been made for your property and has been added to your dashboard. Kindly take a moment to verify the status of your Booking by accessing the provided link.`
+            if (owner_email) {
+                // console.log('owner_email me araha hai')
+                // console.log(owner_email)
+                const owner_name = user?.firstname + " " + user?.lastname
+                let contentHeading = `Hello ${owner_name},`
+                const url = `${process.env.BASE_URL}owner-booking`
+                let property = true
+                await sendEmail(owner_email, "Your Property Booking Added Recently", url, property, contentHeading, contentPara)
+                // console.log("Email send")
+                // return res.status(200).json({ message: `Property ${updatedProperty.unitnumber} updated` })
+            }
+        }
+        return res.status(200).json({ message: `New Booking` })
+    } else {
+        return res.status(400).json({ message: 'Invalid Booking data received' })
+    }
+})
+
+const updateBooking = asyncHandler(async (req, res) => {
+    // console.log(req.body)
+    const { _id, propertyid, unitnumber, buildingname, floor, buildingnumber, communityname, city, customerid, guestname, passportnumber, nationality, mobilenumber, email, checkintype, nooccupants, noadults, totaloccupants, nochildern, confirmationcode, bookingagent, checkindate, nonight, reservationdate, modepayment, checkoutdate, tourismfee, totalpayout, securitydeposit, hostservicefee, cleaningfee, tourismfeetillmonth, tourismfeeacceleratedmonth, totaladditionalfee, totalcollectall, totalroomrent, roomrentamount, guestservicefee, guestmanagementfee, totalguestservices, vatperbookingrent, vatperservicefee, vatpercleaningfee, vatperguestmanagementfee, totalvatper, totalcollectallincl, totalroomrentvat, auditdiff, customertype, passportpdf, ownerid, guestpercentage, hostmanagementfee, vatperhostmanagementfee, firstdays, moremonths, cancelled, hostmanagementpercent, roomrenthostpayable, guestservicepercent, createdBy, updatedBy, softdelete } = req.body
+
+    if (!_id) {
+        return res.status(400).json({ message: 'All fields are required' })
+    }
+
+    const bookingProperty = await Booking.findById(_id).exec()
+    // console.log(bookingProperty, 'bookingProperty')
+    if (!bookingProperty) {
+        return res.status(400).json({ message: 'Booking not found' })
+    }
+
+    // const duplicate = await Booking.findOne({ unitnumber }).lean().exec()
+    // if (duplicate && duplicate?._id.toString() !== _id) {
+    //     return res.status(400).json({ message: 'Duplicate Property' })
+    // }
+
+    // console.log(firstdays, "firstdays")
+
+    let parsedFirstDays = [];
+    if (firstdays?.length) {
+        parsedFirstDays = JSON.parse(firstdays);
+    }
+    let parsedMoreMonths = [];
+    if (moremonths?.length) {
+        parsedMoreMonths = JSON.parse(moremonths);
+    }
+
+    // bookingProperty.propertname = propertname
+    bookingProperty.propertyid = propertyid
+    bookingProperty.unitnumber = unitnumber
+    bookingProperty.buildingname = buildingname
+    bookingProperty.floor = floor
+    bookingProperty.buildingnumber = buildingnumber
+    bookingProperty.communityname = communityname
+    bookingProperty.city = city
+    bookingProperty.customerid = customerid
+    bookingProperty.guestname = guestname
+    bookingProperty.passportnumber = passportnumber
+    bookingProperty.nationality = nationality
+    bookingProperty.mobilenumber = mobilenumber
+    bookingProperty.email = email
+    bookingProperty.checkintype = checkintype
+    bookingProperty.nooccupants = nooccupants
+    bookingProperty.noadults = noadults
+    bookingProperty.nochildern = nochildern
+    bookingProperty.totaloccupants = totaloccupants
+    bookingProperty.confirmationcode = confirmationcode
+    bookingProperty.bookingagent = bookingagent
+    bookingProperty.checkindate = checkindate
+    bookingProperty.nonight = nonight
+    bookingProperty.reservationdate = reservationdate
+    bookingProperty.modepayment = modepayment
+    bookingProperty.checkoutdate = checkoutdate
+    bookingProperty.tourismfee = tourismfee
+    bookingProperty.totalpayout = totalpayout
+    bookingProperty.securitydeposit = securitydeposit
+    bookingProperty.hostservicefee = hostservicefee
+    bookingProperty.cleaningfee = cleaningfee
+    bookingProperty.tourismfeetillmonth = tourismfeetillmonth
+    bookingProperty.tourismfeeacceleratedmonth = tourismfeeacceleratedmonth
+    bookingProperty.totaladditionalfee = totaladditionalfee
+    bookingProperty.totalcollectall = totalcollectall
+    bookingProperty.totalroomrent = totalroomrent
+    bookingProperty.roomrentamount = roomrentamount
+    bookingProperty.guestservicefee = guestservicefee
+    bookingProperty.guestmanagementfee = guestmanagementfee
+    bookingProperty.totalguestservices = totalguestservices
+    bookingProperty.vatperbookingrent = vatperbookingrent
+    bookingProperty.vatperservicefee = vatperservicefee
+    bookingProperty.vatpercleaningfee = vatpercleaningfee
+    bookingProperty.vatperguestmanagementfee = vatperguestmanagementfee
+    bookingProperty.totalvatper = totalvatper
+    bookingProperty.totalroomrentvat = totalroomrentvat
+    bookingProperty.auditdiff = auditdiff
+    bookingProperty.totalcollectallincl = totalcollectallincl
+    bookingProperty.customertype = customertype
+    bookingProperty.passportpdf = passportpdf
+    bookingProperty.ownerid = ownerid
+    bookingProperty.guestpercentage = guestpercentage
+    bookingProperty.hostmanagementfee = hostmanagementfee
+    bookingProperty.vatperhostmanagementfee = vatperhostmanagementfee
+    bookingProperty.firstdays = parsedFirstDays
+    bookingProperty.moremonths = parsedMoreMonths
+    bookingProperty.cancelled = cancelled
+    bookingProperty.hostmanagementpercent = hostmanagementpercent
+    bookingProperty.roomrenthostpayable = roomrenthostpayable
+    bookingProperty.guestservicepercent = guestservicepercent
+    bookingProperty.createdBy = createdBy
+    bookingProperty.updatedBy = updatedBy
+    bookingProperty.softdelete = softdelete
+
+    const updatedBookingM = await bookingProperty.save()
+
+    if (bookingProperty?.propertyid) {
+        // console.log(bookingProperty?.propertyid, 'bookingProperty?.propertyid')
+        // const properties = await AddProperty.find({ _id: { $in: bookingProperty?.propertyid } });
+        const properties = await AddProperty.find({ _id: { $in: bookingProperty?.propertyid } });
+        const property = properties.find(property => property._id.toHexString() === bookingProperty?.propertyid?.toHexString());
+        // console.log(properties, "properties")
+        // console.log(property, "property")
+        // const customerId = properties.map(property => property?.customerid);
+        // const userData = await User.find({ _id: { $in: customerId } });
+        const userData = await User.find({ _id: { $in: property?.customerid } });
+        const user = userData.find(owner => owner._id.toHexString() === property?.customerid?.toHexString());
+        // console.log(userData, "userData")
+        // const user = userData.find(owner => owner._id.toHexString() === userData?._id?.toHexString());
+        // const user = userData.find(userData => String(userData._id) === String(properties.customerid));
+
+        // console.log(user, "user")
+        const owner_email = user?.email
+        // console.log(owner_email, "owner_email")
+        let contentPara = `A recent update has been made with a booking "${bookingProperty?.bookingnumber}" for your property. We kindly ask you to take a moment to confirm the current status of your Booking by clicking on the provided link.`
+        if (owner_email) {
+            // console.log('owner_email me araha hai')
+            // console.log(owner_email)
+            const owner_name = user?.firstname + " " + user?.lastname
+            let contentHeading = `Hello ${owner_name},`
+            const url = `${process.env.BASE_URL}owner-booking`
+            let property = true
+            await sendEmail(owner_email, "Your Property Booking Updated Recently", url, property, contentHeading, contentPara)
+            // console.log("Email send")
+            // return res.status(200).json({ message: `Property ${updatedProperty.unitnumber} updated` })
+        }
+    }
+
+
+    return res.json({ message: `${updatedBookingM.unitnumber} updated` })
+})
+
+// const updateBookingCancel = asyncHandler(async (req, res) => {
+//     console.log(req.body, "req.body");
+//     const { _id, ...updateData } = req.body;
+
+//     const existingBooking = await Booking.findById(_id).exec();
+//     if (!existingBooking) {
+//         return res.status(400).json({ message: 'Booking not found' });
+//     }
+
+//     console.log(updateData, "updateData");
+
+//     if (req.body.softdelete !== undefined) {
+//         updateData.softdelete = req.body.softdelete;
+//         console.log('softdelete hai');
+//     }
+
+//     Object.assign(existingBooking, updateData);
+
+//     const updatedBooking = await existingBooking.save();
+
+//     return res.json({ message: `${updatedBooking._id} updated` });
+// });
+
+const updateBookingCancel = asyncHandler(async (req, res) => {
+    // console.log(req.body, "req.body");
+    const { _id, ...updateData } = req.body;
+
+    const existingBooking = await Booking.findById(_id).exec();
+    if (!existingBooking) {
+        return res.status(400).json({ message: 'Booking not found' });
+    }
+
+    // console.log(updateData, "updateData");
+    // console.log(existingBooking, "existingBooking");
+
+    // if (softdelete !== undefined) {
+    //     updateData.softdelete = softdelete;
+    //     console.log('softdelete exists');
+    // }
+
+    Object.assign(existingBooking, updateData);
+
+    const updatedBooking = await existingBooking.save();
+
+    return res.json({ message: `${updatedBooking._id} updated` });
+});
+
+const deleteBooking = asyncHandler(async (req, res) => {
+    const { _id } = req.body
+
+    if (!_id) {
+        return res.status(400).json({ message: "Id is required" })
+    }
+
+    const deletedBooking = await Booking.findById(_id).exec()
+
+    if (!deletedBooking) {
+        return res.status(400).json({ message: 'Booking not found' })
+    }
+
+    const result = await deletedBooking.deleteOne()
+    const reply = `Booking ${result?.propertyid} with Id ${result?._id} deleted`
+
+    return res.json(reply)
+})
+
+module.exports = {
+    getAllBooking,
+    getBookingById,
+    createBooking,
+    updateBooking,
+    deleteBooking,
+    getPaginationBooking,
+    getSearchBooking,
+    getPaginationBookingWithDate,
+    getSearchBookingByCustomer,
+    getBookingReservation,
+    getAllBookingData,
+    convertCustomerIdToObjectId,
+    getBookingYearly,
+    getBookingCheckIn,
+    getBookingCheckOut,
+    getBookingByPropertyId,
+    getAllBookingCancelled,
+    updateBookingCancel,
+    getAllBookingWithoutSoftdelete,
+    getPaginationBookingOwnerRep,
+    getBookingProperty
+}
+
+// just for the deployment on git adding this line

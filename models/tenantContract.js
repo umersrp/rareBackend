@@ -3,13 +3,11 @@ const mongoose = require('mongoose')
 const tenantContractSchema = new mongoose.Schema({
     propertyid: {
         type: mongoose.Schema.Types.ObjectId,
-        require: true,
-        ref: 'addProperty'
+        ref: 'AddProperty'
     },
     customerid: {
         type: mongoose.Schema.Types.ObjectId,
-        require: true,
-        ref: 'users'
+        ref: 'User'
     },
     customertype: {
         type: String,

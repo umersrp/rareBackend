@@ -464,67 +464,80 @@ const getOwnerContract = asyncHandler(async (req, res) => {
 });
 
 const createTenantContract = asyncHandler(async (req, res) => {
-    // console.log(req.body);
-    const { propertyid, customerid, guestname, passportnumber, customertype, nationality, mobilenumber, email, contractstartdate, contractenddate, createdBy, updatedBy, contractvalue, rentalamount, securitydepositamount, noofchequeorinstallment, commission, contractexecutiondate, passportpdf, key_receipt_doc, tenancy_contract_doc, contractupdation, ejari_certificate_doc, addendum_doc, chequeDetails, } = req.body
-    // let duplicate = await TenantContract.findOne({ customerid }).lean().exec()
-    // if (duplicate) {
-    //     return res.status(409).json({ message: 'Duplicate Tenant Contract' })
-    // }
+    try{
 
-    const contractenddateObject = new Date(contractstartdate);
-    const contractstartdateObject = new Date(contractenddate);
-    const oneDayBeforeCheckout = new Date(contractenddateObject.getTime() + (24 * 60 * 60 * 1000));
-    const oneDayBeforeCheckIN = new Date(contractstartdateObject.getTime() - (24 * 60 * 60 * 1000));
-
-    const existingTenantContract = await TenantContract.findOne({
-        propertyid,
-        $or: [
-            {
-                contractstartdate: {
-                    $lt: contractenddate,
-                },
-                contractenddate: {
-                    $gte: oneDayBeforeCheckout,
-                },
+        const { 
+            propertyid, customerid, guestname, passportnumber, customertype, 
+            nationality, mobilenumber, email, contractstartdate, contractenddate, createdBy, updatedBy, 
+            contractvalue, rentalamount, securitydepositamount, noofchequeorinstallment, commission, 
+            contractexecutiondate, passportpdf, key_receipt_doc, tenancy_contract_doc, contractupdation, 
+            ejari_certificate_doc, addendum_doc, chequeDetails
+        } = req.body
+       
+    
+       
+        const contractenddateObject = new Date(contractstartdate);
+        const contractstartdateObject = new Date(contractenddate);
+        const oneDayBeforeCheckout = new Date(contractenddateObject.getTime() + (24 * 60 * 60 * 1000));
+        const oneDayBeforeCheckIN = new Date(contractstartdateObject.getTime() - (24 * 60 * 60 * 1000));
+    
+       
+    
+        const existingTenantContract = await TenantContract.findOne({$and:[{ propertyid } , { $or : [ {
+            contractstartdate: {
+                $lt: contractenddate,
             },
-        ],
-    });
-
-    // If a duplicate TenantContract already exists, return an error response
-    if (existingTenantContract) {
-        // console.log(existingTenantContract)
-        return res.status(409).json({ message: 'Duplicate Contract' });
+            contractenddate: {
+                $gte: oneDayBeforeCheckout,
+            },
+        },]  }]})
+    
+        // If a duplicate TenantContract already exists, return an error response
+        if (existingTenantContract) {
+            // console.log(existingTenantContract)
+            return res.status(400).json({ message: 'Duplicate Contract for this Property' });
+        }
+    
+        let chequeDetailsParse
+    
+        if (chequeDetails) {
+            chequeDetailsParse = JSON.parse(chequeDetails)
+        }
+    
+        const tenantContractObject =  { 
+            propertyid, customerid, guestname, passportnumber, 
+            customertype, nationality, mobilenumber, email, contractstartdate, 
+            contractenddate, createdBy, updatedBy, contractvalue, rentalamount, 
+            securitydepositamount, noofchequeorinstallment, commission, contractexecutiondate, passportpdf, 
+            key_receipt_doc, tenancy_contract_doc, contractupdation, ejari_certificate_doc, 
+            addendum_doc, chequeDetails: chequeDetailsParse }
+            
+        const createTenantContract = await TenantContract.create(tenantContractObject)
+    
+        if (createTenantContract) {
+            // if (createTenantContract?.propertyid) {
+            //     const properties = await AddProperty.find({ _id: { $in: createTenantContract?.propertyid } });
+            //     const property = properties.find(property => property._id.toHexString() === createTenantContract?.propertyid?.toHexString());
+            //     const userData = await User.find({ _id: { $in: property?.customerid } });
+            //     const user = userData.find(owner => owner._id.toHexString() === property?.customerid?.toHexString());
+            //     const owner_email = user?.email
+            //     let contentPara = `We would like to inform you that a new tenancy contract for your property, with the unit number "${property?.unitnumber}" has been added to your dashboard. Kindly take a moment to verify the status of your property's tenancy contract by accessing the provided link.`
+            //     if (owner_email) {
+            //         const owner_name = user?.firstname + " " + user?.lastname
+            //         let contentHeading = `Hello ${owner_name},`
+            //         const url = `${process.env.BASE_URL}view-tenantcontract/${createTenantContract?._id}`
+            //         let property = true
+            //         await sendEmail(owner_email, "Your Property Tenancy Contract Added Recently", url, property, contentHeading, contentPara)
+            //     }
+            // }
+           return res.status(200).json({ message: `New Tenant Contract created`,status:true })
+        } else {
+          return  res.status(400).json({ message: 'Invalid Tenant Contract received' , status : false })
+        }
+    }catch(err){
+        res.status(500).json({ message : "No Tenant found" , status : false})
     }
 
-    let chequeDetailsParse
-
-    if (chequeDetails) {
-        chequeDetailsParse = JSON.parse(chequeDetails)
-    }
-
-    const tenantContractObject = { propertyid, customerid, guestname, passportnumber, customertype, nationality, mobilenumber, email, contractstartdate, contractenddate, createdBy, updatedBy, contractvalue, rentalamount, securitydepositamount, noofchequeorinstallment, commission, contractexecutiondate, passportpdf, key_receipt_doc, tenancy_contract_doc, contractupdation, ejari_certificate_doc, addendum_doc, chequeDetails: chequeDetailsParse, }
-    const createTenantContract = await TenantContract.create(tenantContractObject)
-
-    if (createTenantContract) {
-        // if (createTenantContract?.propertyid) {
-        //     const properties = await AddProperty.find({ _id: { $in: createTenantContract?.propertyid } });
-        //     const property = properties.find(property => property._id.toHexString() === createTenantContract?.propertyid?.toHexString());
-        //     const userData = await User.find({ _id: { $in: property?.customerid } });
-        //     const user = userData.find(owner => owner._id.toHexString() === property?.customerid?.toHexString());
-        //     const owner_email = user?.email
-        //     let contentPara = `We would like to inform you that a new tenancy contract for your property, with the unit number "${property?.unitnumber}" has been added to your dashboard. Kindly take a moment to verify the status of your property's tenancy contract by accessing the provided link.`
-        //     if (owner_email) {
-        //         const owner_name = user?.firstname + " " + user?.lastname
-        //         let contentHeading = `Hello ${owner_name},`
-        //         const url = `${process.env.BASE_URL}view-tenantcontract/${createTenantContract?._id}`
-        //         let property = true
-        //         await sendEmail(owner_email, "Your Property Tenancy Contract Added Recently", url, property, contentHeading, contentPara)
-        //     }
-        // }
-        res.status(200).json({ message: `New Tenant Contract created` })
-    } else {
-        res.status(400).json({ message: 'Invalid Tenant Contract received' })
-    }
 })
 
 const updateTenantContract = asyncHandler(async (req, res) => {
