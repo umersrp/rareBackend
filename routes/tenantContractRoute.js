@@ -37,7 +37,7 @@ router.route('/api/ownercontract/').get(tenantContractController.getOwnerContrac
 router.route('/api/propertydelete/').get(tenantContractController.getTenantContractProperty)
 router.route('/api/app/search/:key').get(tenantContractController.getTenantContractSearch)
 router.route('/api/tenantcontractdelete').patch(tenantContractController.updateTenantContractCancel)
-router.route('/report/:propertyid').get(tenantContractController.createTenantReport)
+// router.route('/report/:propertyid').get(tenantContractController.createTenantReport)
 
 router.route('/')
     .get(tenantContractController.getAllTenantContract)

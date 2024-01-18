@@ -10,10 +10,10 @@ const bodyParser = require('body-parser')
 const multer = require('multer')
 const upload = multer();
 const app = express()
+dotenv.config()
 
 const PORT = process.env.PORT || 3600
 
-dotenv.config()
 
 connectDB()
 
