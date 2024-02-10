@@ -282,8 +282,7 @@ const SearchSaleRegisterByQuery = async (req, res, next) => {
         if (buildingid) matchConditions['propertyid.buildingid'] = new mongoose.Types.ObjectId(buildingid);
 
         
-        console.log("Match Conditions:", matchConditions);
-
+        
         const data = [
            
             { '$lookup': { 'from': 'addproperties', 'localField': 'propertyid', 'foreignField': '_id', 'as': 'propertyid' } },
