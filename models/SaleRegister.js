@@ -2,8 +2,9 @@ const mongoose = require('mongoose')
 
 const SaleRegisterSchema = new mongoose.Schema({
     propertyid: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         require: true,
+        ref: 'AddProperty'
     },
     buyer_id: {
         type: mongoose.Schema.Types.ObjectId,
