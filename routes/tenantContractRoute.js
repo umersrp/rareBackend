@@ -31,13 +31,16 @@ const upload = multer({
   }
 }).any();
 
-
+router.route('/updatews').get(tenantContractController.updateManys)
 router.route('/:id').get(tenantContractController.getTenantContractById)
 router.route('/api/ownercontract/').get(tenantContractController.getOwnerContract)
 router.route('/api/propertydelete/').get(tenantContractController.getTenantContractProperty)
 router.route('/api/app/search/:key').get(tenantContractController.getTenantContractSearch)
 router.route('/api/tenantcontractdelete').patch(tenantContractController.updateTenantContractCancel)
 router.route('/report/:propertyid').get(tenantContractController.createTenantReport)
+router.route('/tenantsummaryreportbydates/:propertyid').get(tenantContractController.tenantSummaryReportByDates)
+router.route('/tenantsummaryreport/:propertyid').get(tenantContractController.tenantSummaryReport)
+
 
 router.route('/')
     .get(tenantContractController.getAllTenantContract)

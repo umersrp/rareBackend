@@ -16,6 +16,8 @@ const upload = multer({
     })
 }).any()
 
+
+
 router.route('/:id').get(propertyController.getPropertyById)
 router.route('/pagination/pages').get(propertyController.getPaginationProperty)
 router.route('/api/search/:key').get(propertyController.getSearchProperty)

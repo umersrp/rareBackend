@@ -33,6 +33,12 @@ const userSchema = new mongoose.Schema({
         type: String,
         require: true
     },
+    subType:{
+        type : String,
+        enum:['tenant','owner','guest','owner-representative','customer'],
+        default : 'customer',
+        require : false
+    },
     isLead: {
         type: Boolean,
         default: false,

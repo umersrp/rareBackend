@@ -16,7 +16,7 @@ const tenantContract = require('../models/tenantContract')
 
 const getAllProperty = asyncHandler(async (req, res) => {
     // let filteringfilter = req.query.filteringfilter
-    // let sort = parseInt(req.query.sort || 1)
+    // let sort = parseInt(req.query.sort || 1
     const allProperties = await AddProperty.find({
         $and: [
             { owner_changed: { $ne: true } },
@@ -353,7 +353,7 @@ const getAdvanceSearchOwner = asyncHandler(async (req, res) => {
         if (!allProperties?.length) {
             return res.status(400).json({ message: "No Unit found" });
         }
-
+        console.log("=====start=======>", allProperties)
         const propertyIdForTenant = allProperties.map(property => property._id);
         const propertyIds = allProperties.map(property => property.buildingid);
         const ownerId = allProperties.map(property => property.customerid);
@@ -847,7 +847,21 @@ const getPropertyByIdConnect = asyncHandler(async (req, res) => {
 
 
 const createProperty = asyncHandler(async (req, res) => {
-    const { usage, propertytype, projectstatus, transactiontype, projectname, buildingname, subtype, typelayout, tenancystatus, floor, unitnumber, sizearea, plotsize, communityname, ownerassociation, develpoername, amenities, nobathroom, halfbathroom, propertycountry, propertycity, furnished, kitchen, noparking, balcony, dewapremises, district, parkingbay, youtubelink, propertyview, propertyimages, propertylocation, floorplan, typicalfloorplan, buildingelevation, amenitiesimages, unitplanattachment, plotplanattachment, builduparea, customerid, measure_units, customername, purchasedate, ownernamedeed, purchasevaue, communityid, projectnameid, buildingid, subtypeid, developerid, totalbathroom, bathroomensuite, maidroom, driverroom, storeroom, otherroom, ensuite, bedroomensuite, totalbedroom, streetnumber, is_available, available_for, unlisted, available_id, owner_representative_name, owner_representative_id, createdBy, updatedBy, titledeeddocument, OwnerNameAsPerDeed, no_ownernamedeed } = req.body
+    const { 
+        usage, propertytype, projectstatus, transactiontype, projectname, 
+        buildingname, subtype, typelayout, tenancystatus, floor, unitnumber, sizearea, 
+        plotsize, communityname, ownerassociation, develpoername, amenities, nobathroom, 
+        halfbathroom, propertycountry, propertycity, furnished, kitchen, noparking, balcony, 
+        dewapremises, district, parkingbay, youtubelink, propertyview, propertyimages, propertylocation, 
+        floorplan, typicalfloorplan, buildingelevation, amenitiesimages, unitplanattachment, plotplanattachment,
+         builduparea, customerid, measure_units, customername, purchasedate, ownernamedeed, purchasevaue, communityid, 
+         projectnameid, buildingid, subtypeid, developerid, totalbathroom, bathroomensuite, maidroom, driverroom, storeroom, 
+         otherroom, ensuite, bedroomensuite, totalbedroom, streetnumber, is_available, available_for, unlisted, available_id,
+          owner_representative_name, owner_representative_id, createdBy, updatedBy, titledeeddocument, 
+          OwnerNameAsPerDeed, no_ownernamedeed 
+        } = req.body
+
+
     if (!unitnumber || !communityid || !projectnameid) {
         return res.status(400).json({ message: 'All fields are required' })
     }
@@ -886,6 +900,7 @@ const createProperty = asyncHandler(async (req, res) => {
     }
 
     const propertyObject = { usage, propertytype, projectstatus, transactiontype, projectname, buildingname, subtype, typelayout, tenancystatus, floor, unitnumber, sizearea, plotsize, communityname, ownerassociation, develpoername, amenities, nobathroom, halfbathroom, propertycountry, propertycity, furnished, kitchen, noparking, balcony, dewapremises, district, parkingbay, youtubelink, propertyview, propertyimages, propertylocation, floorplan, typicalfloorplan, buildingelevation, amenitiesimages, unitplanattachment, plotplanattachment, builduparea, customerid, measure_units, customername, purchasedate, ownernamedeed, purchasevaue, communityid, projectnameid, buildingid, subtypeid, developerid, totalbathroom, bathroomensuite, maidroom, driverroom, storeroom, otherroom, ensuite, bedroomensuite, totalbedroom, streetnumber, is_available, available_for, unlisted, available_id, owner_representative_name, owner_representative_id, createdBy, updatedBy, titledeeddocument, no_ownernamedeed, OwnerNameAsPerDeed: OwnerNameAsPerDeedParse }
+    await User.updateOne({_id : customerid} , { $set:{ subType : "owner"}})
     const createProperty = await AddProperty.create(propertyObject)
 
     if (createProperty) {
@@ -1033,6 +1048,12 @@ const updatePropertyAvailability = asyncHandler(async (req, res) => {
     const { _id, OwnerNameAsPerDeed, ...updateData } = req.body;
 
     const existingProperty = await AddProperty.findById(_id).exec();
+
+ 
+    await AddProperty.updateOne({_id : _id.toString()},{$set:{ unlisted : true }},{new : true})
+    await rentpurchase.updateOne({porpertyid : _id},{$set:{ unlisted : true }},{ new : true})
+
+
     if (!existingProperty) {
         return res.status(400).json({ message: 'Property not found' });
     }
@@ -1220,5 +1241,5 @@ module.exports = {
     getPropertyByIdConnect,
     updatePropertyAvailability,
     getSearchPropertyMobile,
-    getAdvanceSearchOwner
+    getAdvanceSearchOwner,
 }

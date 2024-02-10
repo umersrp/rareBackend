@@ -16,6 +16,8 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
+//const calculateMonth = require('../utils/calculateMonth')
+
 
 const getAllBookingTest = asyncHandler(async (req, res) => {
     const allbooking = await Booking.find({
@@ -163,12 +165,12 @@ const getAllBookingTest = asyncHandler(async (req, res) => {
 })
 
 const getAllBooking = asyncHandler(async (req, res) => {
-
+   
     const allbooking = await Booking.find({
         $and: [
             { softdelete: { $ne: true } } // Filter out softdeleted bookings
         ]
-    }).sort({ createdAt  : -1})
+    }).sort({ createdAt : -1})
    // .populate({path :'propertyid' , select: "propertylocation propertyimages subtype"})
     // const sortParams = {};
     // const allowedFields = ['checkindate', 'checkoutdate'];
@@ -564,11 +566,11 @@ const getPaginationBookingOwnerRep = asyncHandler(async (req, res) => {
         const booking = await Booking.find({
             $and: [
                 req.query,
-                { softdelete: { $ne: true } } // Filter out softdeleted bookings
+                { softdelete: false } // Filter out softdeleted bookings
             ]
             // propertyid: req.query.propertyid
         })
-            .sort({ _id: "descending" })
+            .sort({ _id: -1 })
             .skip(perPage * page)
             .limit(parseInt(perPage))
         return res.status(200).json(
@@ -921,8 +923,10 @@ const getAllBookingCancelled = asyncHandler(async (req, res) => {
 const getBookingReservation = asyncHandler(async (req, res) => {
     // const fromDate = new Date(req.query.fromDate) // convert to Date object
     // const toDate = new Date(req.query.toDate) // use hardcoded date for now
-    const fromdate = req.query.checkindate
-    const toDate = req.query.checkindate
+    const fromdate = new Date(req.query.checkindate)
+    const toDate = new Date(req.query.checkoutdate)
+
+    console.log(toDate,"==============>",fromdate)
     
     try {
         // const booking = await Booking
@@ -936,16 +940,26 @@ const getBookingReservation = asyncHandler(async (req, res) => {
         //             { reservationdate: { $gte: fromDate, $lte: toDate } }
         //         ]// query by date range
         //     }).sort({ _id: "descending" }).exec() // execute the query
-        const booking = await Booking.find({
-            $and: [
-                { checkindate: { $gte: fromdate.shift(), $lte: toDate.pop() } },
-                { softdelete: { $ne: true } }
+        const booking = await Booking
+        .find({
+            softdelete: false ,
+            $or:[
+                {checkoutdate : { $gte : toDate   , $lte : fromdate } },
+                {checkindate : { $gte :  fromdate , $lte : toDate } },
+                {checkoutdate : { $lte : toDate , $gte :  fromdate  } },
+                
+                {
+                    $and: [
+                    { checkindate: { $gte: fromdate } },
+                    { checkoutdate: { $lte: toDate } },
+                ]
+            }
             ]
-        }).sort({ checkindate: -1 })
+           
+        })
+        .sort({ checkindate: -1 })
 
-        
-
-
+       
         // if (booking.length === 0) {
         //     return res.status(404).json({
         //         message: 'No bookings found',
@@ -1908,7 +1922,18 @@ const createBooking = asyncHandler(async (req, res) => {
     moremonths = parsedMoreMonths
 
     const bookingObject = { propertyid, unitnumber, buildingname, floor, buildingnumber, communityname, city, customerid, guestname, passportnumber, nationality, mobilenumber, email, checkintype, nooccupants, noadults, totaloccupants, nochildern, confirmationcode, bookingagent, checkindate, nonight, reservationdate, modepayment, checkoutdate, tourismfee, totalpayout, securitydeposit, hostservicefee, cleaningfee, tourismfeetillmonth, tourismfeeacceleratedmonth, totaladditionalfee, totalcollectall, totalroomrent, roomrentamount, guestservicefee, guestmanagementfee, totalguestservices, vatperbookingrent, vatperservicefee, vatpercleaningfee, vatperguestmanagementfee, totalvatper, totalcollectallincl, totalroomrentvat, auditdiff, customertype, passportpdf, ownerid, guestpercentage, hostmanagementfee, vatperhostmanagementfee, parsedFirstDays, parsedMoreMonths, firstdays, moremonths, cancelled, hostmanagementpercent, roomrenthostpayable, guestservicepercent, createdBy, updatedBy, softdelete, dtcm_uploaded, passortid_collected, sign_verified, smartcode_provided, payment_collected, payment_received, other_passports }
+   //console.log(customerid,"========>",guestname)
+
+   if(email ){
+    await User.updateOne({ email : email  },{$set: { subType : "guest" , type : "customer"}} , { new : true})     
+}
+ if(customerid){
+    await User.updateOne({ _id : customerid },{$set: { subType : "guest" , type : "customer"}} , { new : true})
+}
+
     const bookingProperty = await Booking.create(bookingObject)
+
+   
 
     const currentYear = new Date().getFullYear()
     const lastDigit = currentYear.toString().split(0)
@@ -1916,7 +1941,7 @@ const createBooking = asyncHandler(async (req, res) => {
     let bookingNumber = "BN-" + lastDigit[1] + "-" + generateCode
     // console.log(bookingNumber, "bookingNumber")
     await bookingProperty.updateOne({ bookingnumber: bookingNumber })
-
+   
     if (bookingProperty?.propertyid) {
         // console.log(bookingProperty?.propertyid, 'bookingProperty?.propertyid')
         // const properties = await AddProperty.find({ _id: { $in: bookingProperty?.propertyid } });
@@ -2274,222 +2299,319 @@ const getBookingSearch = asyncHandler(async (req, res) => {
 
 })
 
+// ---------------------------------------- no of nights start here ...............................................
+
+
+function GetMonthDays(date) {
+    return new Date(new Date(date).getFullYear(), new Date(date).getMonth() + 1, 0).getDate();
+}
+
+function DateDifference(first, second) {
+    return Math.round((second - first) / (1000 * 60 * 60 * 24));
+}
+function InitializeMonthData() {
+    return {
+        No_of_Booked_Nights: 0,
+        TotalDaysinMonth: 0,
+        TotalHostPayable : 0,
+        AveragePerNight : 0,
+        OccpancyRate : 0,
+        TimePerid : ""
+    }
+}
+
+
+
+function calcuate2(bookingData ,from = '',to = '') {
+    const monthNames = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+
+    let MonthData = {};
+    let TotalDaysinMonth = 0;
+    let TotalHostPayable = 0;
+        bookingData.sort((a,b) => {
+            return new Date(a.checkindate) - new Date(b.checkindate);
+        } )
+
+
+    let toDate = to ? new Date(to) :  new Date(bookingData[bookingData.length - 1].checkoutdate);
+    let fromDate =from ? new Date(from) : new Date(bookingData[0].checkindate)
+
+    console.log("toDate",toDate,"fromDate",fromDate)
+
+    bookingData.forEach(x => {
+        let checkInDate = new Date(x.checkindate);
+        let checkOutDate = new Date(x.checkoutdate);
+
+        var compareDate = new Date(checkOutDate.getFullYear(), checkOutDate.getMonth() + 1, 1);
+
+        while (checkInDate < compareDate) {
+            let monthName = monthNames[new Date(checkInDate).getMonth()];
+            const year = new Date(x.checkindate).getFullYear();
+            let current = new Date(checkInDate);
+            let nextMonthDate = new Date(current.setDate(current.getDate() + 1 + (GetMonthDays(checkInDate) - checkInDate.getDate())));
+
+            let nights;
+            let nextMonthTransition = false
+            if (Date.parse(checkOutDate) + 1> Date.parse(nextMonthDate)) {
+                nights = GetMonthDays(checkInDate) - checkInDate.getDate();
+                TotalDaysinMonth = new Date(year, new Date(checkInDate).getMonth() + 1, 0).getDate();
+                TotalHostPayable = Number(x.roomrenthostpayable).toFixed(2)
+                nextMonthTransition = true;
+
+            } else {
+                nights = DateDifference(checkInDate, checkOutDate);
+                TotalDaysinMonth = new Date(year, new Date(checkInDate).getMonth() + 1, 0).getDate();
+                TotalHostPayable = Number(x.roomrenthostpayable).toFixed(2)
+            }
+
+            
+             if(checkInDate<fromDate){
+                let skippedNights = DateDifference(checkInDate, fromDate);
+                nights = nights - skippedNights
+                
+            }
+
+            const formattedDate = `${monthName} ${new Date(checkInDate).getFullYear()}`;
+            if (!MonthData[formattedDate]) {
+                MonthData[formattedDate] = InitializeMonthData()
+            }
+            
+            MonthData[formattedDate].TimePerid = formattedDate;
+            MonthData[formattedDate].No_of_Booked_Nights += nights;
+            MonthData[formattedDate].TotalDaysinMonth  = TotalDaysinMonth;
+            MonthData[formattedDate].TotalHostPayable += Number(TotalHostPayable);
+            MonthData[formattedDate].AveragePerNight = Number(MonthData[formattedDate].TotalHostPayable) / Number(MonthData[formattedDate].No_of_Booked_Nights);
+            MonthData[formattedDate].OccpancyRate = ((Number(MonthData[formattedDate].No_of_Booked_Nights) / Number(MonthData[formattedDate].TotalDaysinMonth)) * 100).toFixed(2);
+            const nextformattedDate = `${monthNames[new Date(checkInDate.getFullYear(),checkInDate.getMonth()+1).getMonth()]} ${new Date(checkInDate).getFullYear()}`;
+            checkInDate.setDate(checkInDate.getDate() + 1 + (GetMonthDays(checkInDate) - checkInDate.getDate()));
+
+            if(nextMonthTransition && (checkInDate < compareDate)){
+                if (!MonthData[nextformattedDate]) 
+                MonthData[nextformattedDate] = InitializeMonthData()
+                MonthData[nextformattedDate].No_of_Booked_Nights += 1
+                MonthData[nextformattedDate].TimePerid = nextformattedDate;
+                if(checkOutDate>toDate){
+                let skippedNights = DateDifference(toDate, checkOutDate);
+                MonthData[nextformattedDate].No_of_Booked_Nights -= skippedNights
+            }
+            }
+
+        }
+    });
+    Object.keys(MonthData).map(month=>{
+        if(MonthData[month].No_of_Booked_Nights < 0) delete MonthData[month]
+    })
+    return { MonthData  };
+}
+
+
 
 const getSummaryOfProperty = asyncHandler(async (req, res) => {
     const propertyid = req.params.propertyid;
-try{
-    const data  = [
-        {
-          '$match': {
-            'propertyid': new mongoose.Types.ObjectId(propertyid), 
-            'cancelled': false
-          }
-        }, {
-          '$project': {
-            'nonight': 1, 
-            'roomrenthostpayable': {
-              '$toDouble': '$roomrenthostpayable'
-            }, 
-            'checkindate': 1
-          }
-        }, {
-          '$sort': {
-            'checkindate': -1
-          }
-        }, {
-          '$project': {
-            'nonight': 1, 
-            'roomrenthostpayable': 1, 
-            'year': {
-              '$year': '$checkindate'
-            }, 
-            'month': {
-              '$month': '$checkindate'
+
+    try {
+        const data = [
+            {
+                '$match': {
+                    'propertyid': new mongoose.Types.ObjectId(propertyid),
+                    'cancelled': false,
+                    'softdelete': false,
+                }
             }
-          }
-        }, {
-          '$group': {
-            '_id': {
-              'year': '$year', 
-              'month': '$month'
-            }, 
-            'totalNonight': {
-              '$sum': '$nonight'
-            }, 
-            'totalhostpayble': {
-              '$sum': '$roomrenthostpayable'
-            }
-          }
-        }, {
-          '$project': {
-            '_id': 0, 
-            'year': '$_id.year', 
-            'month': '$_id.month', 
-            'totalNonight': 1, 
-            'totalhostpayble': {
-              '$round': [
-                '$totalhostpayble', 2
-              ]
-            }
-          }
-        }, {
-          '$addFields': {
-            'averageCost': {
-              '$divide': [
-                '$totalhostpayble', '$totalNonight'
-              ]
-            }
-          }
-        }, {
-          '$project': {
-            '_id': 0, 
-            'year': 1, 
-            'month': 1, 
-            'totalNonight': 1, 
-            'totalhostpayble': 1, 
-            'averageCost': {
-              '$round': [
-                '$averageCost', 2
-              ]
-            }
-          }
-        }, {
-          '$sort': {
-            'year': 1, 
-            'month': 1
-          }
+        ];
+
+        const propertySummary = await Booking.aggregate(data);
+
+        const dats = calcuate2(propertySummary);
+
+        const extractedData = [];
+
+        for (const key in dats.MonthData) {
+            extractedData.push(
+                {
+                    No_of_Booked_Nights: dats.MonthData[key].No_of_Booked_Nights,
+                    TotalDaysinMonth: dats.MonthData[key].TotalDaysinMonth,
+                    TotalHostPayable: dats.MonthData[key].TotalHostPayable,
+                    AveragePerNight: dats.MonthData[key].AveragePerNight,
+                    OccpancyRate: dats.MonthData[key].OccpancyRate,
+                    TimePerid: dats.MonthData[key].TimePerid,
+                }
+            )
         }
-      ]
 
-    const propertySummary = await Booking.aggregate(data)
-
-    res.status(200).json({
-        total : propertySummary.length,
-        message : "Property Summary Fetched Successfully",
-        status:true,
-        data:propertySummary
-    })
-}catch(err){
-    res.status(500).json({
-        message : "No Property data found",
-        status:false
-    })
-}
-})
+    
+        res.status(200).json({
+            message: "Property Summary Fetched Successfully",
+            status: true,
+            data: extractedData
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: "No Property data found",
+            status: false
+        });
+    }
+});
 
 const getSummaryOfPropertyByDates = asyncHandler(async (req, res) => {
     const propertyid = req.params.propertyid;
-    const fromdate = new Date(req.query.fromdate);
-    const todate = new Date(req.query.todate);
+    const fromdate = new Date(req.query.fromdate).toISOString()
+    const todate = new Date( req.query.todate).toISOString()
    
-  //  console.log("fromdate",from , "todate",to)
-try{
-    const data = [
+   console.log("fromdate",fromdate , "todate",todate)
+  try {
+   
+
+  const data =  [
         {
           '$match': {
-            'propertyid':  new mongoose.Types.ObjectId(propertyid), 
+            'propertyid': new mongoose.Types.ObjectId(propertyid),
             'cancelled': false, 
-            'checkindate': {
-              '$gt': fromdate, 
-              '$lte': todate    
-            }
-          }
-        }, {
-          '$project': {
-            'nonight': 1, 
-            'roomrenthostpayable': {
-              '$toDouble': '$roomrenthostpayable'
-            }, 
-            'checkindate': 1
-          }
-        }, {
-          '$sort': {
-            'checkindate': -1
-          }
-        }, {
-          '$project': {
-            'nonight': 1, 
-            'roomrenthostpayable': 1, 
-            'year': {
-              '$year': '$checkindate'
-            }, 
-            'month': {
-              '$month': '$checkindate'
-            }
-          }
-        }, {
-          '$group': {
-            '_id': {
-              'year': '$year', 
-              'month': '$month'
-            }, 
-            'totalNonight': {
-              '$sum': '$nonight'
-            }, 
-            'totalhostpayble': {
-              '$sum': '$roomrenthostpayable'
-            }
-          }
-        }, {
-          '$project': {
-            '_id': 0, 
-            'year': '$_id.year', 
-            'month': '$_id.month', 
-            'totalNonight': 1, 
-            'totalhostpayble': {
-              '$round': [
-                '$totalhostpayble', 2
-              ]
-            }
-          }
-        }, {
-          '$addFields': {
-            'averageCost': {
-              '$divide': [
-                '$totalhostpayble', '$totalNonight'
-              ]
-            }
-          }
-        }, {
-          '$project': {
-            '_id': 0, 
-            'year': 1, 
-            'month': 1, 
-            'totalNonight': 1, 
-            'totalhostpayble': 1, 
-            'averageCost': {
-              '$round': [
-                '$averageCost', 2
-              ]
-            }
-          }
-        }, {
-          '$sort': {
-            'year': 1, 
-            'month': 1
+            'softdelete': false, 
+            'checkindate':{'$gte': new Date( fromdate),'$lte':  new Date(todate)}
+            // $and:[
+                   
+            //     {'checkindate': { '$gte':   fromdate  }},
+            //     {'checkindate': {'$lte': todate }}
+              
+            // ]
           }
         }
       ]
-      
-      // Execute the pipeline using db.yourCollection.aggregate(data);
-      
 
-    const propertySummary = await Booking.aggregate(data)
+    const propertySummary = await Booking.aggregate(data);
+
+    
+
+    const dats = calcuate2(propertySummary,fromdate,todate);
+
+    const extractedData = [];
+
+    for (const key in dats.MonthData) {
+        extractedData.push(
+            {
+                No_of_Booked_Nights: dats.MonthData[key].No_of_Booked_Nights,
+                TotalDaysinMonth: dats.MonthData[key].TotalDaysinMonth,
+                TotalHostPayable: dats.MonthData[key].TotalHostPayable,
+                AveragePerNight: dats.MonthData[key].AveragePerNight,
+                OccpancyRate: dats.MonthData[key].OccpancyRate,
+                TimePerid: dats.MonthData[key].TimePerid,
+            }
+        )
+    }
+
+   const uiux = propertySummary.map((data) => {
+        const {  checkindate , checkoutdate , nonight} = data;
+        return { checkindate , checkoutdate , nonight }
+    })
 
     res.status(200).json({
-        total : propertySummary.length,
-        message : "Property Summary Fetched Successfully",
-        status:true,
-        data:propertySummary
-    })
-}catch(err){
-    console.log("==========>",err)
+        message: "Property Summary Fetched Successfully",
+        status: true,
+        data: extractedData,
+        data1:uiux
+    });
+} catch (err) {
+    console.log("++++++++",err)
     res.status(500).json({
-        message : "No Property data found",
-        status:false
-    })
+        message: "No Property data found",
+        status: false
+    });
 }
 })
+
+
+// ---------------------------------------- no of nights end here  ...............................................
+
+
+
+
+
+// function calcuate2(bookingData) {
+
+//     console.log("******",bookingData)
+
+//     const monthNames = [
+//         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+//         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+//     ];
+//     let MonthData = {}
+//     let TotalDaysinMonth = 0
+//     let formattedDate = ""
+    
+//     bookingData.forEach(x => {
+
+//         let checkInDate = new Date(x.checkindate);
+//         let checkOutDate = new Date(x.checkoutdate);
+        
+    
+//         var compareDate = new Date(checkOutDate.getFullYear(), checkOutDate.getMonth() +1, 1);
+//         let nextMonthDate = ''
+
+//         while(checkInDate < compareDate)
+//         {
+             
+//             let monthName = monthNames[new Date(checkInDate).getMonth()]
+//             const year = new Date(x.checkindate).getFullYear()
+//             let current = new Date(checkInDate)
+//             nextMonthDate = new Date(current.setDate(current.getDate()+1+(GetMonthDays(checkInDate) - checkInDate.getDate())));
+
+            
+            
+//             let nights; 
+
+//             if(Date.parse(checkOutDate)>Date.parse(nextMonthDate)){
+//                 nights= GetMonthDays(checkInDate) - checkInDate.getDate();
+//             }
+//             else {
+//                  nights= DateDifference(checkInDate, checkOutDate);
+//                  TotalDaysinMonth = new Date(year, monthName, 0).getDate();
+//             }
+//             formattedDate = `${monthName} ${new Date(checkInDate).getFullYear()}`;
+//             if (!MonthData[formattedDate]) MonthData[formattedDate] = 0;
+//             MonthData[formattedDate] += nights
+           
+//             checkInDate.setDate(checkInDate.getDate()+1+(GetMonthDays(checkInDate) - checkInDate.getDate()));
+           
+//         }
+
+//     })
+
+//  return {No_of_Booked_Nights: MonthData , Time_period :formattedDate  , TotalNights: TotalDaysinMonth }
+// }
+
+
+
+
+
+
+
+const getAllBookingTests = async (req,res,next) => {
+try{
+    var objectIdString = "63cfea1dbd5c0f684e0e967a";
+    var objectId = mongoose.Types.ObjectId(objectIdString);
+   const data = await Booking.find({propertyid :{ $type : "string" }})
+
+   const ui = data.map(async(item) => {
+    await Booking.updateOne(
+        {_id : item._id.toString()},
+        {$set : { propertyid : mongoose.Types.ObjectId(item.propertyid)}} , 
+        { new :true}
+        )
+   })
+   res.send(ui)
+// db.bookings.updateOne(
+//    { _id: objectIdString },
+//    { $set: { _id: objectId } }
+// );
+}catch(err){
+    console.log("===>",err)
+}
+}
+
 
 
 module.exports = {
@@ -2519,7 +2641,8 @@ module.exports = {
     getAllBookingApproved,
     getBookingSearch,
     sendEmailPDF,
-    getAllBookingTest
+    getAllBookingTest,
+    getAllBookingTests
 }
 
 // just for the deployment on git adding this line

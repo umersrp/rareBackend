@@ -6,8 +6,9 @@ const SaleRegisterSchema = new mongoose.Schema({
         require: true,
     },
     buyer_id: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         require: true,
+        ref: 'User'
     },
     seller_id: {
         type: mongoose.Schema.Types.ObjectId,

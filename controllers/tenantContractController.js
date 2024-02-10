@@ -1,6 +1,7 @@
 const TenantContract = require('../models/tenantContract')
 const asyncHandler = require('express-async-handler')
 const User = require('../models/User')
+const mongoose = require('mongoose')
 // const { axios } = require('axios')
 const axios = require('axios');
 const AddProperty = require('../models/addProperty')
@@ -511,6 +512,17 @@ const createTenantContract = asyncHandler(async (req, res) => {
             securitydepositamount, noofchequeorinstallment, commission, contractexecutiondate, passportpdf, 
             key_receipt_doc, tenancy_contract_doc, contractupdation, ejari_certificate_doc, 
             addendum_doc, chequeDetails: chequeDetailsParse }
+
+          
+            // console.log(customerid,"========>",guestname , customertype)
+
+            if(email ){
+             //const name = guestname?.split(' ')[0]
+             await User.updateOne({ email : email  },{$set: { subType : "tenant" , type : "customer"}} , { new : true})     
+         }
+          if(customerid){
+             await User.updateOne({ _id : customerid },{$set: { subType : "tenant" , type : "customer"}} , { new : true})
+         }
             
         const createTenantContract = await TenantContract.create(tenantContractObject)
     
@@ -632,6 +644,7 @@ const deleteTenant = asyncHandler(async (req, res) => {
         res.status(400).json({ message: 'Tenant ID requires' })
     }
 
+  
     const tenant = await TenantContract.findById(_id).exec()
 
     if (!tenant) {
@@ -645,6 +658,512 @@ const deleteTenant = asyncHandler(async (req, res) => {
     res.json(reply)
 })
 
+
+const createTenantReport = asyncHandler(async (req,res) => {
+    const propertyid = req.params.propertyid;
+    const fromdate =  new Date(req.query.contractstartdate)
+    const toDate =  new Date (req.query.contractenddate)
+    console.log(fromdate,"========>",toDate)
+    try{
+       const data = [
+            {
+              '$match': {
+                'propertyid': new mongoose.Types.ObjectId(propertyid),
+                'softdelete' : false,
+                $or:[
+                  {'contractenddate': { '$gte': toDate , '$lte' : fromdate }},
+                  {'contractstartdate': { '$gte': fromdate,'$lte': toDate  }},
+                  {'contractenddate': {'$lte': toDate , '$gte': fromdate }},
+                  {
+                    $and:[
+                    {'contractstartdate': { '$gte': fromdate  }},
+                    {'contractenddate': {'$lte': toDate }}
+                  ]
+                }
+                ]
+               
+              } 
+            }, {
+              '$lookup': {
+                'from': 'addproperties', 
+                'localField': 'propertyid', 
+                'foreignField': '_id', 
+                'as': 'propertyid'
+              }
+            }, {
+              '$unwind': {
+                'path': '$propertyid', 
+                'preserveNullAndEmptyArrays': true
+              }
+            }, {
+              '$project': {
+                '_id': 1, 
+                'propertyid.projectname': 1, 
+                'propertyid.buildingname': 1, 
+                'propertyid.unitnumber': 1, 
+                'propertyid.communityname': 1, 
+                'propertyid.customername': 1, 
+                'customerid': 1, 
+                'customertype': 1, 
+                'guestname': 1, 
+                'passportnumber': 1, 
+                'nationality': 1, 
+                'mobilenumber': 1, 
+                'contractstartdate': 1, 
+                'contractenddate': 1, 
+                'contractexecutiondate': 1, 
+                'chequeDetails': 1, 
+                'rentalamount': 1, 
+                'noofchequeorinstallment': 1, 
+                'softdelete': 1, 
+                'createdBy': 1, 
+                'propertycode': {
+                  '$concat': [
+                    'Rare/', {
+                      '$reduce': {
+                        'input': {
+                          '$split': [
+                            '$propertyid.communityname', ' '
+                          ]
+                        }, 
+                        'initialValue': '', 
+                        'in': {
+                          '$concat': [
+                            '$$value', {
+                              '$substr': [
+                                '$$this', 0, 1
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    }, '/', {
+                      '$reduce': {
+                        'input': {
+                          '$split': [
+                            '$propertyid.buildingname', ' '
+                          ]
+                        }, 
+                        'initialValue': '', 
+                        'in': {
+                          '$concat': [
+                            '$$value', '$$this'
+                          ]
+                        }
+                      }
+                    }, '/', '$propertyid.unitnumber'
+                  ]
+                }, 
+                'tenantcontractno': {
+                  '$concat': [
+                    'Rare/', {
+                      '$reduce': {
+                        'input': {
+                          '$split': [
+                            '$propertyid.communityname', ' '
+                          ]
+                        }, 
+                        'initialValue': '', 
+                        'in': {
+                          '$concat': [
+                            '$$value', {
+                              '$substr': [
+                                '$$this', 0, 1
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    }, '/', {
+                      '$reduce': {
+                        'input': {
+                          '$split': [
+                            '$propertyid.buildingname', ' '
+                          ]
+                        }, 
+                        'initialValue': '', 
+                        'in': {
+                          '$concat': [
+                            '$$value', '$$this'
+                          ]
+                        }
+                      }
+                    }, '/', {
+                      '$concat': [
+                        '$propertyid.unitnumber', '-', {
+                          '$toString': {
+                            '$floor': {
+                              '$multiply': [
+                                100, {
+                                  '$rand': {}
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },{
+                '$sort':{
+                    'contractstartdate' : -1
+                }
+            }
+          ]
+
+      const reports =  await TenantContract.aggregate(data)
+
+      res.status(200).json({
+        message : "Tenant Reports Generated",
+        status : true,
+        data : reports
+      })
+    }catch(err){
+        res.status(200).json({
+            message : "No Tenant Reports Generated",
+            status : false
+          })
+    }
+})
+
+
+const tenantSummaryReportByDates = async (req,res,next) => {
+  const propertyid = req.params.propertyid;
+  const fromdate =  new Date(req.query.contractstartdate)
+  const toDate =  new Date (req.query.contractenddate)
+try{
+
+
+  const data = [
+    {
+      '$match': {
+        'propertyid':new mongoose.Types.ObjectId(propertyid), 
+        'softdelete' : false,
+        $or:[
+          {'contractstartdate': { '$gte': fromdate,'$lte': toDate  }},
+          {'contractenddate': {'$lte': toDate , '$gte': fromdate }},
+          {
+            $and:[
+            {'contractstartdate': { '$gte': fromdate  }},
+            {'contractenddate': {'$lte': toDate }}
+          ]
+        }
+        ]
+      }
+    }, {
+      '$lookup': {
+        'from': 'addproperties', 
+        'localField': 'propertyid', 
+        'foreignField': '_id', 
+        'as': 'propertyid'
+      }
+    }, {
+      '$unwind': {
+        'path': '$propertyid', 
+        'preserveNullAndEmptyArrays': true
+      }
+    }, {
+      '$project': {
+        'propertyid._id': 1, 
+        'propertyid.communityname': 1, 
+        'propertyid.buildingname': 1, 
+        'propertyid.ownernamedeed': 1, 
+        'propertyid.projectname': 1, 
+        'propertyid.unitnumber': 1, 
+        'tenantcontractno': 1, 
+        'rentalamount': 1, 
+        'contractstartdate': 1, 
+        'contractenddate': 1, 
+        'rentalamount': 1,
+        'tenantcontractno': {
+          '$concat': [
+            'Rare/', {
+              '$reduce': {
+                'input': {
+                  '$split': [
+                    '$propertyid.communityname', ' '
+                  ]
+                }, 
+                'initialValue': '', 
+                'in': {
+                  '$concat': [
+                    '$$value', {
+                      '$substr': [
+                        '$$this', 0, 1
+                      ]
+                    }
+                  ]
+                }
+              }
+            }, '/', {
+              '$reduce': {
+                'input': {
+                  '$split': [
+                    '$propertyid.buildingname', ' '
+                  ]
+                }, 
+                'initialValue': '', 
+                'in': {
+                  '$concat': [
+                    '$$value', '$$this'
+                  ]
+                }
+              }
+            }, '/', {
+              '$concat': [
+                '$propertyid.unitnumber', '-', {
+                  '$toString': {
+                    '$floor': {
+                      '$multiply': [
+                        100, {
+                          '$rand': {}
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }, {
+      '$sort': {
+        'contractstartdate': -1
+      }
+    }
+  ]
+  
+  const reports =  await TenantContract.aggregate(data)
+
+  res.status(200).json({
+    total : reports.length,
+    message : "Tenant Reports Generated",
+    status : true,
+    data : reports
+  })
+
+}catch(err){
+  res.status(200).json({
+    message : "Tenant Reports Generated",
+    status : true
+  })
+}
+}
+
+const tenantSummaryReport = async (req,res,next) => {
+  const propertyid = req.params.propertyid;
+
+try{
+  const data = [
+    {
+      '$match': {
+          'propertyid': new mongoose.Types.ObjectId(propertyid),
+          'softdelete' : false
+      }
+    }, {
+      '$lookup': {
+        'from': 'addproperties', 
+        'localField': 'propertyid', 
+        'foreignField': '_id', 
+        'as': 'propertyid'
+      }
+    }, {
+      '$unwind': {
+        'path': '$propertyid', 
+        'preserveNullAndEmptyArrays': true
+      }
+    }, {
+      '$project': {
+        'propertyid._id': 1, 
+        'propertyid.communityname': 1, 
+        'propertyid.buildingname': 1, 
+        'propertyid.ownernamedeed': 1, 
+        'propertyid.projectname': 1, 
+        'propertyid.unitnumber': 1, 
+        'tenantcontractno': 1, 
+        'rentalamount': 1, 
+        'contractstartdate': 1, 
+        'contractenddate': 1, 
+        'rentalamount': 1,
+        'tenantcontractno': {
+          '$concat': [
+            'Rare/', {
+              '$reduce': {
+                'input': {
+                  '$split': [
+                    '$propertyid.communityname', ' '
+                  ]
+                }, 
+                'initialValue': '', 
+                'in': {
+                  '$concat': [
+                    '$$value', {
+                      '$substr': [
+                        '$$this', 0, 1
+                      ]
+                    }
+                  ]
+                }
+              }
+            }, '/', {
+              '$reduce': {
+                'input': {
+                  '$split': [
+                    '$propertyid.buildingname', ' '
+                  ]
+                }, 
+                'initialValue': '', 
+                'in': {
+                  '$concat': [
+                    '$$value', '$$this'
+                  ]
+                }
+              }
+            }, '/', {
+              '$concat': [
+                '$propertyid.unitnumber', '-', {
+                  '$toString': {
+                    '$floor': {
+                      '$multiply': [
+                        100, {
+                          '$rand': {}
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }, {
+      '$sort': {
+        'contractstartdate': -1
+      }
+    }
+  ]
+  const reports =  await TenantContract.aggregate(data)
+
+  res.status(200).json({
+    total : reports.length,
+    message : "Tenant Reports Generated",
+    status : true,
+    data : reports
+  })
+
+}catch(err){
+  res.status(200).json({
+    message : "Tenant Reports Generated",
+    status : true
+  })
+}
+}
+
+
+const updateManys = async (req,res,next) => {
+    try{
+     const data =   [
+            {
+              '$lookup': {
+                'from': 'addproperties', 
+                'localField': 'propertyid', 
+                'foreignField': '_id', 
+                'as': 'propertyid'
+              }
+            }, {
+              '$unwind': {
+                'path': '$propertyid', 
+                'preserveNullAndEmptyArrays': true
+              }
+            }, {
+              '$project': {
+                'propertyid': 1, 
+                'tenantcontractno': {
+                  '$concat': [
+                    'Rare/', {
+                      '$reduce': {
+                        'input': {
+                          '$split': [
+                            '$propertyid.communityname', ' '
+                          ]
+                        }, 
+                        'initialValue': '', 
+                        'in': {
+                          '$concat': [
+                            '$$value', {
+                              '$substr': [
+                                '$$this', 0, 1
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    }, '/', {
+                      '$reduce': {
+                        'input': {
+                          '$split': [
+                            '$propertyid.buildingname', ' '
+                          ]
+                        }, 
+                        'initialValue': '', 
+                        'in': {
+                          '$concat': [
+                            '$$value', '$$this'
+                          ]
+                        }
+                      }
+                    }, '/', {
+                      '$concat': [
+                        '$propertyid.unitnumber', '-', {
+                          '$toString': {
+                            '$floor': {
+                              '$multiply': [
+                                100, {
+                                  '$rand': {}
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+
+          const tenactContract = await TenantContract.aggregate(data);
+
+
+         const done =  tenactContract.map(async(data) => {
+            const { propertyid , tenantcontractno} = data
+            await TenantContract.updateOne({propertyid : propertyid},{$set:{ propertyid: mongoose.Types.ObjectId(propertyid) }},{new : true})
+          })
+
+        
+      
+          res.status(200).json({
+            message: 'TenantContract updated successfully now',
+            status: true,
+            data : done
+          });
+
+      
+    }catch(err){
+        console.log("tenactContract",err)
+    }
+
+}
+
+
+
+
+
 module.exports = {
     getAllTenantContract,
     getTenantContractById,
@@ -654,5 +1173,9 @@ module.exports = {
     deleteTenant,
     getTenantContractProperty,
     updateTenantContractCancel,
-    getTenantContractSearch
+    getTenantContractSearch,
+    createTenantReport,
+    tenantSummaryReport,
+    tenantSummaryReportByDates,
+    updateManys
 }

@@ -18,12 +18,14 @@ const getAllSaleRegister = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: "No Sale Register found" })
     }
     const buyerIds = allSaleRegister.map(buyer => buyer?.buyer_id).filter(id => id);
+    const sellerIds = allSaleRegister.map(seller => seller?.seller_id).filter(id => id);
     const propertyIds = allSaleRegister.map(property => property?.propertyid).filter(id => id);
     const employeeIds = allSaleRegister.map(employee => employee.createdBy);
     const employeeIdsUpdatedBy = allSaleRegister.map(employee => employee.updatedBy);
 
     try {
         const buyers = await User.find({ _id: { $in: buyerIds } });
+        const seller = await User.find({ _id: { $in: sellerIds } });
         const properties = await AddProperty.find({ _id: { $in: propertyIds } });
         const buildingIds = properties.map(property => property?.buildingid).filter(id => id);
         const projectnameId = properties.map(property => property?.projectnameid).filter(id => id);
@@ -39,9 +41,11 @@ const getAllSaleRegister = asyncHandler(async (req, res) => {
 
 
         const allSaleRegisterAllData = allSaleRegister.map(saleregister => {
+            
             const tenantObject = saleregister.toObject();
-            const { _id, propertyid, property_type, unitnumber, communityname, projectname, buildingname, floor, sold_for, noc_charges, trustee_fee_amount, trustee_buyer, trustee_seller, trustee_both, transfer_fee_amount, transfer_buyer, transfer_seller, transfer_both, commission_amount, vat_on_commission, buyer_name, buyer_inhouse_agent_name, buyer_outside_agent_name, transaction_type, exoected_transfer_date, createdBy, updatedBy, property_new, buyer_new, buyer_type, buyer_id, check_option_cash, check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, contract_B_attachment, title_deed_fee, seller_id, seller_new, seller_type, contract_A_attachment, sales_contract_attachment, notes, createdAt, updatedAt } = tenantObject;
-            const updatedallSaleRegister = { _id, propertyid, property_type, unitnumber, communityname, projectname, buildingname, floor, sold_for, noc_charges, trustee_fee_amount, trustee_buyer, trustee_seller, trustee_both, transfer_fee_amount, transfer_buyer, transfer_seller, transfer_both, commission_amount, vat_on_commission, buyer_name, buyer_inhouse_agent_name, buyer_outside_agent_name, transaction_type, exoected_transfer_date, createdBy, updatedBy, property_new, buyer_new, buyer_type, buyer_id, check_option_cash, check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, contract_B_attachment, title_deed_fee, seller_id, seller_new, seller_type, contract_A_attachment, sales_contract_attachment, notes, createdAt, updatedAt };
+            const { _id, propertyid, property_type, unitnumber, communityname,buyerids, projectname, buildingname, floor, sold_for, noc_charges, trustee_fee_amount, trustee_buyer, trustee_seller, trustee_both, transfer_fee_amount, transfer_buyer, transfer_seller, transfer_both, commission_amount, vat_on_commission, buyer_name, buyer_inhouse_agent_name, buyer_outside_agent_name, transaction_type, exoected_transfer_date, createdBy, updatedBy, property_new, buyer_new, buyer_type, buyer_id, check_option_cash, check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, contract_B_attachment, title_deed_fee, seller_id,    seller_name , seller_email , seller_passportnumber , seller_nationality , seller_mobilenumber ,buyer_passportnumber, seller_new, seller_type, contract_A_attachment,buyer_mobilenumber, sales_contract_attachment, notes, createdAt, updatedAt } = tenantObject;
+            const updatedallSaleRegister = { _id, propertyid, property_type,buyerids, unitnumber, communityname, projectname, buildingname, floor, sold_for, noc_charges, trustee_fee_amount, trustee_buyer, trustee_seller, trustee_both, transfer_fee_amount, transfer_buyer, transfer_seller, transfer_both, commission_amount, vat_on_commission, buyer_name, buyer_inhouse_agent_name, buyer_outside_agent_name, transaction_type, exoected_transfer_date, createdBy, updatedBy, property_new, buyer_new, buyer_type, buyer_id, check_option_cash, check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, contract_B_attachment, title_deed_fee, seller_id,   seller_name , seller_email , seller_passportnumber , seller_nationality , seller_mobilenumber ,buyer_passportnumber, seller_new, seller_type,buyer_mobilenumber, contract_A_attachment, sales_contract_attachment, notes, createdAt, updatedAt };
+         
             if (propertyid) {
                 const property = properties.find(property => String(property._id) === String(saleregister.propertyid));
                 if (property) {
@@ -74,11 +78,22 @@ const getAllSaleRegister = asyncHandler(async (req, res) => {
             }
             if (buyer_id) {
                 const customerid = buyers.find(customerid => String(customerid._id) === String(buyer_id));
+                console.log("33333333",customerid)
+                updateSaleRegister.buyerids = customerid._id
                 updatedallSaleRegister.buyer_name = (customerid?.firstname) + (customerid?.lastname ? " " + customerid?.lastname : "");
                 updatedallSaleRegister.buyer_email = customerid?.email;
                 updatedallSaleRegister.buyer_passportnumber = customerid?.passportidno;
                 updatedallSaleRegister.buyer_nationality = customerid?.passportno;
                 updatedallSaleRegister.buyer_mobilenumber = customerid?.whatsappno;
+            }
+            
+            if(seller_id){
+                const customerid = seller.find(customerid => String(customerid._id) === String(seller_id));
+                updatedallSaleRegister.seller_name = (customerid?.firstname) + (customerid?.lastname ? " " + customerid?.lastname : "");
+                updatedallSaleRegister.seller_email = customerid?.email;
+                updatedallSaleRegister.seller_passportnumber = customerid?.passportidno;
+                updatedallSaleRegister.seller_nationality = customerid?.passportno;
+                updatedallSaleRegister.seller_mobilenumber = customerid?.whatsappno;
             }
 
             const employee = employeeData.find(employee => String(employee._id) === String(createdBy));
@@ -249,13 +264,121 @@ const deleteSaleRegister = asyncHandler(async (req, res) => {
     res.json(reply)
 })
 
+const AllCounts = async (req, res, next) => {
+    try {
+        const allproperty = await SaleRegister.find({ softdelete: false });
+
+        
+        const validSoldValues = allproperty
+            .filter(data => data.sold_for !== null && data.sold_for !== undefined)
+            .map(data => {
+                const { sold_for } = data;
+                const sold = Number(sold_for);
+                return sold;
+            });
+            const sold_for = validSoldValues.reduce((acc, data) => acc + data, 0);
+
+            const property = await SaleRegister.find( {$and :[{propertyid : { $ne: null }} , {softdelete : false }] } ).count()
+           
+
+           const data = [
+                {
+                  '$match': {
+                    'softdelete': false, 
+                    '$and': [
+                      {
+                        'buyer_id': {
+                          '$ne': null
+                        }
+                      }, {
+                        'buyer_id': {
+                          '$exists': true
+                        }
+                      }, {
+                        'buyer_id': {
+                          '$ne': ''
+                        }
+                      }
+                    ]
+                  }
+                }, {
+                  '$group': {
+                    '_id': '$buyer_id', 
+                    'buyername': {
+                      '$first': '$buyer_name'
+                    }
+                  }
+                }, {
+                  '$count': 'totalBuyers'
+                }
+              ]
+           const data1 =   [
+                {
+                  '$match': {
+                    'softdelete': false, 
+                    '$and': [
+                      {
+                        'seller_id': {
+                          '$ne': null
+                        }
+                      }, {
+                        'seller_id': {
+                          '$exists': true
+                        }
+                      }, {
+                        'seller_id': {
+                          '$ne': ''
+                        }
+                      }
+                    ]
+                  }
+                }, {
+                  '$addFields': {
+                    'seller_id_str': {
+                      '$toString': '$seller_id'
+                    }
+                  }
+                }, {
+                  '$group': {
+                    '_id': '$seller_id_str'
+                  }
+                }, {
+                  '$count': 'totalSellers'
+                }
+              ]
+          const buyer = await SaleRegister.aggregate(data)
+            const seller = await SaleRegister.aggregate(data1)
+
+        
+        res.status(200).json({
+            total: allproperty.length,
+            message: "All Counts founds",
+            status: true,
+            data: { 
+            sold_for , 
+            property,
+            buyer : buyer.map(data => data.totalBuyers).pop(),
+            seller:seller.map(data => data.totalSellers).pop() 
+            },
+        });
+    } catch (err) {
+        console.log("=========>",err)
+        res.status(200).json({
+            message: "NO Counts founds",
+            status: false,
+        });
+    }
+};
+
+
 module.exports = {
     getAllSaleRegister,
     getSaleRegisterById,
     createSaleRegister,
     updateSaleRegister,
     deleteSaleRegister,
-    updateSaleRegisterSoftDelete
+    updateSaleRegisterSoftDelete,
+    AllCounts
 }
 
 //deploying on dev-rare that's why changing in this

@@ -35,9 +35,14 @@ router.route('/api/approvedbooking').get(bookingController.getAllBookingApproved
 router.route('/api/updatebooking').patch(bookingController.updateBookingCancel)
 router.route('/api/allbooking/softdelete').get(bookingController.getAllBookingWithoutSoftdelete)
 router.route('/api/allbooking/forproperty').get(bookingController.getBookingProperty)
+
+
+
 router.route('/api/search/mobile/:key').get(bookingController.getBookingSearch)
 router.route('/api/sendpdf').post(bookingController.sendEmailPDF)
 router.route('/api/test').get(bookingController.getAllBookingTest)
+
+router.route('/api/tests').get(bookingController.getAllBookingTests)
 
 router.route('/')
     .get(bookingController.getAllBooking)

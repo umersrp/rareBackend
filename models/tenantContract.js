@@ -9,6 +9,10 @@ const tenantContractSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
+    tenantcontractno:{
+        type :String,
+        default:""
+    },
     customertype: {
         type: String,
         require: true
