@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 const connectDB = async () => {
     try {
-     await mongoose.connect('mongodb+srv://rare_user:LGT7pWdZ3Tv4Y7PX@rare-db.ecj5aq5.mongodb.net/')
+     return await mongoose.connect(process.env.DATABASE_URI)
     } catch (err) {
         console.log(err)
         throw new Error("failed to connect db")
