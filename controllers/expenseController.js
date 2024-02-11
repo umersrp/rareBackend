@@ -68,6 +68,14 @@ const getallExpsenses = async (req,res,next) => {
                 'preserveNullAndEmptyArrays': true
               }
             }, {
+              '$addFields': {
+                'propertyDetails': {
+                  '$concat': [
+                    '$propertyid.communityname', ' - ', '$propertyid.projectname', ' - ', '$propertyid.buildingname', ' - ', '$propertyid.unitnumber'
+                  ]
+                }
+              }
+            }, {
               '$project': {
                 '_id': 1, 
                 'amount': 1, 
@@ -76,7 +84,8 @@ const getallExpsenses = async (req,res,next) => {
                 'softdelete': 1, 
                 'createdAt': 1, 
                 'purpose': '$purposeid.name', 
-                'propertyid': 1
+                'propertyid': 1, 
+                'propertyDetails': 1
               }
             }, {
               '$sort': {
