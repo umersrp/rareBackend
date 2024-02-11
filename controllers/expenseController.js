@@ -102,10 +102,30 @@ const updateExpenseRecord = async (req,res,next) => {
 }
 
 
-const deleteExpenseRecord = async (req,res,next) => {
+const SoftdeleteExpenseRecord = async (req,res,next) => {
     const id = req.params.id
     try{
          await expsenseModel.updateOne({_id : id},{$set : {softdelete : true}},{new : true})
+        res.status(200).json({
+            message : "Expense Deleted Successfully",
+            status : true
+        })
+    }catch(err){
+        res.status(200).json({
+            message : "Expense not Deleted Successfully",
+            status : false
+        })
+    }
+}
+
+const deleteExpenseRecord = async (req,res,next) => {
+    const id = req.params.id
+    try{
+       const checkDeletedId = await expsenseModel.find({ _id : id})
+       if(checkDeletedId && checkDeletedId.length > 0){
+        return res.status(404).json({ message : "Expense not found"})
+       }
+         await expsenseModel.deleteOne({_id : id})
         res.status(200).json({
             message : "Expense Deleted Successfully",
             status : true
@@ -124,10 +144,12 @@ const deleteExpenseRecord = async (req,res,next) => {
 
 
 
+
 module.exports = {
     createExpenseData,
     getallExpsenses,
     getByidExpense,
     updateExpenseRecord,
+    SoftdeleteExpenseRecord,
     deleteExpenseRecord
 }
