@@ -48,6 +48,7 @@ app.use('/saleregister', require('./routes/SaleRegisterRoute'))
 app.use('/powerattorney', require('./routes/PowerAttorneyRoute'))
 app.use('/bankdetails', require('./routes/BankDetailsRoute'))
 app.use('/expense', require('./routes/expenseRoute'))
+app.use('/purpose', require('./routes/purposeRoute'))
 
 app.use(express.static(path.join(__dirname, "./build")));
 app.use('/public', express.static(path.join('public')));
