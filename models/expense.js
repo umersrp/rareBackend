@@ -4,24 +4,23 @@ const expenseSchema = new mongoose.Schema({
     propertyid: {
         type: mongoose.Schema.Types.ObjectId,
         ref : 'AddProperty',
-        require: true
+        // require: true
     },
     purposeid: {
         type: mongoose.Schema.Types.ObjectId,
         ref : 'purposeSchema',
-        require: true
+        // require: true
     },
     amount: {
         type: Number,
-        require: true
+        // require: true
     },
     d_o_p: {
         type: Date,
-        require: true
+        // require: true
     },
     expenseAttachment: {
         type: String,
-        require: true
     },
     softdelete:{
         type : Boolean,
