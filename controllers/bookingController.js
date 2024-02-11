@@ -2309,7 +2309,7 @@ function GetMonthDays(date) {
 function DateDifference(first, second) {
     return Math.round((second - first) / (1000 * 60 * 60 * 24));
 }
-function InitializeMonthData() {
+function InitializeMonthData(month,year) {
     return {
         No_of_Booked_Nights: 0,
         TotalDaysinMonth: 0,
@@ -2376,7 +2376,7 @@ function calcuate2(bookingData ,from = '',to = '') {
 
             const formattedDate = `${monthName} ${new Date(checkInDate).getFullYear()}`;
             if (!MonthData[formattedDate]) {
-                MonthData[formattedDate] = InitializeMonthData()
+                MonthData[formattedDate] = InitializeMonthData(new Date(checkInDate).getMonth(),new Date(checkInDate).getFullYear())
             }
             
             MonthData[formattedDate].TimePerid = formattedDate;
