@@ -331,7 +331,7 @@ const getAllRentpurchase = asyncHandler(async (req, res) => {
 
         tenantDetails.forEach((data) => {
             if(data !== undefined && data.propertyid.toString() != undefined ){
-                if(Date.parse(data.contractstartdate) > Date.parse(data.contractenddate)){
+                if(new Date(data.contractstartdate) > new Date(data.contractenddate)){
                     RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
                 }else{
                     RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
@@ -613,7 +613,7 @@ const getSearchRentpurchase = asyncHandler(async (req, res) => {
         const tenantDetails = await tenantContract.find({ propertyid: { $in: propertyIds } }).sort({ createdAt : -1})
         tenantDetails.forEach((data) => {
             if(data !== undefined && data.propertyid.toString() != undefined ){
-                if(Date.parse(data.contractstartdate) > Date.parse(data.contractenddate)){
+                if(new Date(data.contractstartdate) > new Date(data.contractenddate)){
                     RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
                 }else{
                     RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
