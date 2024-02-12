@@ -2335,11 +2335,9 @@ function calcuate2(bookingData ,from = '',to = '') {
             return new Date(a.checkindate) - new Date(b.checkindate);
         } )
 
-
     let toDate = to ? new Date(to) :  new Date(bookingData[bookingData.length - 1].checkoutdate);
     let fromDate =from ? new Date(from) : new Date(bookingData[0].checkindate)
 
-    console.log("toDate",toDate,"fromDate",fromDate)
 
     bookingData.forEach(x => {
         let checkInDate = new Date(x.checkindate);
@@ -2402,7 +2400,12 @@ function calcuate2(bookingData ,from = '',to = '') {
         }
     });
     Object.keys(MonthData).map(month=>{
-        if(MonthData[month].No_of_Booked_Nights < 0) delete MonthData[month]
+        let compareDateSplit = month.split(' ')
+        let compareDate = new Date(compareDateSplit[1], parseInt(monthNames.indexOf(compareDateSplit[0])), 1);
+        let fromComparison = new Date(fromDate.getFullYear(), fromDate.getMonth() ,1)
+        let toComparison = new Date(toDate.getFullYear(), toDate.getMonth()+1, 0);
+
+        if((compareDate < fromComparison) || (compareDate > toComparison)) delete MonthData[month]
     })
     return { MonthData  };
 }
@@ -2471,13 +2474,12 @@ const getSummaryOfPropertyByDates = asyncHandler(async (req, res) => {
             'propertyid': new mongoose.Types.ObjectId(propertyid),
             'cancelled': false, 
             'softdelete': false, 
-            'checkindate':{'$gte': new Date( fromdate),'$lte':  new Date(todate)}
-            // $and:[
-                   
-            //     {'checkindate': { '$gte':   fromdate  }},
-            //     {'checkindate': {'$lte': todate }}
-              
-            // ]
+            // 'checkindate':{'$gte': new Date( fromdate),'$lte':  new Date(todate)}
+            $or:[
+                {'checkindate':{'$gte': new Date( fromdate),'$lte':  new Date(todate)}},
+                {'checkoutdate': { '$gte': new Date(fromdate) ,'$lte':  new Date(todate)}},
+                // {'checkindate': {'$lte': todate }}
+            ]
           }
         }
       ]
