@@ -366,7 +366,7 @@ const getAllRentpurchase = asyncHandler(async (req, res) => {
                    
 
                     const tenant = tenantDetails.find((tenant) => String(tenant.propertyid) === String(porpertyid) && tenant.contractupdation !== "terminated" && tenant.softdelete === false);
-                    
+                    tenant.forEach(async(data) => await RentPurchase.updateOne({ porpertyid : data?.propertyid.toString()},{$set : {status : "Occupied"}},{new : true}))
                         if (tenant) {
                            
                             updatedAvailability.contract_startdate = tenant.contractstartdate;
