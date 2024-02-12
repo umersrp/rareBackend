@@ -301,7 +301,7 @@ const getAllRentpurchase = asyncHandler(async (req, res) => {
         $and: [
             { softdelete: { $ne: true } } // Filter out softdeleted bookings
         ]
-    }).sort({ _id: "descending" }).limit(2).skip(0)
+    }).sort({ _id: "descending" }).limit(10).skip(1)
     if (!rentPurchase?.length) {
         return res.status(400).json({ message: "No Project Name found" });
     }
@@ -333,10 +333,11 @@ const getAllRentpurchase = asyncHandler(async (req, res) => {
         // const tenantDetailsCustomer = await tenantContract.find({ _id: { $in: propertyIds } });
         // const customerIds = tenantDetailsCustomer.map(tenants => tenants?.customerid)
 
-        const rentPurchaseWithBuilding = rentPurchase.map(rent => {
+        const rentPurchaseWithBuilding = rentPurchase.map(async(rent) => {
             const availabilityObject = rent.toObject();
             const { porpertyid, employeeid, propertyvaluation, maintenance, status ,listingtype, key_location, noof_key, listingsource, createdAt, _id, propertystatus, unlisted, again_available, createdBy, updatedBy, updatedAt, multi_propertyvaluation, multivaluation, property_reference, transaction_status } = availabilityObject;
             const updatedAvailability = { porpertyid, employeeid, propertyvaluation,status , maintenance, listingtype, key_location, noof_key, listingsource, createdAt, _id, propertystatus, unlisted, again_available, createdBy, updatedBy, updatedAt, multi_propertyvaluation, multivaluation, property_reference, transaction_status };
+           
             if (porpertyid) {
                 const property = properties.find(property => String(property._id) === String(rent.porpertyid));
                 if (property) {
@@ -356,11 +357,8 @@ const getAllRentpurchase = asyncHandler(async (req, res) => {
                     updatedAvailability.measure_units = property.measure_units;
 
                 
-
-                   
-
-                    tenantDetails.forEach(async(data) => await RentPurchase.updateOne({ porpertyid : data?.propertyid.toString()},{$set : {status : "Occupied"}},{new : true}))
                     const tenant = tenantDetails.find((tenant) => String(tenant.propertyid) === String(porpertyid) && tenant.contractupdation !== "terminated" && tenant.softdelete === false);
+                    
                         if (tenant) {
                            
                             updatedAvailability.contract_startdate = tenant.contractstartdate;
