@@ -9,6 +9,7 @@ const Employee = require('../models/employee')
 const { default: axios } = require('axios')
 const tenantContract = require('../models/tenantContract')
 const User = require('../models/User')
+const { EventEmitterAsyncResource } = require('nodemailer/lib/xoauth2')
 
 // const getAllRentpurchase = asyncHandler(async (req, res) => {
 //     const rentPurchase = await RentPurchase.find().sort({ _id: "descending" })
@@ -352,7 +353,11 @@ const getAllRentpurchase = asyncHandler(async (req, res) => {
                     updatedAvailability.builduparea = property.builduparea;
                     updatedAvailability.measure_units = property.measure_units;
 
-                    console.log("tenantDetails2222",tenantDetails)
+                   
+
+                    tenantDetails.map(async(data) => {
+                        await RentPurchase.updateOne({ porpertyid :  data.propertyid.toString()},{$set : {status :  "Occupied"}},{new : true})
+                    })
 
                     const tenant = tenantDetails.find((tenant) => String(tenant.propertyid) === String(porpertyid) && tenant.contractupdation !== "terminated" && tenant.softdelete === false);
                     
