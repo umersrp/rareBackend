@@ -355,18 +355,12 @@ const getAllRentpurchase = asyncHandler(async (req, res) => {
                     updatedAvailability.builduparea = property.builduparea;
                     updatedAvailability.measure_units = property.measure_units;
 
-                    tenantDetails.forEach(async(data) => {
-                        await RentPurchase.updateOne(
-                            { porpertyid :  data?.propertyid.toString()},
-                            {$set : {status : "Occupied"}},
-                            {new : true}
-                            )
-                    })
+                
 
                    
 
-                    const tenant = tenantDetails.find((tenant) => String(tenant.propertyid) === String(porpertyid) && tenant.contractupdation !== "terminated" && tenant.softdelete === false);
                     tenantDetails.forEach(async(data) => await RentPurchase.updateOne({ porpertyid : data?.propertyid.toString()},{$set : {status : "Occupied"}},{new : true}))
+                    const tenant = tenantDetails.find((tenant) => String(tenant.propertyid) === String(porpertyid) && tenant.contractupdation !== "terminated" && tenant.softdelete === false);
                         if (tenant) {
                            
                             updatedAvailability.contract_startdate = tenant.contractstartdate;
