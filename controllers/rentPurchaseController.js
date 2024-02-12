@@ -304,7 +304,7 @@ const getAllRentpurchase = asyncHandler(async (req, res) => {
     if (!rentPurchase?.length) {
         return res.status(400).json({ message: "No Project Name found" });
     }
-    console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    
     const propertyIds = rentPurchase.map(property => property.porpertyid);
     const employeeIds = rentPurchase.map(employee => employee.employeeid);
     const employeeCreatedBy = rentPurchase.map(employee => employee.createdBy);
@@ -352,8 +352,12 @@ const getAllRentpurchase = asyncHandler(async (req, res) => {
                     updatedAvailability.builduparea = property.builduparea;
                     updatedAvailability.measure_units = property.measure_units;
 
-                    const tenant = tenantDetails.find(tenant => String(tenant.propertyid) === String(porpertyid) && tenant.contractupdation !== "terminated" && tenant.softdelete === false);
+                    console.log("tenantDetails2222",tenantDetails)
+
+                    const tenant = tenantDetails.find((tenant) => String(tenant.propertyid) === String(porpertyid) && tenant.contractupdation !== "terminated" && tenant.softdelete === false);
+                    
                         if (tenant) {
+                           
                             updatedAvailability.contract_startdate = tenant.contractstartdate;
                             updatedAvailability.contract_enddate = tenant.contractenddate;
                             updatedAvailability.tenantid = tenant._id;
