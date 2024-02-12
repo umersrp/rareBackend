@@ -301,7 +301,7 @@ const getAllRentpurchase = asyncHandler(async (req, res) => {
         $and: [
             { softdelete: { $ne: true } } // Filter out softdeleted bookings
         ]
-    }).sort({ _id: "descending" }).limit(10).skip(1)
+    }).sort({ _id: "descending" })
     if (!rentPurchase?.length) {
         return res.status(400).json({ message: "No Project Name found" });
     }
