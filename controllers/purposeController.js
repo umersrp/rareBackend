@@ -36,7 +36,7 @@ status : false
 
 const getall = async(req,res,next) => {
 try{
-    const allRecord = await Purposemodel.find();
+    const allRecord = await Purposemodel.find().sort({ createdAt : -1});
 
     res.status(200).json({
      message :  `${allRecord.length} records  fetched successfully`,
