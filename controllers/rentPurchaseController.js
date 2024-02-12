@@ -356,14 +356,11 @@ const getAllRentpurchase = asyncHandler(async (req, res) => {
                     updatedAvailability.measure_units = property.measure_units;
 
                     tenantDetails.forEach(async(data) => {
-                        if(data.softdelete === false){
-                              await RentPurchase.updateOne(
-                                { porpertyid :  data?.propertyid.toString()},
-                                {$set : {status : "Occupied"}},
-                                {new : true}
-                                )
-                              
-                        }
+                        await RentPurchase.updateOne(
+                            { porpertyid :  data?.propertyid.toString()},
+                            {$set : {status : "Occupied"}},
+                            {new : true}
+                            )
                     })
 
                    
