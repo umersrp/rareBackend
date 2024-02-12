@@ -16,4 +16,4 @@ router.route('/delete/:id').delete(expenseController.deleteExpenseRecord)
 
 
 
-module.exports = routers
+module.exports = router
