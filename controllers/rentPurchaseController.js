@@ -329,8 +329,15 @@ const getAllRentpurchase = asyncHandler(async (req, res) => {
         const userData = await User.find({ _id: { $in: ownerId } });
         const tenantDetails = await tenantContract.find({ propertyid: { $in: propertyIds } }).sort({ createdAt : -1})
 
-        tenantDetails.map(async(data) => {
-            await RentPurchase.updateOne({ porpertyid :  data.propertyid.toString()},{$set : {status : "Occupied"}},{new : true})
+        tenantDetails.forEach(async(data) => {
+            if(data.softdelete === false){
+                 const datas =  await RentPurchase.updateOne(
+                    { porpertyid :  data?.propertyid.toString()},
+                    {$set : {status : "Occupied"}},
+                    {new : true}
+                    )
+                  console.log("=====>",datas)
+            }
         })
         // const tenantDetailsCustomer = await tenantContract.find({ _id: { $in: propertyIds } });
         // const customerIds = tenantDetailsCustomer.map(tenants => tenants?.customerid)

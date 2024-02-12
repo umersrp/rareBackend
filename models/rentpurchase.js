@@ -7,8 +7,8 @@ const rentPurchaseSchema = new mongoose.Schema({
     },
     status:{
         type : String,
-        enum : ['Vacant' , 'Occupied'],
-        default : 'Vacant'
+        enum : ['Pending' , 'Vacant' , 'Occupied'],
+        default : 'Pending'
     },
     propertystatus: {
         type: String,
