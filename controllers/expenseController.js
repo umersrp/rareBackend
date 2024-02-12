@@ -67,15 +67,7 @@ const getallExpsenses = async (req,res,next) => {
                 'path': '$propertyid', 
                 'preserveNullAndEmptyArrays': true
               }
-            }, {
-              '$addFields': {
-                'propertyDetails': {
-                  '$concat': [
-                    '$propertyid.communityname', ' | ', '$propertyid.projectname', ' | ', '$propertyid.buildingname', ' | ', '$propertyid.unitnumber'
-                  ]
-                }
-              }
-            }, {
+            },  {
               '$project': {
                 '_id': 1, 
                 'amount': 1, 
