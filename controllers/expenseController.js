@@ -71,7 +71,7 @@ const getallExpsenses = async (req,res,next) => {
               '$addFields': {
                 'propertyDetails': {
                   '$concat': [
-                    '$propertyid.communityname', ' - ', '$propertyid.projectname', ' - ', '$propertyid.buildingname', ' - ', '$propertyid.unitnumber'
+                    '$propertyid.communityname', ' | ', '$propertyid.projectname', ' | ', '$propertyid.buildingname', ' | ', '$propertyid.unitnumber'
                   ]
                 }
               }
