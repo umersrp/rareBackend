@@ -328,6 +328,10 @@ const getAllRentpurchase = asyncHandler(async (req, res) => {
         const employeeDataUpdatedBy = await Employee.find({ _id: { $in: employeeIdsUpdatedBy } });
         const userData = await User.find({ _id: { $in: ownerId } });
         const tenantDetails = await tenantContract.find({ propertyid: { $in: propertyIds } }).sort({ createdAt : -1})
+
+        tenantDetails.map(async(data) => {
+            await RentPurchase.updateOne({ porpertyid :  data.propertyid.toString()},{$set : {status : data.status ? "Occupied" : "Vacant"}},{new : true})
+        })
         // const tenantDetailsCustomer = await tenantContract.find({ _id: { $in: propertyIds } });
         // const customerIds = tenantDetailsCustomer.map(tenants => tenants?.customerid)
 
@@ -355,9 +359,7 @@ const getAllRentpurchase = asyncHandler(async (req, res) => {
 
                    
 
-                    tenantDetails.map(async(data) => {
-                        await RentPurchase.updateOne({ porpertyid :  data.propertyid.toString()},{$set : {status :  "Occupied"}},{new : true})
-                    })
+                   
 
                     const tenant = tenantDetails.find((tenant) => String(tenant.propertyid) === String(porpertyid) && tenant.contractupdation !== "terminated" && tenant.softdelete === false);
                     
