@@ -357,10 +357,6 @@ const getAllRentpurchase = asyncHandler(async (req, res) => {
                     updatedAvailability.builduparea = property.builduparea;
                     updatedAvailability.measure_units = property.measure_units;
 
-                   
-
-                   
-
                     const tenant = tenantDetails.find((tenant) => String(tenant.propertyid) === String(porpertyid) && tenant.contractupdation !== "terminated" && tenant.softdelete === false);
                     
                         if (tenant) {
