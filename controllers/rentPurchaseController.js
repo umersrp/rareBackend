@@ -358,7 +358,7 @@ const getAllRentpurchase = asyncHandler(async (req, res) => {
                     updatedAvailability.status = status
 
 
-                    tenantDetails.map(async(data) => {
+                    tenantDetails.forEach(async(data) => {
                         if(data !== undefined && data.propertyid.toString() != undefined ){
                             if(Date.parse(data.contractstartdate) > Date.parse(data.contractenddate)){
                                 await RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true})
@@ -635,7 +635,7 @@ const getSearchRentpurchase = asyncHandler(async (req, res) => {
                     updatedAvailability.measure_units = property.measure_units;
                     updatedAvailability.status = status;
 
-                    tenantDetails.map(async(data) => {
+                    tenantDetails.forEach(async(data) => {
                         if(data !== undefined && data.propertyid.toString() != undefined ){
                             if(Date.parse(data.contractstartdate) > Date.parse(data.contractenddate)){
                                 await RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true})
