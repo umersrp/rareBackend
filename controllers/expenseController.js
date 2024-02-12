@@ -15,7 +15,7 @@ const createExpenseData = async (req,res,next) => {
             propertyid,
             purposeid,
             amount,
-            d_o_p : new Date(d_o_p).toISOString(),
+            d_o_p : d_o_p ? new Date(d_o_p).toISOString() : null,
             expenseAttachment : attach
         }
 
