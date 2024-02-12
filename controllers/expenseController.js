@@ -153,7 +153,7 @@ const getByidExpense = async (req,res,next) => {
           }
         }
       ]
-        const getExpense = await expsenseModel.findOne({ _id : id});
+        const getExpense = await expsenseModel.aggregate(data);
 
         res.status(200).json({
             message : "Expense fetched successfully",
