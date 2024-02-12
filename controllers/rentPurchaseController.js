@@ -358,12 +358,12 @@ const getAllRentpurchase = asyncHandler(async (req, res) => {
                     updatedAvailability.status = status
 
 
-                    tenantDetails.forEach(async(data) => {
+                    tenantDetails.forEach((data) => {
                         if(data !== undefined && data.propertyid.toString() != undefined ){
                             if(Date.parse(data.contractstartdate) > Date.parse(data.contractenddate)){
-                                await RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true})
+                                RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
                             }else{
-                                await RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true})
+                                 RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
                             }
                         }
                     })
@@ -635,12 +635,12 @@ const getSearchRentpurchase = asyncHandler(async (req, res) => {
                     updatedAvailability.measure_units = property.measure_units;
                     updatedAvailability.status = status;
 
-                    tenantDetails.forEach(async(data) => {
+                    tenantDetails.forEach((data) => {
                         if(data !== undefined && data.propertyid.toString() != undefined ){
                             if(Date.parse(data.contractstartdate) > Date.parse(data.contractenddate)){
-                                await RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true})
+                                RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
                             }else{
-                                await RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true})
+                                RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
                             }
                         }
                     })
