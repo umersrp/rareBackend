@@ -108,7 +108,7 @@ const getByidExpense = async (req,res,next) => {
       const data = [
         {
           '$match': {
-            '_id' : new mongoose.Schema.Types.ObjectId(id),
+            '_id' : mongoose.Schema.Types.ObjectId(id),
             'softdelete': false
           }
         }, {
