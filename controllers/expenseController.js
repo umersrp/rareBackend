@@ -143,9 +143,9 @@ const getByidExpense = async (req,res,next) => {
             'expenseAttachment': 1, 
             'softdelete': 1, 
             'createdAt': 1, 
-            'purpose': '$purposeid.name', 
+            'purposeid': 1, 
             'propertyid': 1, 
-            'propertyDetails': 1
+            
           }
         }, {
           '$sort': {
