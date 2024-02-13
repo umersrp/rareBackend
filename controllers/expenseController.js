@@ -1,5 +1,5 @@
 const expsenseModel = require('../models/expense');
-
+const mongoose = require('mongoose')
 const createExpenseData = async (req,res,next) => {
     try{
         
@@ -15,7 +15,7 @@ const createExpenseData = async (req,res,next) => {
             propertyid,
             purposeid,
             amount,
-            d_o_p : new Date(d_o_p).toISOString(),
+            d_o_p : d_o_p ? new Date(d_o_p).toISOString() : null,
             expenseAttachment : attach
         }
 
@@ -105,7 +105,55 @@ const getallExpsenses = async (req,res,next) => {
 const getByidExpense = async (req,res,next) => {
     const id = req.params.id
     try{
-        const getExpense = await expsenseModel.findOne({ _id : id});
+      const data = [
+        {
+          '$match': {
+            '_id' : mongoose.Types.ObjectId(id),
+            'softdelete': false
+          }
+        }, {
+          '$lookup': {
+            'from': 'addproperties', 
+            'localField': 'propertyid', 
+            'foreignField': '_id', 
+            'as': 'propertyid'
+          }
+        }, {
+          '$lookup': {
+            'from': 'purposeschemas', 
+            'localField': 'purposeid', 
+            'foreignField': '_id', 
+            'as': 'purposeid'
+          }
+        }, {
+          '$unwind': {
+            'path': '$purposeid', 
+            'preserveNullAndEmptyArrays': true
+          }
+        }, {
+          '$unwind': {
+            'path': '$propertyid', 
+            'preserveNullAndEmptyArrays': true
+          }
+        },  {
+          '$project': {
+            '_id': 1, 
+            'amount': 1, 
+            'd_o_p': 1, 
+            'expenseAttachment': 1, 
+            'softdelete': 1, 
+            'createdAt': 1, 
+            'purposeid': 1, 
+            'propertyid': 1, 
+            
+          }
+        }, {
+          '$sort': {
+            'createdAt': -1
+          }
+        }
+      ]
+        const getExpense = await expsenseModel.aggregate(data);
 
         res.status(200).json({
             message : "Expense fetched successfully",
