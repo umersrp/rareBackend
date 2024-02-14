@@ -331,31 +331,50 @@ const getAllRentpurchase = asyncHandler(async (req, res) => {
         const tenantDetails = await tenantContract.find({ propertyid: { $in: propertyIds } }).sort({ createdAt : -1})
         const Booking = await  Bookings.find({  propertyid : {$in : propertyIds }}).sort({ createdAt : -1})
 
-        tenantDetails.forEach((data) => {
-            if(data !== undefined && data.propertyid.toString() != undefined ){
-                if(new Date(data.contractstartdate) > new Date(data.contractenddate)){
-                    RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
-                }else{
-                    RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
-                }
-            }
-        })
+        // tenantDetails.forEach((data) => {
+        //     if(data !== undefined && data.propertyid.toString() != undefined ){
+        //         if(new Date(data.contractstartdate) > new Date(data.contractenddate)){
+        //             RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
+        //         }else{
+        //             RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
+        //         }
+        //     }
+        // })
 
 
-        Booking.forEach((data) => {
-            if(data !== undefined && data.propertyid.toString() != undefined ){
-                RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Short-term" }},{new : true}).then(res => res)
-            }
-            // else{
-            //     RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Long-term" }},{new : true}).then(res => res)
-            // }
-        })
+        // Booking.forEach((data) => {
+        //     if(data !== undefined && data.propertyid.toString() != undefined ){
+        //         RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Short-term" }},{new : true}).then(res => res)
+        //     }
+        //     // else{
+        //     //     RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Long-term" }},{new : true}).then(res => res)
+        //     // }
+        // })
 
        
         // const tenantDetailsCustomer = await tenantContract.find({ _id: { $in: propertyIds } });
         // const customerIds = tenantDetailsCustomer.map(tenants => tenants?.customerid)
 
         const rentPurchaseWithBuilding = rentPurchase.map((rent) => {
+            if(!rent.status && !rent.propertyType){
+                tenantDetails.forEach((data) => {
+                    if(data !== undefined && data.propertyid.toString() != undefined ){
+                        if(new Date(data.contractstartdate) > new Date(data.contractenddate)){
+                            RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
+                        }else{
+                            RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
+                        }
+                    }
+                })
+                Booking.forEach((data) => {
+                    if(data !== undefined && data.propertyid.toString() != undefined ){
+                        RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Short-term" }},{new : true}).then(res => res)
+                    }
+                    // else{
+                    //     RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Long-term" }},{new : true}).then(res => res)
+                    // }
+                })
+            }
             const availabilityObject = rent.toObject();
             const { porpertyid,status,propertyType, employeeid, propertyvaluation, maintenance ,listingtype, key_location, noof_key, listingsource, createdAt, _id, propertystatus, unlisted, again_available, createdBy, updatedBy, updatedAt, multi_propertyvaluation, multivaluation, property_reference, transaction_status } = availabilityObject;
             const updatedAvailability = { porpertyid,status,propertyType, employeeid, propertyvaluation , maintenance, listingtype, key_location, noof_key, listingsource, createdAt, _id, propertystatus, unlisted, again_available, createdBy, updatedBy, updatedAt, multi_propertyvaluation, multivaluation, property_reference, transaction_status };
@@ -591,7 +610,6 @@ const getPaginationRentpurchaseWithDate = asyncHandler(async (req, res) => {
 })
 
 const getSearchRentpurchase = asyncHandler(async (req, res) => {
-    // console.log(req?.query)
     try {
         const rentpurchase = await RentPurchase.find({
             $and: [
@@ -628,27 +646,47 @@ const getSearchRentpurchase = asyncHandler(async (req, res) => {
 
         
 
-        tenantDetails.forEach((data) => {
-            if(data !== undefined && data.propertyid.toString() != undefined ){
-                if(new Date(data.contractstartdate) > new Date(data.contractenddate)){
-                    RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
-                }else{
-                    RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
-                }
-            }
-        })
+        // tenantDetails.forEach((data) => {
+        //     if(data !== undefined && data.propertyid.toString() != undefined ){
+        //         if(new Date(data.contractstartdate) > new Date(data.contractenddate)){
+        //             RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
+        //         }else{
+        //             RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
+        //         }
+        //     }
+        // })
 
-        Booking.forEach((data) => {
-            if(data !== undefined && data.propertyid.toString() != undefined ){
-                RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Short-term" }},{new : true}).then(res => res)
-            }
-            // else{
-            //     RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Long-term" }},{new : true}).then(res => res)
-            // }
-        })
+        // Booking.forEach((data) => {
+        //     if(data !== undefined && data.propertyid.toString() != undefined ){
+        //         RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Short-term" }},{new : true}).then(res => res)
+        //     }
+        //     // else{
+        //     //     RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Long-term" }},{new : true}).then(res => res)
+        //     // }
+        // })
+
         const userData = await User.find({ _id: { $in: ownerId } });
 
         const rentPurchaseWithBuilding = rentpurchase.map(rent => {
+            if(!rent.status && !rent.propertyType){
+                tenantDetails.forEach((data) => {
+                    if(data !== undefined && data.propertyid.toString() != undefined ){
+                        if(new Date(data.contractstartdate) > new Date(data.contractenddate)){
+                            RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
+                        }else{
+                            RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
+                        }
+                    }
+                })
+                Booking.forEach((data) => {
+                    if(data !== undefined && data.propertyid.toString() != undefined ){
+                        RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Short-term" }},{new : true}).then(res => res)
+                    }
+                    // else{
+                    //     RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Long-term" }},{new : true}).then(res => res)
+                    // }
+                })
+            }
             const availabilityObject = rent.toObject();
             const { porpertyid,status,propertyType, employeeid, propertyvaluation, maintenance, listingtype, key_location, noof_key, listingsource, createdAt, _id, propertystatus, unlisted, unlist_date, again_available, createdBy, updatedBy, updatedAt, multi_propertyvaluation, multivaluation, property_reference, transaction_status } = availabilityObject;
             const updatedAvailability = { porpertyid,status,propertyType, employeeid, propertyvaluation, maintenance, listingtype, key_location, noof_key, listingsource, createdAt, _id, propertystatus, unlisted, unlist_date, again_available, createdBy, updatedBy, updatedAt, multi_propertyvaluation, multivaluation, property_reference, transaction_status };
