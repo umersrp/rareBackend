@@ -89,9 +89,9 @@ const getAllPropertyConnect = asyncHandler(async (req, res) => {
           
             if(data !== undefined && data.propertyid.toString() != undefined && data.softdelete === false ){
                 if(new Date(data.contractenddate) > new Date()){
-                    rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
-                }else if(new Date(data.contractenddate) < new Date()){
                     rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
+                }else if(new Date(data.contractenddate) < new Date()){
+                    rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
                 }
 
                 // else{
