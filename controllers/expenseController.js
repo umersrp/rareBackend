@@ -16,7 +16,7 @@ const createExpenseData = async (req,res,next) => {
             purposeid,
             amount,
             d_o_p : d_o_p ? new Date(d_o_p).toISOString() : null,
-            expenseAttachment : attach
+            expenseAttachment : req.files ?  attach : null
         }
 
         const expsenseData = await expsenseModel.create(data);
