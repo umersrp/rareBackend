@@ -111,14 +111,16 @@ const getByidExpense = async (req,res,next) => {
             '_id' : mongoose.Types.ObjectId(id),
             'softdelete': false
           }
-        }, {
-          '$lookup': {
-            'from': 'addproperties', 
-            'localField': 'propertyid', 
-            'foreignField': '_id', 
-            'as': 'propertyid'
-          }
-        }, {
+        }, 
+        // {
+        //   '$lookup': {
+        //     'from': 'addproperties', 
+        //     'localField': 'propertyid', 
+        //     'foreignField': '_id', 
+        //     'as': 'propertyid'
+        //   }
+        // },
+         {
           '$lookup': {
             'from': 'purposeschemas', 
             'localField': 'purposeid', 
@@ -130,12 +132,14 @@ const getByidExpense = async (req,res,next) => {
             'path': '$purposeid', 
             'preserveNullAndEmptyArrays': true
           }
-        }, {
-          '$unwind': {
-            'path': '$propertyid', 
-            'preserveNullAndEmptyArrays': true
-          }
-        },  {
+        }, 
+        // {
+        //   '$unwind': {
+        //     'path': '$propertyid', 
+        //     'preserveNullAndEmptyArrays': true
+        //   }
+        // },
+          {
           '$project': {
             '_id': 1, 
             'amount': 1, 
