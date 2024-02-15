@@ -10,7 +10,7 @@ const createExpenseData = async (req,res,next) => {
         // if(existingData && existingData.length > 0){
         //     return res.status(400).json({ message : `Dupicate Purpose for this Property`,status:false})
         // }
-        const attach = req.files.expenseAttachment[0].path.replace(/\\/g, "/")
+        const attach =  req.files.expenseAttachment?.map(data => data.path.replace(/\\/g, "/")).pop()
         const data = {
             propertyid,
             purposeid,
