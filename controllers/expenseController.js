@@ -16,7 +16,7 @@ const createExpenseData = async (req,res,next) => {
             purposeid,
             amount,
             d_o_p : d_o_p ? new Date(d_o_p).toISOString() : null,
-            expenseAttachment : req.files ?  attach : null
+            expenseAttachment : req.files ?  attach : ""
         }
 
         const expsenseData = await expsenseModel.create(data);
@@ -185,7 +185,7 @@ const updateExpenseRecord = async (req,res,next) => {
                 purposeid : purposeid,
                 amount : amount,
                 d_o_p : d_o_p,
-                expenseAttachment : req.files ? req.files.expenseAttachment?.map(data => data.path.replace(/\\/g, "/")).pop() : null
+                expenseAttachment : req.files ? req.files.expenseAttachment?.map(data => data.path.replace(/\\/g, "/")).pop() : " "
              }
             },
             {new : true}
