@@ -2336,8 +2336,8 @@ function calcuate2(bookingData ,from = '',to = '') {
         } )
 
     let toDate = to ? new Date(to) :  new Date(bookingData[bookingData.length - 1].checkoutdate);
-    let fromDate =from ? new Date(from) : new Date(bookingData[0].checkindate)
-
+    let fromDate =from ? new Date(from) : new Date(bookingData[0].checkindate);
+    let firstEntry = bookingData[0]
 
     bookingData.forEach(x => {
         let checkInDate = new Date(x.checkindate);
@@ -2405,7 +2405,7 @@ function calcuate2(bookingData ,from = '',to = '') {
         let fromComparison = new Date(fromDate.getFullYear(), fromDate.getMonth() ,1)
         let toComparison = new Date(toDate.getFullYear(), toDate.getMonth()+1, 0);
 
-        if((compareDate < fromComparison) || (compareDate > toComparison)) delete MonthData[month]
+        if((new Date(firstEntry.checkindate) > compareDate && new Date(firstEntry.checkoutdate) > compareDate) || (compareDate < fromComparison) || (compareDate > toComparison)) delete MonthData[month]
     })
     return { MonthData  };
 }
