@@ -10,13 +10,13 @@ const createExpenseData = async (req,res,next) => {
         // if(existingData && existingData.length > 0){
         //     return res.status(400).json({ message : `Dupicate Purpose for this Property`,status:false})
         // }
-        const attach = req.files.expenseAttachment[0].path.replace(/\\/g, "/")
+        const attach =  req.files.expenseAttachment?.map(data => data.path.replace(/\\/g, "/")).pop()
         const data = {
             propertyid,
             purposeid,
             amount,
             d_o_p : d_o_p ? new Date(d_o_p).toISOString() : null,
-            expenseAttachment : attach
+            expenseAttachment : req.files ?  attach : ""
         }
 
         const expsenseData = await expsenseModel.create(data);
@@ -111,14 +111,16 @@ const getByidExpense = async (req,res,next) => {
             '_id' : mongoose.Types.ObjectId(id),
             'softdelete': false
           }
-        }, {
-          '$lookup': {
-            'from': 'addproperties', 
-            'localField': 'propertyid', 
-            'foreignField': '_id', 
-            'as': 'propertyid'
-          }
-        }, {
+        }, 
+        // {
+        //   '$lookup': {
+        //     'from': 'addproperties', 
+        //     'localField': 'propertyid', 
+        //     'foreignField': '_id', 
+        //     'as': 'propertyid'
+        //   }
+        // },
+         {
           '$lookup': {
             'from': 'purposeschemas', 
             'localField': 'purposeid', 
@@ -130,12 +132,14 @@ const getByidExpense = async (req,res,next) => {
             'path': '$purposeid', 
             'preserveNullAndEmptyArrays': true
           }
-        }, {
-          '$unwind': {
-            'path': '$propertyid', 
-            'preserveNullAndEmptyArrays': true
-          }
-        },  {
+        }, 
+        // {
+        //   '$unwind': {
+        //     'path': '$propertyid', 
+        //     'preserveNullAndEmptyArrays': true
+        //   }
+        // },
+          {
           '$project': {
             '_id': 1, 
             'amount': 1, 
@@ -181,7 +185,7 @@ const updateExpenseRecord = async (req,res,next) => {
                 purposeid : purposeid,
                 amount : amount,
                 d_o_p : d_o_p,
-                expenseAttachment : req.files ? req.files.expenseAttachment?.map(data => data.path.replace(/\\/g, "/")).pop() : null
+                expenseAttachment : req.files ? req.files.expenseAttachment?.map(data => data.path.replace(/\\/g, "/")).pop() : " "
              }
             },
             {new : true}
