@@ -2405,7 +2405,8 @@ function calcuate2(bookingData ,from = '',to = '') {
         let fromComparison = new Date(fromDate.getFullYear(), fromDate.getMonth() ,1)
         let toComparison = new Date(toDate.getFullYear(), toDate.getMonth()+1, 0);
 
-        if((new Date(firstEntry.checkindate) > compareDate && new Date(firstEntry.checkoutdate) > compareDate) || (compareDate < fromComparison) || (compareDate > toComparison)) delete MonthData[month]
+// ((new Date(firstEntry.checkindate) > compareDate) && (new Date(firstEntry.checkoutdate) > compareDate))
+        if((fromDate > compareDate) || (compareDate < fromComparison) || (compareDate > toComparison)) delete MonthData[month]
     })
     return { MonthData  };
 }
