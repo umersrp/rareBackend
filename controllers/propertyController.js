@@ -6,6 +6,7 @@ const ProjectName = require('../models/projectName')
 const SubType = require('../models/subType')
 const DeveloperName = require('../models/developerName')
 const TenantContract = require('../models/tenantContract')
+const Bookings = require('../models/booking');
 const asyncHandler = require('express-async-handler')
 const sendEmail = require('../utils/sendEmail')
 const cron = require('node-cron');
@@ -13,6 +14,7 @@ const Employee = require('../models/employee')
 const managementContract = require('../models/managementContract')
 const rentpurchase = require('../models/rentpurchase')
 const tenantContract = require('../models/tenantContract')
+
 
 const getAllProperty = asyncHandler(async (req, res) => {
     // let filteringfilter = req.query.filteringfilter
@@ -55,6 +57,8 @@ const getAllPropertyConnect = asyncHandler(async (req, res) => {
     const availableId = allProperties.map(property => property?.available_id);
     const employeeCreatedBy = allProperties.map(employee => employee.createdBy);
     const employeeIdsUpdatedBy = allProperties.map(employee => employee.updatedBy);
+    const propertyIdss = allProperties.map(data => data._id)
+    
 
     const buildingData = await BuildingName.find({ _id: { $in: propertyIds } });
     const userData = await User.find({ _id: { $in: ownerId } });
@@ -66,6 +70,46 @@ const getAllPropertyConnect = asyncHandler(async (req, res) => {
     const avaiabilityData = await rentpurchase.find({ _id: { $in: availableId } });
     const employeeDataCreatedBy = await Employee.find({ _id: { $in: employeeCreatedBy } });
     const employeeDataUpdatedBy = await Employee.find({ _id: { $in: employeeIdsUpdatedBy } });
+
+
+    const compareproperty = allProperties.map(data =>({ id : data._id.toString()}))
+    const tenantDetails = await tenantContract.find({ propertyid: { $in: propertyIdss } }).sort({ createdAt : -1})
+    const Booking = await  Bookings.find({  propertyid : {$in : propertyIdss }}).sort({ createdAt : -1})
+
+        if(!tenantDetails.length) {
+            rentpurchase.updateOne({porpertyid : compareproperty.map((data) => data.id).pop()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
+        }
+
+        tenantDetails.forEach((data) => {
+
+            if(data !== undefined && data.propertyid.toString() != undefined && data.softdelete === true){
+                
+                rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
+            }
+          
+            if(data !== undefined && data.propertyid.toString() != undefined && data.softdelete === false ){
+                if(new Date(data.contractenddate) > new Date()){
+                    rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
+                }else if(new Date(data.contractenddate) < new Date()){
+                    rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
+                }
+
+                // else{
+                //     rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
+                // }
+            }
+           
+
+         
+        })
+        Booking.forEach((data) => {
+            if(data !== undefined && data.propertyid.toString() != undefined ){
+                rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Short-term" }},{new : true}).then(res => res)
+            }
+            // else{
+            //     RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Long-term" }},{new : true}).then(res => res)
+            // }
+        })
 
     const updatedProperties = allProperties.map(property => {
         const propertyObject = property.toObject();
@@ -116,6 +160,8 @@ const getAllPropertyConnect = asyncHandler(async (req, res) => {
             updatedProperty.unlisted = avaiability?.unlisted;
             updatedProperty.un_listed = avaiability?.unlisted;
             updatedProperty.multi_propertyvaluation = avaiability?.multi_propertyvaluation;
+            updatedProperty.status = avaiability?.status;
+            updatedProperty.propertyType = avaiability?.propertyType;
         }
 
         const employeeCreatedBy = employeeDataCreatedBy.find(employee => String(employee._id) === String(createdBy));
