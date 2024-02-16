@@ -31,6 +31,7 @@ router.route('/api/connectdb/').get(propertyController.getAllPropertyConnect)
 router.route('/api/connectdb/:id').get(propertyController.getPropertyByIdConnect)
 router.route('/api/app/search/:key').get(propertyController.getAdvanceSearchOwner)
 router.route('/api/availability/').patch(upload, propertyController.updatePropertyAvailability)
+router.route('/api/status/:propertyid').put(propertyController.ChangePropertyStatus)
 
 router.route('/')
     .get(propertyController.getAllProperty)

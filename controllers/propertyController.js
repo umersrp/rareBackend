@@ -1270,6 +1270,30 @@ const deleteProperty = asyncHandler(async (req, res) => {
     return res.json(reply)
 })
 
+
+const ChangePropertyStatus = async (req,res,next) => {
+    const propertyid = req.params.propertyid
+    const status = req.query.status
+    try{
+        if(status === "Vacant"){
+            await rentpurchase.updateOne({porpertyid : propertyid} ,{$set : { status : "Occupy_Pending"}} , {new : true})
+            //await TenantContract.updateOne({propertyid : propertyid } , { $set:{ contractupdation : "terminated"} } ,{ new : true })
+        }
+
+
+        if(status === "Occupied"){
+            await rentpurchase.updateOne({porpertyid : propertyid} ,{$set : { status : "Vacant"}} , {new : true})
+            await TenantContract.updateOne({propertyid : propertyid } , { $set:{ contractupdation : "terminated"} } ,{ new : true })
+        }
+       
+
+        res.status(201).json({ message : "Updated Successfully",status : true})
+
+    }catch(err){
+        res.status(500).json({ message : "not Updated Successfully",status : false})
+    }
+}
+
 module.exports = {
     getAllProperty,
     getPropertyById,
@@ -1288,4 +1312,5 @@ module.exports = {
     updatePropertyAvailability,
     getSearchPropertyMobile,
     getAdvanceSearchOwner,
+    ChangePropertyStatus
 }
