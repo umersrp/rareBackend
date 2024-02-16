@@ -1294,6 +1294,23 @@ const ChangePropertyStatus = async (req,res,next) => {
     }
 }
 
+
+
+const ActiveContract = async (req,res,next) => {
+    try{
+    const allactive =    await TenantContract.find(
+         { $and :[{propertyid : req.params.id} ,
+         { contractupdation : { $ne : "terminated"} } , 
+         { softdelete : false}
+        ]});
+    res.status(200).json({ data : allactive})
+    }catch(err){
+        res.status(500).json({ message : "nO active"})
+    }
+    }
+  
+  
+
 module.exports = {
     getAllProperty,
     getPropertyById,
@@ -1312,5 +1329,6 @@ module.exports = {
     updatePropertyAvailability,
     getSearchPropertyMobile,
     getAdvanceSearchOwner,
-    ChangePropertyStatus
+    ChangePropertyStatus,
+    ActiveContract
 }
