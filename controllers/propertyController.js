@@ -84,7 +84,7 @@ const getAllPropertyConnect = asyncHandler(async (req, res) => {
       await Promise.all(avaiabilityData.map(async(data) => {
             if(data !== undefined && data.status === "Pending"){
                
-                if (tenantDetails) {
+                if (tenantDetails && Array.isArray(tenantDetails)) {
                     await Promise.all(tenantDetails.map(async(data) => {
                         
                         if(data !== undefined && data.propertyid.toString() != undefined && data.softdelete === true){
