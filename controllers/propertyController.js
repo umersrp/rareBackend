@@ -1275,24 +1275,30 @@ const deleteProperty = asyncHandler(async (req, res) => {
 const ChangePropertyStatus = async (req,res,next) => {
     const propertyid = req.params.propertyid
     const status = req.query.status
+
+    
     try{
         if(status === "Vacant"){
-            await rentpurchase.updateOne({porpertyid : propertyid} ,{$set : { status : "Occupy_Pending"}} , {new : true})
+            await rentpurchase.findOneAndUpdate({porpertyid : propertyid} ,{$set : { status : "Occupy_Pending"}} , {new : true})
             //await TenantContract.updateOne({propertyid : propertyid } , { $set:{ contractupdation : "terminated"} } ,{ new : true })
         }
 
 
         if(status === "Occupied"){
-           const p1 =  await rentpurchase.updateOne({porpertyid : propertyid} ,{$set : { status : "Vacant"}} , {new : true})
-           const p2 =  await TenantContract.updateOne({propertyid : propertyid.toString() } , { $set:{ contractupdation : "terminated"} } ,{ new : true })
-           const pro = await Promise.all([p1,p2])
-           return pro
+            const p1 =  await rentpurchase.findOneAndUpdate({porpertyid : propertyid} ,{$set : { status : "Vacant"}} , {new : true})
+            const p2 =  await TenantContract.findOneAndUpdate({propertyid : propertyid } , { $set:{ contractupdation : "terminated"} } ,{ new : true })
+            
+             await Promise.all([p1,p2])
+            
+           
+         
         }
        
 
         res.status(201).json({ message : "Updated Successfully",status : true})
 
     }catch(err){
+        
         res.status(500).json({ message : "not Updated Successfully",status : false})
     }
 }
