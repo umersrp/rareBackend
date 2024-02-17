@@ -1283,8 +1283,10 @@ const ChangePropertyStatus = async (req,res,next) => {
 
 
         if(status === "Occupied"){
-            await rentpurchase.updateOne({porpertyid : propertyid} ,{$set : { status : "Vacant"}} , {new : true})
-            await TenantContract.updateOne({propertyid : propertyid.toString() } , { $set:{ contractupdation : "terminated"} } ,{ new : true })
+           const p1 =  await rentpurchase.updateOne({porpertyid : propertyid} ,{$set : { status : "Vacant"}} , {new : true})
+           const p2 =  await TenantContract.updateOne({propertyid : propertyid.toString() } , { $set:{ contractupdation : "terminated"} } ,{ new : true })
+           const pro = await Promise.all([p1,p2])
+           return pro
         }
        
 
