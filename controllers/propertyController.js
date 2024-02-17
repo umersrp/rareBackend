@@ -81,37 +81,37 @@ const getAllPropertyConnect = asyncHandler(async (req, res) => {
             rentpurchase.updateOne({porpertyid : compareproperty.map((data) => data.id).pop()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
         }
 
-      await Promise.all(avaiabilityData.map(async(data) => {
-            if(data !== undefined && data.status === "Pending"){
+    //   await Promise.all(avaiabilityData.map(async(data) => {
+    //         if(data !== undefined && data.status === "Pending"){
                
-                if (tenantDetails && Array.isArray(tenantDetails)) {
-                    await Promise.all(tenantDetails.map(async(data) => {
+    //             if (tenantDetails && Array.isArray(tenantDetails)) {
+    //                 await Promise.all(tenantDetails.map(async(data) => {
                         
-                        if(data !== undefined && data.propertyid.toString() != undefined && data.softdelete === true){
+    //                     if(data !== undefined && data.propertyid.toString() != undefined && data.softdelete === true){
                             
-                          await  rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Pending" }},{new : true})
-                        }
+    //                       await  rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Pending" }},{new : true})
+    //                     }
                     
-                        if(data !== undefined && data.propertyid.toString() != undefined && data.softdelete === false ){
-                            if(new Date(data.contractenddate) > new Date()){
-                              await  rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true})
-                            }else if(new Date(data.contractenddate) < new Date()){
-                              await  rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true})
-                            }
+    //                     if(data !== undefined && data.propertyid.toString() != undefined && data.softdelete === false ){
+    //                         if(new Date(data.contractenddate) > new Date()){
+    //                           await  rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true})
+    //                         }else if(new Date(data.contractenddate) < new Date()){
+    //                           await  rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true})
+    //                         }
             
-                            // else{
-                            //     rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
-                            // }
-                        }
+    //                         // else{
+    //                         //     rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
+    //                         // }
+    //                     }
                     
             
                     
-                    }))
-                }
-            }else{
-                return null;
-            }
-        }))
+    //                 }))
+    //             }
+    //         }else{
+    //             return null;
+    //         }
+    //     }))
 
        
         
