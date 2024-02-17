@@ -32,7 +32,7 @@ router.route('/api/connectdb/:id').get(propertyController.getPropertyByIdConnect
 router.route('/api/app/search/:key').get(propertyController.getAdvanceSearchOwner)
 router.route('/api/availability/').patch(upload, propertyController.updatePropertyAvailability)
 router.route('/api/status/:propertyid').put(propertyController.ChangePropertyStatus)
-router.route('/activecontract/:id').get(propertyController.ActiveContract)
+router.route('/activecontract/:propertyid').get(propertyController.ActiveContract)
 
 router.route('/')
     .get(propertyController.getAllProperty)

@@ -14,6 +14,7 @@ const Employee = require('../models/employee')
 const managementContract = require('../models/managementContract')
 const rentpurchase = require('../models/rentpurchase')
 const tenantContract = require('../models/tenantContract')
+const { default: mongoose } = require('mongoose')
 
 
 const getAllProperty = asyncHandler(async (req, res) => {
@@ -1298,13 +1299,23 @@ const ChangePropertyStatus = async (req,res,next) => {
 
 const ActiveContract = async (req,res,next) => {
     try{
+
+    
     const allactive =    await TenantContract.find(
-         { $and :[{propertyid : req.params.id} ,
-         { contractupdation : { $ne : "terminated"} } , 
-         { softdelete : false}
-        ]});
-    res.status(200).json({ data : allactive})
+         {$and :[
+            { propertyid : req.params.propertyid } , 
+            { softdelete : false} , {contractupdation : {$ne : "terminated"} }
+        ]} 
+         )
+    const datesNow = allactive.filter((data) => {
+        if(data.contractenddate > new Date()){
+            return data
+        }
+    })
+   
+     res.status(200).json({ data : datesNow})
     }catch(err){
+        
         res.status(500).json({ message : "nO active"})
     }
     }
