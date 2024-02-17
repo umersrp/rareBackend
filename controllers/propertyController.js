@@ -85,18 +85,18 @@ const getAllPropertyConnect = asyncHandler(async (req, res) => {
             if(data !== undefined && data.status === "Pending"){
                
                 if (tenantDetails) {
-                    await Promise.all(tenantDetails.map((data) => {
+                    await Promise.all(tenantDetails.map(async(data) => {
                         
                         if(data !== undefined && data.propertyid.toString() != undefined && data.softdelete === true){
                             
-                            rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
+                          await  rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Pending" }},{new : true})
                         }
                     
                         if(data !== undefined && data.propertyid.toString() != undefined && data.softdelete === false ){
                             if(new Date(data.contractenddate) > new Date()){
-                                rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
+                              await  rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true})
                             }else if(new Date(data.contractenddate) < new Date()){
-                                rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
+                              await  rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true})
                             }
             
                             // else{
@@ -109,7 +109,7 @@ const getAllPropertyConnect = asyncHandler(async (req, res) => {
                     }))
                 }
             }else{
-                return
+                return null;
             }
         }))
 
