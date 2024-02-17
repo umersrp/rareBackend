@@ -73,13 +73,13 @@ const getAllPropertyConnect = asyncHandler(async (req, res) => {
     const employeeDataUpdatedBy = await Employee.find({ _id: { $in: employeeIdsUpdatedBy } });
 
 
-    const compareproperty = allProperties.map(data =>({ id : data._id.toString()}))
-    const tenantDetails = await tenantContract.find({ propertyid: { $in: propertyIdss } }).sort({ createdAt : -1})
-    const Booking = await  Bookings.find({  propertyid : {$in : propertyIdss }}).sort({ createdAt : -1})
+    // const compareproperty = allProperties.map(data =>({ id : data._id.toString()}))
+    // const tenantDetails = await tenantContract.find({ propertyid: { $in: propertyIdss } }).sort({ createdAt : -1})
+    // const Booking = await  Bookings.find({  propertyid : {$in : propertyIdss }}).sort({ createdAt : -1})
 
-        if(!tenantDetails.length) {
-            rentpurchase.updateOne({porpertyid : compareproperty.map((data) => data.id).pop()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
-        }
+    //     if(!tenantDetails.length) {
+    //         rentpurchase.updateOne({porpertyid : compareproperty.map((data) => data.id).pop()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
+    //     }
 
     //   await Promise.all(avaiabilityData.map(async(data) => {
     //         if(data !== undefined && data.status === "Pending"){
@@ -115,14 +115,14 @@ const getAllPropertyConnect = asyncHandler(async (req, res) => {
 
        
         
-        Booking.forEach((data) => {
-            if(data !== undefined && data.propertyid.toString() != undefined ){
-                rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Short-term" }},{new : true}).then(res => res)
-            }
-            // else{
-            //     RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Long-term" }},{new : true}).then(res => res)
-            // }
-        })
+        // Booking.forEach((data) => {
+        //     if(data !== undefined && data.propertyid.toString() != undefined ){
+        //         rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Short-term" }},{new : true}).then(res => res)
+        //     }
+        //     // else{
+        //     //     RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Long-term" }},{new : true}).then(res => res)
+        //     // }
+        // })
 
     const updatedProperties = allProperties.map(property => {
         const propertyObject = property.toObject();
