@@ -118,7 +118,8 @@ const tenantContractSchema = new mongoose.Schema({
     },
     contractupdation: {
         type: String,
-        require: true
+        require: true,
+        default:""
     },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
