@@ -3,12 +3,17 @@ const mongoose = require('mongoose')
 const tenantContractSchema = new mongoose.Schema({
     propertyid: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'AddProperty'
+        ref: 'AddProperty',
+        available_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'RentPurchase'
+        }
     },
     customerid: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
+
     tenantcontractno:{
         type :String,
         default:""
