@@ -1292,7 +1292,7 @@ const ChangePropertyStatus = async (req,res,next) => {
     try{
         if(status === "Vacant"){
             await rentpurchase.findOneAndUpdate({porpertyid : propertyid} ,{$set : { status : "Occupy_Pending"}} , {new : true})
-            //await TenantContract.updateOne({propertyid : propertyid } , { $set:{ contractupdation : "terminated"} } ,{ new : true })
+            await TenantContract.updateOne({propertyid : propertyid } , { $set:{ contractupdation : ""} } ,{ new : true })
         }
 
 
