@@ -13,6 +13,64 @@ const Employee = require('../models/employee')
 const sendEmail = require('../utils/sendEmail');
 const moment = require('moment-timezone');
 
+const allTenantRequest = async (req,res,next) => {
+  try{
+   const data = [
+      {
+        '$lookup': {
+          'from': 'addproperties', 
+          'localField': 'propertyid', 
+          'foreignField': '_id', 
+          'as': 'propertyid'
+        }
+      }, {
+        '$unwind': {
+          'path': '$propertyid', 
+          'preserveNullAndEmptyArrays': true
+        }
+      }, {
+        '$project': {
+          'propertyid': 1
+        }
+      }, 
+      {
+        '$addFields': {
+          'propertyid.available_id': {
+            '$toObjectId': '$propertyid.available_id'
+          }
+        }
+      }, {
+        '$match': {
+          'propertyid.is_available': true, 
+          'propertyid.available_id': {
+            '$ne': ''
+          }
+        }
+      }, {
+        '$lookup': {
+          'from': 'rentpurchases', 
+          'localField': 'propertyid.available_id', 
+          'foreignField': '_id', 
+          'as': 'propertyid.available_id'
+        }
+      }, {
+        '$project': {
+          'propertyid.available_id': 1
+        }
+      }, {
+        '$unwind': {
+          'path': '$propertyid.available_id', 
+          'preserveNullAndEmptyArrays': true
+        }
+      }
+    ]
+   const datas = await TenantContract.aggregate(data)
+   res.status(200).json({ data : datas})
+  }catch(err){
+    res.status(500).json({ data : err})
+  }
+}
+
 const getAllTenantContract = asyncHandler(async (req, res) => {
     const tenantContract = await TenantContract.find({
         $and: [
@@ -141,7 +199,7 @@ const getAllTenantContract = asyncHandler(async (req, res) => {
             const completed_data = tenantContract?.propertyid && tenantContract?.email && tenantContract?.customertype && tenantContract?.contractstartdate && tenantContract?.contractenddate && tenantContract?.rentalamount && tenantContract?.securitydepositamount && tenantContract?.noofchequeorinstallment && tenantContract?.contractexecutiondate && tenantContract?.ejari_certificate_doc && tenantContract?.tenancy_contract_doc && tenantContract?.addendum_doc && tenantContract?.key_receipt_doc && tenantContract?.chequeDetails?.length ? true : false
             return { ...tenantContract, contractstart_date: formattedcontractstartdate, Created_At: formattedCreatedAt, contractend_date: formattedcontractenddate, contractexecution_date: formattedcontractexecutiondate, updatedAt: formattedupdatedAt, createdAt: formattedCreatedAt, completed_data: completed_data }
         })
-
+        
         res.json(formattedDate);
     } catch (error) {
         console.error(error);
@@ -1177,5 +1235,6 @@ module.exports = {
     createTenantReport,
     tenantSummaryReport,
     tenantSummaryReportByDates,
-    updateManys
+    updateManys,
+    allTenantRequest
 }
