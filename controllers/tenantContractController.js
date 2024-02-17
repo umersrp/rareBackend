@@ -9,13 +9,15 @@ const BuildingName = require('../models/buildingName')
 const ProjectName = require('../models/projectName')
 const CommunityName = require('../models/communityname')
 const SubType = require('../models/subType');
+const Bookings = require('../models/booking');
+const rentpurchase =require('../models/rentpurchase')
 const Employee = require('../models/employee')
 const sendEmail = require('../utils/sendEmail');
 const moment = require('moment-timezone');
 
-const allTenantRequest = async (req,res,next) => {
+const Alltenants = async (req,res,next) => {
   try{
-   const data = [
+    const data = [
       {
         '$lookup': {
           'from': 'addproperties', 
@@ -23,14 +25,25 @@ const allTenantRequest = async (req,res,next) => {
           'foreignField': '_id', 
           'as': 'propertyid'
         }
-      }, {
+      }, 
+      {
         '$unwind': {
           'path': '$propertyid', 
           'preserveNullAndEmptyArrays': true
         }
-      }, {
+      }, 
+      {
         '$project': {
-          'propertyid': 1
+          'propertyid': 1,
+          "contractenddate"  :1,
+          'softdelete'  :1
+        }
+      }, 
+      {
+        '$match': {
+          'propertyid.is_available': true, 
+          'propertyid.available_id': { '$ne': '' },
+          // 'propertyid.available_id': { '$regex': /^[0-9a-fA-F]{24}$/ }
         }
       }, 
       {
@@ -39,172 +52,222 @@ const allTenantRequest = async (req,res,next) => {
             '$toObjectId': '$propertyid.available_id'
           }
         }
-      }, {
-        '$match': {
-          'propertyid.is_available': true, 
-          'propertyid.available_id': {
-            '$ne': ''
-          }
-        }
-      }, {
+      }, 
+      {
         '$lookup': {
           'from': 'rentpurchases', 
           'localField': 'propertyid.available_id', 
           'foreignField': '_id', 
           'as': 'propertyid.available_id'
         }
-      }, {
+      }, 
+      {
         '$project': {
-          'propertyid.available_id': 1
+          'propertyid.available_id': 1,
+          'propertyid._id': 1,
+          "contractenddate"  :1,
+          "softdelete" : 1
         }
-      }, {
+      }, 
+      {
         '$unwind': {
           'path': '$propertyid.available_id', 
           'preserveNullAndEmptyArrays': true
         }
       }
     ]
+
+   
+    
    const datas = await TenantContract.aggregate(data)
-   res.status(200).json({ data : datas})
-  }catch(err){
-    res.status(500).json({ data : err})
+
+   if(!datas.length) {
+    rentpurchase.updateOne({porpertyid : datas.map((data) => data.propertyid._id).pop()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
   }
-}
+   const allproperties = datas.map((data) => data.propertyid._id)
+   const Booking = await  Bookings.find({  propertyid : {$in : allproperties }}).sort({ createdAt : -1})
+   datas.forEach(async(data) => {
 
-const getAllTenantContract = asyncHandler(async (req, res) => {
-    const tenantContract = await TenantContract.find({
-        $and: [
-            { softdelete: { $ne: true } } // Filter out softdeleted bookings
-        ]
-    }).sort({ _id: "descending" })
-    if (!tenantContract?.length) {
-        return res.status(400).json({ message: "No Tenant Contract found" })
+   
+
+    if(data.propertyid.available_id.status === "Occupied"){
+      return;
     }
-    const customerIds = tenantContract.map(customer => customer?.customerid);
-    const customerEmail = tenantContract.map(customer => customer?.email);
-    const propertyIds = tenantContract.map(property => property?.propertyid);
-    const employeeIds = tenantContract.map(employee => employee.createdBy);
-    const employeeIdsUpdatedBy = tenantContract.map(employee => employee.updatedBy);
 
-    try {
-        const customers = await User.find({ _id: { $in: customerIds } });
-        const customersEmails = await User.find({ email: { $in: customerEmail } });
-        const properties = await AddProperty.find({ _id: { $in: propertyIds } });
-        const buildingIds = properties.map(property => property?.buildingid);
-        const projectnameId = properties.map(property => property?.projectnameid);
-        const communityId = properties.map(property => property?.communityid);
-        const subtypeId = properties.map(property => property?.subtypeid);
-        const ownerId = properties.map(property => property.customerid);
+    if(data.propertyid.available_id.status === "Vacant"){
+      return;
+    }
 
-        const buildings = await BuildingName.find({ _id: { $in: buildingIds } });
-        const projectnames = await ProjectName.find({ _id: { $in: projectnameId } });
-        const communityData = await CommunityName.find({ _id: { $in: communityId } });
-        const subtypeData = await SubType.find({ _id: { $in: subtypeId } });
-        const employeeData = await Employee.find({ _id: { $in: employeeIds } });
-        const employeeDataUpdatedBy = await Employee.find({ _id: { $in: employeeIdsUpdatedBy } });
-        const userData = await User.find({ _id: { $in: ownerId } });
+    if(data.propertyid.available_id.status === "Pending") {
 
-        // console.log(customers, "customers")
+      if(data !== undefined && data.propertyid._id != undefined && data.softdelete === true){                 
+        await  rentpurchase.updateOne({porpertyid : data.propertyid._id},{ $set : { status : "Pending" }},{new : true})
+      }
 
-        const tenantContractAllData = tenantContract.map(customerData => {
-            const tenantObject = customerData.toObject();
-            const { _id, propertyid, customerid, guestname, passportnumber, customertype, nationality, mobilenumber, email, contractstartdate, contractenddate, createdBy, updatedBy, contractvalue, chequenumbe, chequedate, totalamount, chequeimage, rentalamount, securitydepositamount, noofchequeorinstallment, commission, contractexecutiondate, passportpdf, key_receipt_doc, tenancy_contract_doc, contractupdation, ejari_certificate_doc, addendum_doc, chequeDetails, createdAt, updatedAt } = tenantObject;
-            const updatedTenantContract = { _id, propertyid, customerid, guestname, passportnumber, customertype, nationality, mobilenumber, email, contractstartdate, contractenddate, createdBy, updatedBy, contractvalue, chequenumbe, chequedate, totalamount, chequeimage, rentalamount, securitydepositamount, noofchequeorinstallment, commission, contractexecutiondate, passportpdf, key_receipt_doc, tenancy_contract_doc, contractupdation, ejari_certificate_doc, addendum_doc, chequeDetails, createdAt, updatedAt };
-            if (propertyid) {
-                const property = properties.find(property => String(property._id) === String(customerData.propertyid));
-                if (property) {
-                    updatedTenantContract.unitnumber = property.unitnumber;
-                    updatedTenantContract.floor = property.floor;
-                    updatedTenantContract.OwnerNameAsPerDeed = property.OwnerNameAsPerDeed;
-
-                    const building = buildings.find(building => String(building._id) === String(property.buildingid));
-                    if (building) {
-                        updatedTenantContract.building_name = building.buildingname;
-                        updatedTenantContract.buildingid = building._id;
-                    }
-
-                    const projectname = projectnames.find(project => String(project._id) === String(property.projectnameid));
-                    if (projectname) {
-                        updatedTenantContract.project_name = projectname.projectName;
-                        updatedTenantContract.projectnameid = projectname._id;
-                    }
-
-                    const community = communityData.find(community => String(community._id) === String(property.communityid));
-                    if (community) {
-                        updatedTenantContract.community_name = community.communityname;
-                        updatedTenantContract.communityid = community._id;
-                    }
-
-                    const subtype = subtypeData.find(subtype => String(subtype._id) === String(property.subtypeid));
-                    if (subtype) {
-                        updatedTenantContract.subtype_name = subtype.subtypename;
-                    }
-
-                    const customerid = userData.find(customerid => String(customerid._id) === String(property?.customerid));
-                    if (customerid) {
-                        updatedTenantContract.property_owner_name = (customerid?.firstname) + (customerid?.lastname ? " " + customerid?.lastname : "") + (customerid?.email ? " | " + customerid?.email : "");
-                        updatedTenantContract.property_owner_email = customerid?.email;
-                        updatedTenantContract.property_owner_id = customerid?._id;
-                    }
-                }
-            }
-            if (customerid) {
-                const customer = customers.find(customer => String(customer._id) === String(customerData.customerid));
-                updatedTenantContract.owner_name = customer?.firstname + " " + customer?.lastname;
-                updatedTenantContract.owner_email = customer?.email;
-                updatedTenantContract.owner_nationality = customer?.passportno;
-                updatedTenantContract.owner_passportidno = customer?.passportidno;
-                updatedTenantContract.owner_mobilenumber = customer?.whatsappno;
-            } else {
-                const customer = customersEmails.find(customer => customer.email === customerData.email);
-                updatedTenantContract.owner_name = guestname;
-                updatedTenantContract.owner_passportidno = passportnumber;
-                updatedTenantContract.owner_email = email;
-                updatedTenantContract.owner_nationality = nationality;
-                updatedTenantContract.owner_mobilenumber = mobilenumber;
-                updatedTenantContract.customerid = customer?._id;
-            }
-
-            const employee = employeeData.find(employee => String(employee._id) === String(createdBy));
-            if (employee) {
-                updatedTenantContract.employee_email_createdBy = employee?.email;
-            }
-            const employeeUpdatedBy = employeeDataUpdatedBy.find(employee => String(employee._id) === String(updatedBy));
-            if (employeeUpdatedBy) {
-                updatedTenantContract.employee_email_updatedBy = employeeUpdatedBy?.email;
-            }
+      if(data !== undefined && data.propertyid._id && data.softdelete === false){
+          if(new Date(data.contractenddate ) > new Date()){
+            rentpurchase.updateOne({porpertyid : data.propertyid._id},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
+          }else if(new Date(data.contractenddate ) < new Date()){
+            rentpurchase.updateOne({porpertyid : data.propertyid._id},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
+        }
+      }
+    }
+   })
 
 
-            return updatedTenantContract;
-        });
+   Booking.forEach((data) => {
+    if(data !== undefined && data.propertyid._id != undefined ){
+        rentpurchase.updateOne({porpertyid : data.propertyid._id},{ $set : { propertyType : "Short-term" }},{new : true}).then(res => res)
+    }
+    // else{
+    //     RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Long-term" }},{new : true}).then(res => res)
+    // }
+})
 
-        const formattedDate = tenantContractAllData?.map(tenantContract => {
-            // const formattedcontractstartdate = tenantContract.contractstartdate ? new Date(tenantContract.contractstartdate).toDateString() : ''
-            // const formattedcontractstartdate = tenantContract.contractstartdate && tenantContract?.contractstartdate !== null ? String(tenantContract.contractstartdate)?.split('T') : ''
-            // console.log(tenantContract.contractstartdate, 'tenantContract.contractstartdate')
-            // console.log(formattedcontractstartdate[0], "formattedcontractstartdate[0]")
-            // console.log(formattedcontractstartdate[1], "formattedcontractstartdate[1]")
-            const formattedcontractstartdate = tenantContract.contractstartdate ? new Date(tenantContract.contractstartdate).toDateString() : '';
-            const formattedcontractenddate = tenantContract.contractenddate ? new Date(tenantContract.contractenddate).toDateString() : ''
-            const formattedcontractexecutiondate = tenantContract.contractexecutiondate ? new Date(tenantContract.contractexecutiondate).toDateString() : ''
-            const formattedCreatedAt = tenantContract.createdAt ? new Date(tenantContract.createdAt).toDateString() : ''
-            const formattedupdatedAt = tenantContract.updatedAt ? new Date(tenantContract.updatedAt).toDateString() : ''
-
-            // const formattedcontractstartdate = tenantContract.contractstartdate ? moment(tenantContract.contractstartdate).tz('Asia/Dubai').format('DD MMM YYYY') : '';
-            // const formattedcontractenddate = tenantContract.contractenddate ? moment(tenantContract.contractenddate).tz('Asia/Dubai').format('DD MMM YYYY') : '';
-            // const formattedcontractexecutiondate = tenantContract.contractexecutiondate ? moment(tenantContract.contractexecutiondate).tz('Asia/Dubai').format('DD MMM YYYY') : '';
-            // const formattedCreatedAt = tenantContract.createdAt ? moment(tenantContract.createdAt).tz('Asia/Dubai').format('DD MMM YYYY') : '';
-            // const formattedupdatedAt = tenantContract.updatedAt ? moment(tenantContract.updatedAt).tz('Asia/Dubai').format('DD MMM YYYY') : '';
-
-            const completed_data = tenantContract?.propertyid && tenantContract?.email && tenantContract?.customertype && tenantContract?.contractstartdate && tenantContract?.contractenddate && tenantContract?.rentalamount && tenantContract?.securitydepositamount && tenantContract?.noofchequeorinstallment && tenantContract?.contractexecutiondate && tenantContract?.ejari_certificate_doc && tenantContract?.tenancy_contract_doc && tenantContract?.addendum_doc && tenantContract?.key_receipt_doc && tenantContract?.chequeDetails?.length ? true : false
-            return { ...tenantContract, contractstart_date: formattedcontractstartdate, Created_At: formattedCreatedAt, contractend_date: formattedcontractenddate, contractexecution_date: formattedcontractexecutiondate, updatedAt: formattedupdatedAt, createdAt: formattedCreatedAt, completed_data: completed_data }
-        })
-        
-        res.json(formattedDate);
-    } catch (error) {
+        res.json(datas);
+    } 
+    catch (error) {
         console.error(error);
         res.status(500).json({ message: "Server Error" });
     }
+}
+
+
+
+const getAllTenantContract = asyncHandler(async (req, res) => {
+  const tenantContract = await TenantContract.find({
+      $and: [
+          { softdelete: { $ne: true } } // Filter out softdeleted bookings
+      ]
+  }).sort({ _id: "descending" })
+  if (!tenantContract?.length) {
+      return res.status(400).json({ message: "No Tenant Contract found" })
+  }
+  const customerIds = tenantContract.map(customer => customer?.customerid);
+  const customerEmail = tenantContract.map(customer => customer?.email);
+  const propertyIds = tenantContract.map(property => property?.propertyid);
+  const employeeIds = tenantContract.map(employee => employee.createdBy);
+  const employeeIdsUpdatedBy = tenantContract.map(employee => employee.updatedBy);
+
+  try {
+      const customers = await User.find({ _id: { $in: customerIds } });
+      const customersEmails = await User.find({ email: { $in: customerEmail } });
+      const properties = await AddProperty.find({ _id: { $in: propertyIds } });
+      const buildingIds = properties.map(property => property?.buildingid);
+      const projectnameId = properties.map(property => property?.projectnameid);
+      const communityId = properties.map(property => property?.communityid);
+      const subtypeId = properties.map(property => property?.subtypeid);
+      const ownerId = properties.map(property => property.customerid);
+
+      const buildings = await BuildingName.find({ _id: { $in: buildingIds } });
+      const projectnames = await ProjectName.find({ _id: { $in: projectnameId } });
+      const communityData = await CommunityName.find({ _id: { $in: communityId } });
+      const subtypeData = await SubType.find({ _id: { $in: subtypeId } });
+      const employeeData = await Employee.find({ _id: { $in: employeeIds } });
+      const employeeDataUpdatedBy = await Employee.find({ _id: { $in: employeeIdsUpdatedBy } });
+      const userData = await User.find({ _id: { $in: ownerId } });
+
+      // console.log(customers, "customers")
+
+      const tenantContractAllData = tenantContract.map(customerData => {
+          const tenantObject = customerData.toObject();
+          const { _id, propertyid, customerid, guestname, passportnumber, customertype, nationality, mobilenumber, email, contractstartdate, contractenddate, createdBy, updatedBy, contractvalue, chequenumbe, chequedate, totalamount, chequeimage, rentalamount, securitydepositamount, noofchequeorinstallment, commission, contractexecutiondate, passportpdf, key_receipt_doc, tenancy_contract_doc, contractupdation, ejari_certificate_doc, addendum_doc, chequeDetails, createdAt, updatedAt } = tenantObject;
+          const updatedTenantContract = { _id, propertyid, customerid, guestname, passportnumber, customertype, nationality, mobilenumber, email, contractstartdate, contractenddate, createdBy, updatedBy, contractvalue, chequenumbe, chequedate, totalamount, chequeimage, rentalamount, securitydepositamount, noofchequeorinstallment, commission, contractexecutiondate, passportpdf, key_receipt_doc, tenancy_contract_doc, contractupdation, ejari_certificate_doc, addendum_doc, chequeDetails, createdAt, updatedAt };
+          if (propertyid) {
+              const property = properties.find(property => String(property._id) === String(customerData.propertyid));
+              if (property) {
+                  updatedTenantContract.unitnumber = property.unitnumber;
+                  updatedTenantContract.floor = property.floor;
+                  updatedTenantContract.OwnerNameAsPerDeed = property.OwnerNameAsPerDeed;
+
+                  const building = buildings.find(building => String(building._id) === String(property.buildingid));
+                  if (building) {
+                      updatedTenantContract.building_name = building.buildingname;
+                      updatedTenantContract.buildingid = building._id;
+                  }
+
+                  const projectname = projectnames.find(project => String(project._id) === String(property.projectnameid));
+                  if (projectname) {
+                      updatedTenantContract.project_name = projectname.projectName;
+                      updatedTenantContract.projectnameid = projectname._id;
+                  }
+
+                  const community = communityData.find(community => String(community._id) === String(property.communityid));
+                  if (community) {
+                      updatedTenantContract.community_name = community.communityname;
+                      updatedTenantContract.communityid = community._id;
+                  }
+
+                  const subtype = subtypeData.find(subtype => String(subtype._id) === String(property.subtypeid));
+                  if (subtype) {
+                      updatedTenantContract.subtype_name = subtype.subtypename;
+                  }
+
+                  const customerid = userData.find(customerid => String(customerid._id) === String(property?.customerid));
+                  if (customerid) {
+                      updatedTenantContract.property_owner_name = (customerid?.firstname) + (customerid?.lastname ? " " + customerid?.lastname : "") + (customerid?.email ? " | " + customerid?.email : "");
+                      updatedTenantContract.property_owner_email = customerid?.email;
+                      updatedTenantContract.property_owner_id = customerid?._id;
+                  }
+              }
+          }
+          if (customerid) {
+              const customer = customers.find(customer => String(customer._id) === String(customerData.customerid));
+              updatedTenantContract.owner_name = customer?.firstname + " " + customer?.lastname;
+              updatedTenantContract.owner_email = customer?.email;
+              updatedTenantContract.owner_nationality = customer?.passportno;
+              updatedTenantContract.owner_passportidno = customer?.passportidno;
+              updatedTenantContract.owner_mobilenumber = customer?.whatsappno;
+          } else {
+              const customer = customersEmails.find(customer => customer.email === customerData.email);
+              updatedTenantContract.owner_name = guestname;
+              updatedTenantContract.owner_passportidno = passportnumber;
+              updatedTenantContract.owner_email = email;
+              updatedTenantContract.owner_nationality = nationality;
+              updatedTenantContract.owner_mobilenumber = mobilenumber;
+              updatedTenantContract.customerid = customer?._id;
+          }
+
+          const employee = employeeData.find(employee => String(employee._id) === String(createdBy));
+          if (employee) {
+              updatedTenantContract.employee_email_createdBy = employee?.email;
+          }
+          const employeeUpdatedBy = employeeDataUpdatedBy.find(employee => String(employee._id) === String(updatedBy));
+          if (employeeUpdatedBy) {
+              updatedTenantContract.employee_email_updatedBy = employeeUpdatedBy?.email;
+          }
+
+         
+          return updatedTenantContract;
+      });
+
+      const formattedDate = tenantContractAllData?.map(tenantContract => {
+          // const formattedcontractstartdate = tenantContract.contractstartdate ? new Date(tenantContract.contractstartdate).toDateString() : ''
+          // const formattedcontractstartdate = tenantContract.contractstartdate && tenantContract?.contractstartdate !== null ? String(tenantContract.contractstartdate)?.split('T') : ''
+          // console.log(tenantContract.contractstartdate, 'tenantContract.contractstartdate')
+          // console.log(formattedcontractstartdate[0], "formattedcontractstartdate[0]")
+          // console.log(formattedcontractstartdate[1], "formattedcontractstartdate[1]")
+          const formattedcontractstartdate = tenantContract.contractstartdate ? new Date(tenantContract.contractstartdate).toDateString() : '';
+          const formattedcontractenddate = tenantContract.contractenddate ? new Date(tenantContract.contractenddate).toDateString() : ''
+          const formattedcontractexecutiondate = tenantContract.contractexecutiondate ? new Date(tenantContract.contractexecutiondate).toDateString() : ''
+          const formattedCreatedAt = tenantContract.createdAt ? new Date(tenantContract.createdAt).toDateString() : ''
+          const formattedupdatedAt = tenantContract.updatedAt ? new Date(tenantContract.updatedAt).toDateString() : ''
+
+          // const formattedcontractstartdate = tenantContract.contractstartdate ? moment(tenantContract.contractstartdate).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+          // const formattedcontractenddate = tenantContract.contractenddate ? moment(tenantContract.contractenddate).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+          // const formattedcontractexecutiondate = tenantContract.contractexecutiondate ? moment(tenantContract.contractexecutiondate).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+          // const formattedCreatedAt = tenantContract.createdAt ? moment(tenantContract.createdAt).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+          // const formattedupdatedAt = tenantContract.updatedAt ? moment(tenantContract.updatedAt).tz('Asia/Dubai').format('DD MMM YYYY') : '';
+
+          const completed_data = tenantContract?.propertyid && tenantContract?.email && tenantContract?.customertype && tenantContract?.contractstartdate && tenantContract?.contractenddate && tenantContract?.rentalamount && tenantContract?.securitydepositamount && tenantContract?.noofchequeorinstallment && tenantContract?.contractexecutiondate && tenantContract?.ejari_certificate_doc && tenantContract?.tenancy_contract_doc && tenantContract?.addendum_doc && tenantContract?.key_receipt_doc && tenantContract?.chequeDetails?.length ? true : false
+          return { ...tenantContract, contractstart_date: formattedcontractstartdate, Created_At: formattedCreatedAt, contractend_date: formattedcontractenddate, contractexecution_date: formattedcontractexecutiondate, updatedAt: formattedupdatedAt, createdAt: formattedCreatedAt, completed_data: completed_data }
+      })
+      Alltenants()
+      res.json(formattedDate);
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Server Error" });
+  }
 })
 
 const getTenantContractSearch = asyncHandler(async (req, res) => {
@@ -1222,7 +1285,9 @@ const updateManys = async (req,res,next) => {
 
 
 
+
 module.exports = {
+
     getAllTenantContract,
     getTenantContractById,
     getOwnerContract,
@@ -1236,5 +1301,5 @@ module.exports = {
     tenantSummaryReport,
     tenantSummaryReportByDates,
     updateManys,
-    allTenantRequest
+    // allTenantRequest
 }
