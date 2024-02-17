@@ -42,7 +42,7 @@ const getAllPropertyConnect = asyncHandler(async (req, res) => {
             { softdelete: { $ne: true } },
             { owner_changed: { $ne: true } } // Filter out softdeleted bookings
         ]
-    }).sort({ _id: "descending" });
+    }).sort({ createdAt: -1 });
 
     if (!allProperties?.length) {
         return res.status(400).json({ message: "No Unit found" });
@@ -81,28 +81,36 @@ const getAllPropertyConnect = asyncHandler(async (req, res) => {
             rentpurchase.updateOne({porpertyid : compareproperty.map((data) => data.id).pop()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
         }
 
-        // tenantDetails.forEach((data) => {
-            
-        //     if(data !== undefined && data.propertyid.toString() != undefined && data.softdelete === true){
+        avaiabilityData.forEach((data) => {
+            if(data.status === "Pending"){
+                        tenantDetails.forEach((data) => {
+                    
+                    if(data !== undefined && data.propertyid.toString() != undefined && data.softdelete === true){
+                        
+                        rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
+                    }
                 
-        //         rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
-        //     }
-          
-        //     if(data !== undefined && data.propertyid.toString() != undefined && data.softdelete === false ){
-        //         if(new Date(data.contractenddate) > new Date()){
-        //             rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
-        //         }else if(new Date(data.contractenddate) < new Date()){
-        //             rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
-        //         }
+                    if(data !== undefined && data.propertyid.toString() != undefined && data.softdelete === false ){
+                        if(new Date(data.contractenddate) > new Date()){
+                            rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
+                        }else if(new Date(data.contractenddate) < new Date()){
+                            rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
+                        }
 
-        //         // else{
-        //         //     rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
-        //         // }
-        //     }
-           
+                        // else{
+                        //     rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
+                        // }
+                    }
+                
 
-         
-        // })
+                
+                })
+            }else{
+                return
+            }
+        })
+
+        
         Booking.forEach((data) => {
             if(data !== undefined && data.propertyid.toString() != undefined ){
                 rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Short-term" }},{new : true}).then(res => res)
