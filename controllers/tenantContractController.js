@@ -88,30 +88,32 @@ const Alltenants = async (req,res,next) => {
    const Booking = await  Bookings.find({  propertyid : {$in : allproperties }}).sort({ createdAt : -1})
    datas.forEach(async(data) => {
 
-   
-
-    if(data.propertyid.available_id.status === "Occupied"){
-      return;
-    }
-
-    if(data.propertyid.available_id.status === "Vacant"){
-      return;
-    }
-
-    if(data.propertyid.available_id.status === "Pending") {
-
-      if(data !== undefined && data.propertyid._id != undefined && data.softdelete === true){                 
-        await  rentpurchase.updateOne({porpertyid : data.propertyid._id},{ $set : { status : "Pending" }},{new : true})
-      }
-
-      if(data !== undefined && data.propertyid._id && data.softdelete === false){
-          if(new Date(data.contractenddate ) > new Date()){
-            rentpurchase.updateOne({porpertyid : data.propertyid._id},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
-          }else if(new Date(data.contractenddate ) < new Date()){
-            rentpurchase.updateOne({porpertyid : data.propertyid._id},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
+   if(data !== undefined && data.propertyid._id != undefined){
+        if(data.propertyid.available_id.status === "Occupied"){
+          return;
         }
-      }
-    }
+  
+        if(data.propertyid.available_id.status === "Vacant"){
+          return;
+        }
+
+        if(data.propertyid.available_id.status === "Pending") {
+      
+          if(data.softdelete === true){                 
+            await  rentpurchase.updateOne({porpertyid : data.propertyid._id},{ $set : { status : "Pending" }},{new : true})
+          }
+      
+          if(data.softdelete === false){
+              if(new Date(data.contractenddate ) > new Date()){
+                rentpurchase.updateOne({porpertyid : data.propertyid._id},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
+              }else if(new Date(data.contractenddate ) < new Date()){
+                rentpurchase.updateOne({porpertyid : data.propertyid._id},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
+            }
+          }
+        }
+   }
+
+
    })
 
 
