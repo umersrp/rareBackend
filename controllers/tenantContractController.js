@@ -126,7 +126,7 @@ const Alltenants = async (req,res,next) => {
     // }
 })
 
-        // res.status(200).json(datas);
+        
     } 
     catch (error) {
         console.error("==============><",error);
