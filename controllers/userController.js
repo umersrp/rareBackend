@@ -1123,7 +1123,26 @@ const verifyEmail = asyncHandler(async (req, res) => {
 
 // deployment krne kye liye add kr raha hn
 
+
+const allOwners =  async(req,res,next) => {
+try{
+    const allOnsers = await User.find({ subType : "owner"})
+    res.status(200).json({
+        total : allOnsers.length,
+        message : "All Owners Fetched Successfully",
+        status : true,
+        data : allOnsers
+    })
+}catch(err){
+    res.status(500).json({
+        message : "No Owners Found",
+        status : false
+    })
+}
+}
+
 module.exports = {
+    allOwners,
     getAllUsers,
     getAllUserRedux,
     getUser,

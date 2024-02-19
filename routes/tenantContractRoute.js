@@ -13,7 +13,7 @@ const upload = multer({
     }
   }),
   limits: {
-    fileSize: 10 * 1024 * 1024, 
+    fileSize: 30 * 1024 * 1024, 
   },
   fileFilter: function (req, file, cb) {
     const allowedFileTypes = /jpeg|jpg|pdf|png/;
@@ -21,7 +21,7 @@ const upload = multer({
     const extname = allowedFileTypes.test(file.mimetype);
     const mimetype = allowedFileTypes.test(file.mimetype);
 
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > 30 * 1024 * 1024) {
         cb(new Error('File size exceeds 10 MB limit!'));
       } else if (mimetype && extname) {
         cb(null, true);

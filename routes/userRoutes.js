@@ -68,6 +68,7 @@ router.route('/api/logout/method').get(userController.logOutFromERP)
 router.route('/api/search/mobile/:key').get(userController.getSearchedCustomerMobile)
 router.route('/api/search/mobile/lead/:key').get(userController.getSearchedLeadMobile)
 router.route('/api/specific/userupdate').patch(userController.updateUserSpecific)
+router.route('/api/ownerlist').get(userController.allOwners);
 // router.route('/lead/verified:').get(userController.getAllUsersVerified)
 // router.route('/upload').post(upload)
 
