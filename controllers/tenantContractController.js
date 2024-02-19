@@ -63,7 +63,7 @@ const Alltenants = async (req,res,next) => {
       return;
     }
 
-    if(data.propertyid.status === "Contract_Pending") {
+    if(data.propertyid.status === "Contract_Occupied_Pending") {
     
   
       if(data.softdelete === false){

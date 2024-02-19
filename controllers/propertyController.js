@@ -1306,7 +1306,7 @@ const ChangePropertyStatus = async (req,res,next) => {
         }
 
         if(status === "Pending"){
-            await AddProperty.findOneAndUpdate({_id : propertyid} ,{$set : { status : "Contract_Pending"}} , {new : true})
+            await AddProperty.findOneAndUpdate({_id : propertyid} ,{$set : { status : "Contract_Occupied_Pending"}} , {new : true})
         }
        
 
