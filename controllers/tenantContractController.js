@@ -39,42 +39,6 @@ const Alltenants = async (req,res,next) => {
           'softdelete'  :1
         }
       }, 
-      {
-        '$match': {
-          'propertyid.is_available': true, 
-          'propertyid.available_id': { '$ne': '' },
-          // 'propertyid.available_id': { '$regex': /^[0-9a-fA-F]{24}$/ }
-        }
-      }, 
-      {
-        '$addFields': {
-          'propertyid.available_id': {
-            '$toObjectId': '$propertyid.available_id'
-          }
-        }
-      }, 
-      {
-        '$lookup': {
-          'from': 'rentpurchases', 
-          'localField': 'propertyid.available_id', 
-          'foreignField': '_id', 
-          'as': 'propertyid.available_id'
-        }
-      }, 
-      {
-        '$project': {
-          'propertyid.available_id': 1,
-          'propertyid._id': 1,
-          "contractenddate"  :1,
-          "softdelete" : 1
-        }
-      }, 
-      {
-        '$unwind': {
-          'path': '$propertyid.available_id', 
-          'preserveNullAndEmptyArrays': true
-        }
-      }
     ]
 
    
@@ -82,32 +46,33 @@ const Alltenants = async (req,res,next) => {
    const datas = await TenantContract.aggregate(data)
 
    if(!datas.length) {
-    rentpurchase.updateOne({porpertyid : datas.map((data) => data.propertyid._id).pop()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
+    AddProperty.updateOne({_id : datas.map((data) => data.propertyid._id.toString()).pop()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
   }
    const allproperties = datas.map((data) => data.propertyid._id)
    const Booking = await  Bookings.find({  propertyid : {$in : allproperties }}).sort({ createdAt : -1})
+
    datas.forEach(async(data) => {
 
    if(data !== undefined && data.propertyid._id != undefined){
-        if(data.propertyid.available_id.status === "Occupied"){
-          return;
-        }
+        // if(data.propertyid.status === "Occupied"){
+        //   return;
+        // }
   
-        if(data.propertyid.available_id.status === "Vacant"){
-          return;
-        }
+        // if(data.propertyid.status === "Vacant"){
+        //   return;
+        // }
 
-        if(data.propertyid.available_id.status === "Pending") {
+        if(data.propertyid.status === "Pending") {
       
           if(data.softdelete === true){                 
-            await  rentpurchase.updateOne({porpertyid : data.propertyid._id},{ $set : { status : "Pending" }},{new : true})
+            await  AddProperty.updateOne({_id :  data.propertyid._id.toString()},{ $set : { status : "Pending" }},{new : true})
           }
       
           if(data.softdelete === false){
               if(new Date(data.contractenddate ) > new Date()){
-                rentpurchase.updateOne({porpertyid : data.propertyid._id},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
+                AddProperty.updateOne({_id : data.propertyid._id.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
               }else if(new Date(data.contractenddate ) < new Date()){
-                rentpurchase.updateOne({porpertyid : data.propertyid._id},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
+                AddProperty.updateOne({_id : data.propertyid._id.toString()},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
             }
           }
         }
@@ -119,7 +84,7 @@ const Alltenants = async (req,res,next) => {
 
    Booking.forEach((data) => {
     if(data !== undefined && data.propertyid._id != undefined ){
-        rentpurchase.updateOne({porpertyid : data.propertyid._id},{ $set : { propertyType : "Short-term" }},{new : true}).then(res => res)
+      AddProperty.updateOne({_id : data.propertyid._id.toString()},{ $set : { propertyType : "Short-term" }},{new : true}).then(res => res)
     }
     // else{
     //     RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Long-term" }},{new : true}).then(res => res)
