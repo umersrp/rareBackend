@@ -55,6 +55,14 @@ const Alltenants = async (req,res,next) => {
 
    if(data !== undefined && data.propertyid._id != undefined){
 
+    if(data.propertyid.status === "Occupied"){
+      return;
+    }
+
+    if(data.propertyid.status === "Vacant"){
+      return;
+    }
+
     if(data.propertyid.status === "Pending") {
       if(data.softdelete === true){                 
         await  AddProperty.updateOne({_id :  data.propertyid._id.toString()},{ $set : { status : "Pending" }},{new : true})
@@ -70,13 +78,7 @@ const Alltenants = async (req,res,next) => {
     }
 
     
-        if(data.propertyid.status === "Occupied"){
-          return;
-        }
-  
-        if(data.propertyid.status === "Vacant"){
-          return;
-        }
+      
 
        
    }
