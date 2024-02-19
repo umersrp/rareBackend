@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const tenantContractController = require('../controllers/tenantContractController')
 const multer = require('multer')
-
+const { upload : uploads } = require('../utils/forImagesData')
 const upload = multer({
   storage: multer.diskStorage({
     destination: function (req, file, cb) {
@@ -44,7 +44,7 @@ router.route('/tenantsummaryreport/:propertyid').get(tenantContractController.te
 
 router.route('/')
     .get(tenantContractController.getAllTenantContract)
-    .post(upload, tenantContractController.createTenantContract)
+    .post(upload,uploads, tenantContractController.createTenantContract)
     .patch(upload, tenantContractController.updateTenantContract)
     .delete(tenantContractController.deleteTenant)
 

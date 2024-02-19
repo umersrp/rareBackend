@@ -594,7 +594,7 @@ const createTenantContract = asyncHandler(async (req, res) => {
             propertyid, customerid, guestname, passportnumber, customertype, 
             nationality, mobilenumber, email, contractstartdate, contractenddate, createdBy, updatedBy, 
             contractvalue, rentalamount, securitydepositamount, noofchequeorinstallment, commission, 
-            contractexecutiondate, passportpdf, key_receipt_doc, tenancy_contract_doc, contractupdation, 
+            contractexecutiondate, passportpdf, key_receipt_doc, contractupdation, 
             ejari_certificate_doc, addendum_doc, chequeDetails
         } = req.body
        
@@ -633,7 +633,7 @@ const createTenantContract = asyncHandler(async (req, res) => {
             customertype, nationality, mobilenumber, email, contractstartdate, 
             contractenddate, createdBy, updatedBy, contractvalue, rentalamount, 
             securitydepositamount, noofchequeorinstallment, commission, contractexecutiondate, passportpdf, 
-            key_receipt_doc, tenancy_contract_doc, contractupdation, ejari_certificate_doc, 
+            key_receipt_doc, tenancy_contract_doc : req.files ? req.files.map((data) => data.tenancy_contract_doc.replace(/\\/g, '/')) : "", contractupdation, ejari_certificate_doc, 
             addendum_doc, chequeDetails: chequeDetailsParse }
 
           

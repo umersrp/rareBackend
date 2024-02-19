@@ -6,8 +6,8 @@ const multer = require('multer')
         destination: function (req, file, cb) {
             if (file.fieldname === "expenseAttachment") {
             cb(null, "./public/expsenseImgae/");
-            } else if (file.fieldname === "category_image") {
-            cb(null, "./public/Category/");
+            } else if (file.fieldname === "tenancy_contract_doc") {
+            cb(null, "./public/tenancy_contract_doc#/");
             } else if (file.fieldname === "product_image") {
             cb(null, "./public/Product/");
             }
@@ -16,7 +16,7 @@ const multer = require('multer')
             if (file.fieldname === "expenseAttachment") {
             const filename = file.originalname.split(" ").join("-");
             cb(null, `${filename}`);
-            } else if (file.fieldname === "category_image") {
+            } else if (file.fieldname === "tenancy_contract_doc") {
             const filename = file.originalname.split(" ").join("-");
             cb(null, `${filename}`);
             } else if (file.fieldname === "product_image") {
@@ -48,7 +48,7 @@ const upload = multer({
   storage: storage,
 }).fields([
   { name: "expenseAttachment", maxCount: 8 },
-  { name: "category_image", maxCount: 8 },
+  { name: "tenancy_contract_doc", maxCount: 8 },
   { name: "product_image", maxCount: 8 },
 ]);
 
