@@ -1125,11 +1125,9 @@ const verifyEmail = asyncHandler(async (req, res) => {
 
 
 const allOwners =  async(req,res,next) => {
-const limit = req.query.limit || 50;
-const offset = req.query.offset || 1
-const skip = (offset - 1) * limit;
+
 try{
-    const allOnsers = await User.find({ subType : "owner"}).limit(limit).skip(skip)
+    const allOnsers = await User.find({ subType : "owner"})
     res.status(200).json({
         total : allOnsers.length,
         message : "All Owners Fetched Successfully",
