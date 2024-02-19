@@ -44,7 +44,7 @@ router.route('/tenantsummaryreport/:propertyid').get(tenantContractController.te
 
 router.route('/')
     .get(tenantContractController.getAllTenantContract)
-    .post(upload,uploads, tenantContractController.createTenantContract)
+    .post(upload, tenantContractController.createTenantContract)
     .patch(upload, tenantContractController.updateTenantContract)
     .delete(tenantContractController.deleteTenant)
 
