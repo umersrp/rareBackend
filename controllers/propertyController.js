@@ -656,6 +656,8 @@ const getAdvanceSearch = asyncHandler(async (req, res) => {
                     updatedProperty.propertystatus = avaiability?.propertystatus;
                     updatedProperty.unlisted = avaiability?.unlisted;
                     updatedProperty.multi_propertyvaluation = avaiability?.multi_propertyvaluation;
+                    updatedProperty.status = avaiability?.status;
+                    updatedProperty.propertyType = avaiability?.propertyType;
                 }
 
             }
