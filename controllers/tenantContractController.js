@@ -61,11 +61,10 @@ const Alltenants = async (req,res,next) => {
       }
   
       if(data.softdelete === false){
-        console.log("@@@@@",data)
           if(new Date(data.contractenddate ) > new Date()){
-            AddProperty.updateOne({_id : data.propertyid._id.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
+           await AddProperty.updateOne({_id : data.propertyid._id.toString()},{ $set : { status : "Occupied" }},{new : true})
           }else if(new Date(data.contractenddate ) < new Date()){
-            AddProperty.updateOne({_id : data.propertyid._id.toString()},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
+          await  AddProperty.updateOne({_id : data.propertyid._id.toString()},{ $set : { status : "Vacant" }},{new : true})
         }
       }
     }
