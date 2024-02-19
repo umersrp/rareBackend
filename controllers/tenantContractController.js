@@ -63,6 +63,16 @@ const Alltenants = async (req,res,next) => {
       return;
     }
 
+    if(data.propertyid.status === "Contract_Pending") {
+    
+  
+      if(data.softdelete === false){
+          if(new Date(data.contractenddate ) > new Date()){
+           await AddProperty.updateOne({_id : data.propertyid._id.toString()},{ $set : { status : "Occupied" }},{new : true})
+          }
+      }
+    }
+
     if(data.propertyid.status === "Pending") {
       if(data.softdelete === true){                 
         await  AddProperty.updateOne({_id :  data.propertyid._id.toString()},{ $set : { status : "Pending" }},{new : true})
