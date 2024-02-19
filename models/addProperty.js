@@ -11,7 +11,7 @@ const addPropertySchema = new mongoose.Schema({
     },
     status:{
         type : String,
-        enum : ['Pending' , 'Vacant' , 'Occupied' , 'Occupy_Pending','Contract_Pending'],
+        enum : ['Pending' , 'Vacant' , 'Occupied' ,'Contract_Pending'],
         default : 'Pending'
     },
     propertyType:{

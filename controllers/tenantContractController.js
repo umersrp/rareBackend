@@ -54,6 +54,18 @@ const Alltenants = async (req,res,next) => {
    datas.forEach(async(data) => {
 
    if(data !== undefined && data.propertyid._id != undefined){
+
+    if(data.softdelete === true){                 
+      await  AddProperty.updateOne({_id :  data.propertyid._id.toString()},{ $set : { status : "Pending" }},{new : true})
+    }
+
+    if(data.softdelete === false){
+        if(new Date(data.contractenddate ) > new Date()){
+          AddProperty.updateOne({_id : data.propertyid._id.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
+        }else if(new Date(data.contractenddate ) < new Date()){
+          AddProperty.updateOne({_id : data.propertyid._id.toString()},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
+      }
+    }
         // if(data.propertyid.status === "Occupied"){
         //   return;
         // }
@@ -62,20 +74,10 @@ const Alltenants = async (req,res,next) => {
         //   return;
         // }
 
-        if(data.propertyid.status === "Pending") {
+        // if(data.propertyid.status === "Pending") {
       
-          if(data.softdelete === true){                 
-            await  AddProperty.updateOne({_id :  data.propertyid._id.toString()},{ $set : { status : "Pending" }},{new : true})
-          }
-      
-          if(data.softdelete === false){
-              if(new Date(data.contractenddate ) > new Date()){
-                AddProperty.updateOne({_id : data.propertyid._id.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
-              }else if(new Date(data.contractenddate ) < new Date()){
-                AddProperty.updateOne({_id : data.propertyid._id.toString()},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
-            }
-          }
-        }
+          
+        // }
    }
 
 
