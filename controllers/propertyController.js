@@ -173,8 +173,8 @@ const getAllPropertyConnect = asyncHandler(async (req, res) => {
             updatedProperty.unlisted = avaiability?.unlisted;
             updatedProperty.un_listed = avaiability?.unlisted;
             updatedProperty.multi_propertyvaluation = avaiability?.multi_propertyvaluation;
-            updatedProperty.status = avaiability?.status;
-            updatedProperty.propertyType = avaiability?.propertyType;
+            // updatedProperty.status = avaiability?.status;
+            // updatedProperty.propertyType = avaiability?.propertyType;
         }
 
         const employeeCreatedBy = employeeDataCreatedBy.find(employee => String(employee._id) === String(createdBy));
