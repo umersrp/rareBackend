@@ -574,11 +574,19 @@ const createTenantContract = asyncHandler(async (req, res) => {
             propertyid, customerid, guestname, passportnumber, customertype, 
             nationality, mobilenumber, email, contractstartdate, contractenddate, createdBy, updatedBy, 
             contractvalue, rentalamount, securitydepositamount, noofchequeorinstallment, commission, 
-            contractexecutiondate, passportpdf, key_receipt_doc,tenancy_contract_doc, contractupdation, 
-            ejari_certificate_doc, addendum_doc, chequeDetails
+            contractexecutiondate, passportpdf,contractupdation,
+            chequeDetails
         } = req.body
        
-    
+    const {
+      key_receipt_doc,
+      tenancy_contract_doc,  
+      ejari_certificate_doc, 
+      addendum_doc, 
+    } = req.files
+
+
+   
        
         const contractenddateObject = new Date(contractstartdate);
         const contractstartdateObject = new Date(contractenddate);
@@ -610,11 +618,17 @@ const createTenantContract = asyncHandler(async (req, res) => {
     
         const tenantContractObject =  { 
             propertyid, customerid, guestname, passportnumber, 
-            customertype, nationality, mobilenumber, email, contractstartdate, 
-            contractenddate, createdBy, updatedBy, contractvalue, rentalamount, 
-            securitydepositamount, noofchequeorinstallment, commission, contractexecutiondate, passportpdf, 
-            key_receipt_doc, tenancy_contract_doc , contractupdation, ejari_certificate_doc, 
-            addendum_doc, chequeDetails: chequeDetailsParse }
+            customertype, nationality, mobilenumber, email, 
+            contractstartdate : new Date(contractstartdate).toISOString(), 
+            contractenddate : new Date(contractenddate).toISOString(), 
+            contractexecutiondate : new Date(contractexecutiondate).toISOString(),
+            createdBy, updatedBy, contractvalue, rentalamount, 
+            securitydepositamount, noofchequeorinstallment, commission, passportpdf,  contractupdation,
+            key_receipt_doc : key_receipt_doc ?  req.files.key_receipt_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : null , 
+            tenancy_contract_doc : tenancy_contract_doc ? req.files.tenancy_contract_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : null ,
+            ejari_certificate_doc : ejari_certificate_doc ? req.files.ejari_certificate_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : null , 
+            addendum_doc : addendum_doc ? req.files.addendum_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : null ,
+            chequeDetails: chequeDetailsParse }
 
           
             // console.log(customerid,"========>",guestname , customertype)
@@ -626,7 +640,9 @@ const createTenantContract = asyncHandler(async (req, res) => {
           if(customerid){
              await User.updateOne({ _id : customerid },{$set: { subType : "tenant" , type : "customer"}} , { new : true})
          }
-            
+         
+         
+
         const createTenantContract = await TenantContract.create(tenantContractObject)
     
         if (createTenantContract) {
