@@ -78,7 +78,7 @@ const getAllSaleRegister = asyncHandler(async (req, res) => {
                 }
             }
             if (buyer_id) {
-                const customerid = buyers.find(customerid => String(customerid._id) === String(buyer_id));
+                const customerid = buyers.find(customerid => String(customerid._id) === String(buyer_id)) || "";
                 console.log("33333333",customerid)
                 updateSaleRegister.buyerids = customerid._id
                 updatedallSaleRegister.buyer_name = (customerid?.firstname) + (customerid?.lastname ? " " + customerid?.lastname : "");
@@ -86,6 +86,8 @@ const getAllSaleRegister = asyncHandler(async (req, res) => {
                 updatedallSaleRegister.buyer_passportnumber = customerid?.passportidno;
                 updatedallSaleRegister.buyer_nationality = customerid?.passportno;
                 updatedallSaleRegister.buyer_mobilenumber = customerid?.whatsappno;
+            }else{
+              console.log("checking.....")
             }
             
             if(seller_id){
@@ -171,7 +173,7 @@ const createSaleRegister = asyncHandler(async (req, res) => {
       transaction_type, exoected_transfer_date, createdBy, updatedBy, property_new, buyer_new, buyer_type, buyer_id : buyer_id || "000000000000000000000000" ,  
       check_option_cash, check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, contract_B_attachment, 
       title_deed_fee, seller_id, seller_new, seller_type, contract_A_attachment, sales_contract_attachment, notes }
-      
+
     const createSaleRegister = await SaleRegister.create(SaleRegisterObject)
 
     if (createSaleRegister) {
