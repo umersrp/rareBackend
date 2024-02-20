@@ -8,7 +8,6 @@ const SaleRegisterSchema = new mongoose.Schema({
     },
     buyer_id: {
         type: mongoose.Schema.Types.ObjectId,
-        require: true,
         ref: 'User'
     },
     seller_id: {

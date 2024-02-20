@@ -143,7 +143,17 @@ const getSaleRegisterById = asyncHandler(async (req, res) => {
 })
 
 const createSaleRegister = asyncHandler(async (req, res) => {
-    const { propertyid, property_type, unitnumber, communityname, projectname, buildingname, floor, sold_for, noc_charges, trustee_fee_amount, trustee_buyer, trustee_seller, trustee_both, transfer_fee_amount, transfer_buyer, transfer_seller, transfer_both, commission_amount, vat_on_commission, buyer_name, buyer_inhouse_agent_name, buyer_outside_agent_name, transaction_type, exoected_transfer_date, createdBy, updatedBy, property_new, buyer_new, buyer_type, buyer_id, check_option_cash, check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, contract_B_attachment, title_deed_fee, seller_id, seller_new, seller_type, contract_A_attachment, sales_contract_attachment, notes } = req.body
+    const {
+       propertyid, property_type, unitnumber, communityname, projectname, buildingname, floor, 
+       sold_for, noc_charges, trustee_fee_amount, trustee_buyer, trustee_seller, trustee_both, 
+       transfer_fee_amount, transfer_buyer, transfer_seller, transfer_both, commission_amount, vat_on_commission, 
+       buyer_name, buyer_inhouse_agent_name, buyer_outside_agent_name, transaction_type, exoected_transfer_date, 
+       createdBy, updatedBy, property_new, buyer_new, buyer_type, 
+       buyer_id ,
+       check_option_cash, 
+       check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, 
+       contract_B_attachment, title_deed_fee, seller_id, seller_new, seller_type, 
+       contract_A_attachment, sales_contract_attachment, notes } = req.body
     // if (!SaleRegister) {
     //     return res.status(400).json({ message: 'All fields are required' })
     // }
@@ -154,7 +164,14 @@ const createSaleRegister = asyncHandler(async (req, res) => {
     //     return res.status(409).json({ message: "Duplicate Sale Register" })
     // }
 
-    const SaleRegisterObject = { propertyid, property_type, unitnumber, communityname, projectname, buildingname, floor, sold_for, noc_charges, trustee_fee_amount, trustee_buyer, trustee_seller, trustee_both, transfer_fee_amount, transfer_buyer, transfer_seller, transfer_both, commission_amount, vat_on_commission, buyer_name, buyer_inhouse_agent_name, buyer_outside_agent_name, transaction_type, exoected_transfer_date, createdBy, updatedBy, property_new, buyer_new, buyer_type, buyer_id, check_option_cash, check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, contract_B_attachment, title_deed_fee, seller_id, seller_new, seller_type, contract_A_attachment, sales_contract_attachment, notes }
+    const SaleRegisterObject = { 
+      propertyid, property_type, unitnumber, communityname, projectname, buildingname, floor, sold_for, noc_charges, 
+      trustee_fee_amount, trustee_buyer, trustee_seller, trustee_both, transfer_fee_amount, transfer_buyer, transfer_seller, 
+      transfer_both, commission_amount, vat_on_commission, buyer_name, buyer_inhouse_agent_name, buyer_outside_agent_name, 
+      transaction_type, exoected_transfer_date, createdBy, updatedBy, property_new, buyer_new, buyer_type, buyer_id : buyer_id || "000000000000000000000000" ,  
+      check_option_cash, check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, contract_B_attachment, 
+      title_deed_fee, seller_id, seller_new, seller_type, contract_A_attachment, sales_contract_attachment, notes }
+      
     const createSaleRegister = await SaleRegister.create(SaleRegisterObject)
 
     if (createSaleRegister) {
