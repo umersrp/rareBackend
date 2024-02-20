@@ -673,7 +673,21 @@ const createTenantContract = asyncHandler(async (req, res) => {
 })
 
 const updateTenantContract = asyncHandler(async (req, res) => {
-    const { _id, propertyid, customerid, guestname, passportnumber, customertype, nationality, mobilenumber, email, contractstartdate, contractenddate, createdBy, updatedBy, contractvalue, rentalamount, securitydepositamount, noofchequeorinstallment, commission, contractexecutiondate, passportpdf, key_receipt_doc, tenancy_contract_doc, contractupdation, ejari_certificate_doc, addendum_doc, chequeDetails, } = req.body
+    const { 
+      _id, propertyid, customerid, guestname, 
+      passportnumber, customertype, nationality, mobilenumber, 
+      email, contractstartdate, contractenddate, createdBy, updatedBy, 
+      contractvalue, rentalamount, securitydepositamount, noofchequeorinstallment, 
+      commission, contractexecutiondate, passportpdf, 
+      contractupdation,  
+      chequeDetails, } = req.body
+
+    const {
+      key_receipt_doc,
+      tenancy_contract_doc,  
+      ejari_certificate_doc, 
+      addendum_doc, 
+    } = req.files
 
     if (!_id) {
         return res.status(400).json({ message: "Id is requires" })
@@ -698,9 +712,9 @@ const updateTenantContract = asyncHandler(async (req, res) => {
     tenantContractNames.nationality = nationality
     tenantContractNames.mobilenumber = mobilenumber
     tenantContractNames.email = email
-    tenantContractNames.contractstartdate = contractstartdate
-    tenantContractNames.contractenddate = contractenddate
-    tenantContractNames.contractexecutiondate = contractexecutiondate
+    tenantContractNames.contractstartdate = new Date( contractstartdate).toISOString()
+    tenantContractNames.contractenddate =  new Date (contractenddate).toISOString()
+    tenantContractNames.contractexecutiondate = new Date (contractexecutiondate).toISOString()
     tenantContractNames.contractvalue = contractvalue
     // tenantContractNames.chequenumbe = chequenumbe
     // tenantContractNames.chequedate = chequedate
@@ -712,10 +726,10 @@ const updateTenantContract = asyncHandler(async (req, res) => {
     tenantContractNames.noofchequeorinstallment = noofchequeorinstallment
     tenantContractNames.commission = commission
     tenantContractNames.passportpdf = passportpdf
-    tenantContractNames.ejari_certificate_doc = ejari_certificate_doc
-    tenantContractNames.tenancy_contract_doc = tenancy_contract_doc
-    tenantContractNames.addendum_doc = addendum_doc
-    tenantContractNames.key_receipt_doc = key_receipt_doc
+    tenantContractNames.ejari_certificate_doc = ejari_certificate_doc ? req.files.ejari_certificate_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : null , 
+    tenantContractNames.tenancy_contract_doc = tenancy_contract_doc ? req.files.tenancy_contract_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : null ,
+    tenantContractNames.addendum_doc = addendum_doc ? req.files.addendum_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : null ,
+    tenantContractNames.key_receipt_doc = key_receipt_doc ?  req.files.key_receipt_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : null , 
     tenantContractNames.contractupdation = contractupdation
     tenantContractNames.createdBy = createdBy
     tenantContractNames.updatedBy = updatedBy
