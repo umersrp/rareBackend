@@ -79,7 +79,6 @@ const getAllSaleRegister = asyncHandler(async (req, res) => {
             }
             if (buyer_id) {
                 const customerid = buyers.find(customerid => String(customerid._id) === String(buyer_id)) || "";
-                console.log("33333333",customerid)
                 updateSaleRegister.buyerids = customerid._id
                 updatedallSaleRegister.buyer_name = (customerid?.firstname) + (customerid?.lastname ? " " + customerid?.lastname : "");
                 updatedallSaleRegister.buyer_email = customerid?.email;
