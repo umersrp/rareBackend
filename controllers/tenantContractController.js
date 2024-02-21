@@ -624,7 +624,7 @@ const createTenantContract = asyncHandler(async (req, res) => {
 
 
     
-        console.log("chequeDetailsParse",chequeDetailsParse)
+        console.log("chequeDetailsParse",chequeDetails)
 
         const tenantContractObject =  { 
             propertyid, customerid, guestname, passportnumber, 
