@@ -583,9 +583,15 @@ const createTenantContract = asyncHandler(async (req, res) => {
       tenancy_contract_doc,  
       ejari_certificate_doc, 
       addendum_doc, 
+      chequeimage
     } = req.files
 
 
+    chequeDetails.map((data,index) => {
+      const chq = chequeimage[index]
+      const cheque = chq.path.replace(/\\/g, '/')
+      return { ...data , chequeimage : cheque }
+    })
    
        
         const contractenddateObject = new Date(contractstartdate);
@@ -615,7 +621,11 @@ const createTenantContract = asyncHandler(async (req, res) => {
         if (chequeDetails) {
             chequeDetailsParse = JSON.parse(chequeDetails)
         }
+
+
     
+        console.log("chequeDetailsParse",chequeDetailsParse)
+
         const tenantContractObject =  { 
             propertyid, customerid, guestname, passportnumber, 
             customertype, nationality, mobilenumber, email, 
@@ -628,7 +638,8 @@ const createTenantContract = asyncHandler(async (req, res) => {
             tenancy_contract_doc : tenancy_contract_doc ? req.files.tenancy_contract_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : null ,
             ejari_certificate_doc : ejari_certificate_doc ? req.files.ejari_certificate_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : null , 
             addendum_doc : addendum_doc ? req.files.addendum_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : null ,
-            chequeDetails: chequeDetailsParse }
+            chequeDetails: chequeDetailsParse 
+          }
 
           
             // console.log(customerid,"========>",guestname , customertype)
