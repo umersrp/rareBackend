@@ -619,7 +619,7 @@ const createTenantContract = asyncHandler(async (req, res) => {
         let chequeDetailsParse
     
         if (chequeDetails) {
-            chequeDetailsParse = JSON.parse(chequeDetails)
+            chequeDetailsParse = chequeDetails
         }
 
 
