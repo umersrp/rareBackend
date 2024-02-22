@@ -14,7 +14,7 @@ const upload = multer({
         }
     })
 }).any()
-
+router.route('/shortterm').get(bookingController.allShorttermProperties)
 router.route('/:id').get(bookingController.getBookingById)
 router.route('/pagination/pages').get(bookingController.getPaginationBooking)
 router.route('/ownerrepresentative/pages').get(bookingController.getPaginationBookingOwnerRep)
