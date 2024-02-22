@@ -15,7 +15,7 @@ const upload = multer({
         }
     })
 }).any()
-getShortTermProperty
+
 
 
 router.route('/:id').get(propertyController.getPropertyById)
