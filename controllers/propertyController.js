@@ -17,6 +17,24 @@ const tenantContract = require('../models/tenantContract')
 const { default: mongoose } = require('mongoose')
 
 
+const getShortTermProperty = async (req,res,next) => {
+try{
+    const allShortterm = await AddProperty.find({ propertyType : "Short-term"})
+    res.status(200).json({
+        total : allShortterm.length,
+        message : "All Short term properties",
+        status : true,
+        data : allShortterm
+    })
+}catch(err){
+    res.status(200).json({
+        message : "All Short term properties",
+        status : flase
+    })
+}
+}
+
+
 const getAllProperty = asyncHandler(async (req, res) => {
     // let filteringfilter = req.query.filteringfilter
     // let sort = parseInt(req.query.sort || 1
@@ -1346,6 +1364,7 @@ const ActiveContract = async (req,res,next) => {
   
 
 module.exports = {
+    getShortTermProperty,
     getAllProperty,
     getPropertyById,
     createProperty,
