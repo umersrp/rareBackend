@@ -617,19 +617,19 @@ const createTenantContract = asyncHandler(async (req, res) => {
 
 
 
-        let chequeDetailsParse
+        // let chequeDetailsParse
     
-        if (chequeDetails) {
-            chequeDetailsParse = chequeDetails.map((data,index) => {
-              console.log("------->",data)
-              // const chq = chequeimage[index]
-              // const cheque = chq.map((data) => data.path.replace(/\\/g, '/')).pop()
-              // return { ...data , chequeimage : cheque }
-            })
-        }
+        // if (chequeDetails) {
+        //     chequeDetailsParse = chequeDetails.map((data,index) => {
+        //       console.log("------->",data)
+        //       // const chq = chequeimage[index]
+        //       // const cheque = chq.map((data) => data.path.replace(/\\/g, '/')).pop()
+        //       // return { ...data , chequeimage : cheque }
+        //     })
+        // }
 
 
-    console.log("chequeDetailsParse",chequeDetailsParse)
+    // console.log("chequeDetailsParse",chequeDetailsParse)
         
 
         const tenantContractObject =  { 
@@ -644,7 +644,7 @@ const createTenantContract = asyncHandler(async (req, res) => {
             tenancy_contract_doc : tenancy_contract_doc ? req.files.tenancy_contract_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : null ,
             ejari_certificate_doc : ejari_certificate_doc ? req.files.ejari_certificate_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : null , 
             addendum_doc : addendum_doc ? req.files.addendum_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : null ,
-            chequeDetails: chequeDetailsParse 
+            // chequeDetails: chequeDetailsParse 
           }
 
           
