@@ -20,7 +20,7 @@ const axios = require('axios');
 
 const allShorttermProperties = async (req,res,next) => {
     try{
-        const data = [
+       const data = [
             {
               '$lookup': {
                 'from': 'addproperties', 
@@ -36,6 +36,10 @@ const allShorttermProperties = async (req,res,next) => {
             }, {
               '$match': {
                 'propertyid.propertyType': 'Short-term'
+              }
+            }, {
+              '$project': {
+                'propertyid': 1
               }
             }, {
               '$sort': {
