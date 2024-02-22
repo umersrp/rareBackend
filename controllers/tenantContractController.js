@@ -578,6 +578,9 @@ const createTenantContract = asyncHandler(async (req, res) => {
             chequeDetails
         } = req.body
        
+        console.log("=====>",req.body)
+
+
     const {
       key_receipt_doc,
       tenancy_contract_doc,  
