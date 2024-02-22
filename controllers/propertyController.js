@@ -1346,7 +1346,23 @@ const ActiveContract = async (req,res,next) => {
     }
     }
   
-  
+    const allShorttermProperties = async (req,res,next) => {
+        console.log("111111111111111")
+        try{
+              const datas = await AddProperty.find({ propertyType: 'Short-term'})
+              res.status(200).json({
+                total :datas.length,
+                message : "total shorterm pro",
+                status : true,
+                data : datas
+              })
+        }catch(err){
+            res.status(500).json({
+                message : "no fetched shorterm pro",
+                status : true,
+              })
+        }
+    }
 
 module.exports = {
     getAllProperty,
@@ -1367,5 +1383,6 @@ module.exports = {
     getSearchPropertyMobile,
     getAdvanceSearchOwner,
     ChangePropertyStatus,
-    ActiveContract
+    ActiveContract,
+    allShorttermProperties
 }
