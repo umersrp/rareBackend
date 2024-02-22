@@ -18,6 +18,50 @@ const path = require('path');
 const axios = require('axios');
 //const calculateMonth = require('../utils/calculateMonth')
 
+const allShorttermProperties = async (req,res,next) => {
+    try{
+       const data = [
+            {
+              '$lookup': {
+                'from': 'addproperties', 
+                'localField': 'propertyid', 
+                'foreignField': '_id', 
+                'as': 'propertyid'
+              }
+            }, {
+              '$unwind': {
+                'path': '$propertyid', 
+                'preserveNullAndEmptyArrays': true
+              }
+            }, {
+              '$match': {
+                'propertyid.propertyType': 'Short-term'
+              }
+            }, {
+              '$project': {
+                'propertyid': 1
+              }
+            }, {
+              '$sort': {
+                '_id': -1
+              }
+            }
+          ]
+          const datas = await Booking.aggregate(data)
+          res.status(200).json({
+            total :datas.length,
+            message : "total shorterm pro",
+            status : true,
+            data : datas
+          })
+    }catch(err){
+        res.status(500).json({
+            message : "no fetched shorterm pro",
+            status : true,
+          })
+    }
+}
+
 
 const getAllBookingTest = asyncHandler(async (req, res) => {
     const allbooking = await Booking.find({
@@ -2645,7 +2689,8 @@ module.exports = {
     getBookingSearch,
     sendEmailPDF,
     getAllBookingTest,
-    getAllBookingTests
+    getAllBookingTests,
+    allShorttermProperties
 }
 
 // just for the deployment on git adding this line
