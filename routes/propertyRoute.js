@@ -19,7 +19,7 @@ const upload = multer({
 
 
 router.route('/:id').get(propertyController.getPropertyById)
-router.route('/shortterm').get(propertyController.getShortTermProperty)
+
 router.route('/pagination/pages').get(propertyController.getPaginationProperty)
 router.route('/api/search/:key').get(propertyController.getSearchProperty)
 router.route('/api/search/mobile/:key').get(propertyController.getSearchPropertyMobile)
