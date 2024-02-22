@@ -14,7 +14,7 @@ const multer = require('multer')
                 cb(null, "./public/ejari_certificate_doc/");
             }else if (file.fieldname === "addendum_doc") {
                 cb(null, "./public/addendum_doc/");
-            }else if (file.fieldname === "chequeimage") {
+            }else if (file.fieldname === "chequeDetailsImages") {
                 cb(null, "./public/chequeimage/");
             }
         },
@@ -34,7 +34,7 @@ const multer = require('multer')
             }else if (file.fieldname === "addendum_doc") {
                 const filename = file.originalname.split(" ").join("-");
                 cb(null, `${filename}`);
-            }else if (file.fieldname === "chequeimage") {
+            }else if (file.fieldname === "chequeDetailsImages") {
                 const filename = file.originalname.split(" ").join("-");
                 cb(null, `${filename}`);
             }
@@ -68,7 +68,7 @@ const upload = multer({
   { name: "key_receipt_doc", maxCount: 8 },
   { name: "ejari_certificate_doc", maxCount: 8 },
   { name: "addendum_doc", maxCount: 8 },
-  { name: "chequeimage", maxCount: 8 }
+  { name: "chequeDetailsImages" }
 ]);
 
 // const singleupload = multer({
