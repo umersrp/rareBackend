@@ -19,7 +19,31 @@ const { default: mongoose } = require('mongoose')
 
 const getShortTermProperty = async (req,res,next) => {
 try{
-    const allShortterm = await AddProperty.find({ propertyType : "Short-term"})
+
+  const data =  [
+        {
+          '$lookup': {
+            'from': 'addproperties', 
+            'localField': 'propertyid', 
+            'foreignField': '_id', 
+            'as': 'propertyid'
+          }
+        }, {
+          '$unwind': {
+            'path': '$propertyid', 
+            'preserveNullAndEmptyArrays': true
+          }
+        }, {
+          '$match': {
+            'propertyid.propertyType': 'Short-term'
+          }
+        }, {
+          '$sort': {
+            '_id': -1
+          }
+        }
+      ]
+    const allShortterm = await Bookings.aggregate(data)
     res.status(200).json({
         total : allShortterm.length,
         message : "All Short term properties",
