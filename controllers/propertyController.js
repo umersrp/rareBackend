@@ -415,7 +415,6 @@ const getAdvanceSearchOwner = asyncHandler(async (req, res) => {
         if (!allProperties?.length) {
             return res.status(400).json({ message: "No Unit found" });
         }
-        console.log("=====start=======>", allProperties)
         const propertyIdForTenant = allProperties.map(property => property._id);
         const propertyIds = allProperties.map(property => property.buildingid);
         const ownerId = allProperties.map(property => property.customerid);
@@ -1347,7 +1346,6 @@ const ActiveContract = async (req,res,next) => {
     }
   
     const allShorttermProperties = async (req,res,next) => {
-        console.log("111111111111111")
         try{
               const datas = await AddProperty.find({ propertyType: 'Short-term'})
               res.status(200).json({
