@@ -587,13 +587,13 @@ const createTenantContract = asyncHandler(async (req, res) => {
     } = req.files
 
 
-    // chequeDetails.map((data,index) => {
-    //   const chq = chequeimage[index]
-    //   const cheque = chq.map((data) => data.path.replace(/\\/g, '/')).pop()
-    //   return { ...data , chequeimage : cheque }
-    // })
+   const ui = JSON.parse(chequeDetails.map((data,index) => {
+      const chq = chequeimage[index]
+      const cheque = chq.map((data) => data.path.replace(/\\/g, '/')).pop()
+      return { ...data , chequeimage : cheque }
+    }))
    
-    console.log("chequeDetails",chequeDetails)
+    console.log("chequeDetails",ui)
        
         const contractenddateObject = new Date(contractstartdate);
         const contractstartdateObject = new Date(contractenddate);
