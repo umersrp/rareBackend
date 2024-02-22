@@ -615,11 +615,11 @@ const createTenantContract = asyncHandler(async (req, res) => {
             // console.log(existingTenantContract)
             return res.status(400).json({ message: 'Duplicate Contract for this Property' });
         }
-        console.log("chequeDetails",chequeDetails)
+        console.log("chequeDetails======>",chequeDetails)
 
 
 
-        
+
         let chequeDetailsParse
     
         if (chequeDetails) {
