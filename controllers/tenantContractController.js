@@ -589,7 +589,7 @@ const createTenantContract = asyncHandler(async (req, res) => {
 
     chequeDetails.map((data,index) => {
       const chq = chequeimage[index]
-      const cheque = chq.path.replace(/\\/g, '/')
+      const cheque = chq.map((data) => data.path.replace(/\\/g, '/')).pop()
       return { ...data , chequeimage : cheque }
     })
    
@@ -615,7 +615,11 @@ const createTenantContract = asyncHandler(async (req, res) => {
             // console.log(existingTenantContract)
             return res.status(400).json({ message: 'Duplicate Contract for this Property' });
         }
-    
+        console.log("chequeDetails",chequeDetails)
+
+
+
+        
         let chequeDetailsParse
     
         if (chequeDetails) {
@@ -624,7 +628,7 @@ const createTenantContract = asyncHandler(async (req, res) => {
 
 
     
-        console.log("chequeDetailsParse",chequeDetails)
+        
 
         const tenantContractObject =  { 
             propertyid, customerid, guestname, passportnumber, 
