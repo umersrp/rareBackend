@@ -49,9 +49,8 @@ app.use('/powerattorney', require('./routes/PowerAttorneyRoute'))
 app.use('/bankdetails', require('./routes/BankDetailsRoute'))
 app.use('/expense', require('./routes/expenseRoute'))
 app.use('/purpose', require('./routes/purposeRoute'))
-
-app.use(express.static(path.join(__dirname, "./build")));
 app.use('/public', express.static(path.join('public')));
+app.use(express.static(path.join(__dirname, "./build")));
 app.get('/*', function (req, res) {
     return res.sendFile(path.resolve(__dirname, './build', 'index.html'));
 });
