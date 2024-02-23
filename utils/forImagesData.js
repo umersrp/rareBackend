@@ -7,7 +7,7 @@ const multer = require('multer')
             if (file.fieldname === "expenseAttachment") {
             cb(null, "./public/expsenseImgae/");
             } else if (file.fieldname === "tenancy_contract_doc") {
-            cb(null, "./public/tenancy_contract_doc#/");
+            cb(null, "./public/tenancy_contract_doc/");
             } else if (file.fieldname === "key_receipt_doc") {
             cb(null, "./public/key_receipt_doc/");
             }else if (file.fieldname === "ejari_certificate_doc") {
