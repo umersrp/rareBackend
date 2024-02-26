@@ -17,7 +17,7 @@ const addPropertySchema = new mongoose.Schema({
     propertyType:{
         type : String,
         enum : ['Short-term' , 'Long-term'],
-        default : 'Long-term'
+        default : ''
     },
     propertytype: {
         type: String,
