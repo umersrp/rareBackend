@@ -1,0 +1,1 @@
+const s="/assets/money.eafec3f4.png",a="/assets/tenant emails.f56e6c36.png",t="/assets/tenant.9113151f.png",e="/assets/telephone.23c5ca02.png",n="/assets/passport.cd726dc3.png",c="/assets/id-card.95b12a16.png";export{t as a,e as b,c as i,s as m,n as p,a as t};
