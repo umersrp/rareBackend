@@ -1,1 +1,0 @@
-import{j as a}from"./index.f6951efa.js";var r="D:\\srp\\Rare_Frontend\\src\\pages\\my-components\\DeleteParagraph.jsx";const t=({moduleName:o,linkedName:e})=>a("p",{children:`You don't have the access to delete this ${e}`},void 0,!1,{fileName:r,lineNumber:5,columnNumber:9},void 0);export{t as D};
