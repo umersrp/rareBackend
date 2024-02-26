@@ -911,7 +911,7 @@ const getPropertyByIdConnect = asyncHandler(async (req, res) => {
 
 const createProperty = asyncHandler(async (req, res) => {
     const { 
-        usage, propertytype, projectstatus, transactiontype, projectname, 
+        usage, propertytype, projectstatus, transactiontype, projectname, propertyType,
         buildingname, subtype, typelayout, tenancystatus, floor, unitnumber, sizearea, 
         plotsize, communityname, ownerassociation, develpoername, amenities, nobathroom, 
         halfbathroom, propertycountry, propertycity, furnished, kitchen, noparking, balcony, 
@@ -962,7 +962,7 @@ const createProperty = asyncHandler(async (req, res) => {
         OwnerNameAsPerDeedParse = JSON.parse(OwnerNameAsPerDeed)
     }
 
-    const propertyObject = { usage, propertytype, projectstatus, transactiontype, projectname, buildingname, subtype, typelayout, tenancystatus, floor, unitnumber, sizearea, plotsize, communityname, ownerassociation, develpoername, amenities, nobathroom, halfbathroom, propertycountry, propertycity, furnished, kitchen, noparking, balcony, dewapremises, district, parkingbay, youtubelink, propertyview, propertyimages, propertylocation, floorplan, typicalfloorplan, buildingelevation, amenitiesimages, unitplanattachment, plotplanattachment, builduparea, customerid, measure_units, customername, purchasedate, ownernamedeed, purchasevaue, communityid, projectnameid, buildingid, subtypeid, developerid, totalbathroom, bathroomensuite, maidroom, driverroom, storeroom, otherroom, ensuite, bedroomensuite, totalbedroom, streetnumber, is_available, available_for, unlisted, available_id, owner_representative_name, owner_representative_id, createdBy, updatedBy, titledeeddocument, no_ownernamedeed, OwnerNameAsPerDeed: OwnerNameAsPerDeedParse }
+    const propertyObject = { usage, propertytype, projectstatus, transactiontype,propertyType, projectname, buildingname, subtype, typelayout, tenancystatus, floor, unitnumber, sizearea, plotsize, communityname, ownerassociation, develpoername, amenities, nobathroom, halfbathroom, propertycountry, propertycity, furnished, kitchen, noparking, balcony, dewapremises, district, parkingbay, youtubelink, propertyview, propertyimages, propertylocation, floorplan, typicalfloorplan, buildingelevation, amenitiesimages, unitplanattachment, plotplanattachment, builduparea, customerid, measure_units, customername, purchasedate, ownernamedeed, purchasevaue, communityid, projectnameid, buildingid, subtypeid, developerid, totalbathroom, bathroomensuite, maidroom, driverroom, storeroom, otherroom, ensuite, bedroomensuite, totalbedroom, streetnumber, is_available, available_for, unlisted, available_id, owner_representative_name, owner_representative_id, createdBy, updatedBy, titledeeddocument, no_ownernamedeed, OwnerNameAsPerDeed: OwnerNameAsPerDeedParse }
     await User.updateOne({_id : customerid} , { $set:{ subType : "owner"}})
     const createProperty = await AddProperty.create(propertyObject)
 
@@ -1011,7 +1011,7 @@ const createProperty = asyncHandler(async (req, res) => {
 })
 
 const updateProperty = asyncHandler(async (req, res) => {
-    const { _id, usage, propertytype, projectstatus, transactiontype, projectname, buildingname, subtype, typelayout, tenancystatus, floor, unitnumber, sizearea, plotsize, communityname, ownerassociation, develpoername, amenities, nobathroom, halfbathroom, propertycountry, propertycity, furnished, kitchen, noparking, balcony, dewapremises, district, parkingbay, youtubelink, propertyview, propertyimages, propertylocation, floorplan, typicalfloorplan, buildingelevation, amenitiesimages, unitplanattachment, plotplanattachment, builduparea, customerid, measure_units, customername, purchasedate, ownernamedeed, purchasevaue, communityid, projectnameid, buildingid, subtypeid, developerid, totalbathroom, bathroomensuite, maidroom, driverroom, storeroom, otherroom, ensuite, bedroomensuite, totalbedroom, streetnumber, is_available, available_for, unlisted, available_id, owner_representative_name, owner_representative_id, createdBy, updatedBy, titledeeddocument, owner_changed, no_ownernamedeed, OwnerNameAsPerDeed } = req.body
+    const { _id, usage, propertytype, projectstatus, transactiontype, projectname,propertyType, buildingname, subtype, typelayout, tenancystatus, floor, unitnumber, sizearea, plotsize, communityname, ownerassociation, develpoername, amenities, nobathroom, halfbathroom, propertycountry, propertycity, furnished, kitchen, noparking, balcony, dewapremises, district, parkingbay, youtubelink, propertyview, propertyimages, propertylocation, floorplan, typicalfloorplan, buildingelevation, amenitiesimages, unitplanattachment, plotplanattachment, builduparea, customerid, measure_units, customername, purchasedate, ownernamedeed, purchasevaue, communityid, projectnameid, buildingid, subtypeid, developerid, totalbathroom, bathroomensuite, maidroom, driverroom, storeroom, otherroom, ensuite, bedroomensuite, totalbedroom, streetnumber, is_available, available_for, unlisted, available_id, owner_representative_name, owner_representative_id, createdBy, updatedBy, titledeeddocument, owner_changed, no_ownernamedeed, OwnerNameAsPerDeed } = req.body
 
     // if (!_id || !usage || !propertytype || !projectstatus || !transactiontype || !projectname || !buildingname || !tenancystatus || !floor || !unitnumber || !sizearea || !communityname || !develpoername || !nobathroom || !furnished || !kitchen || !noparking || !dewapremises || !district) {
     //     return res.status(400).json({ message: 'All fields are required' })
@@ -1030,6 +1030,7 @@ const updateProperty = asyncHandler(async (req, res) => {
     // updateProperty.propertname = propertname
     updateProperty.usage = usage
     updateProperty.propertytype = propertytype
+    updateProperty.propertyType = propertyType
     updateProperty.projectstatus = projectstatus
     updateProperty.transactiontype = transactiontype
     updateProperty.projectname = projectname
