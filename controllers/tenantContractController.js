@@ -579,7 +579,7 @@ const createTenantContract = asyncHandler(async (req, res) => {
       chequeDetails
   } = req.body
      
-    console.log('files',req.files);
+   
       const {
         key_receipt_doc,
         tenancy_contract_doc,  
@@ -642,7 +642,7 @@ const createTenantContract = asyncHandler(async (req, res) => {
         if(customerid){
            await User.updateOne({ _id : customerid },{$set: { subType : "tenant" , type : "customer"}} , { new : true})
        }
-          
+      console.log("============>",tenantContractObject)
       const createTenantContract = await TenantContract.create(tenantContractObject)
   
       if (createTenantContract) {
