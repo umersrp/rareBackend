@@ -621,7 +621,7 @@ const createTenantContract = asyncHandler(async (req, res) => {
   
       if (chequeDetails) {
           chequeDetailsParse = JSON.parse(chequeDetails)
-        chequeDetailsImages.map((x,i)=>{  return  chequeDetailsParse[i].chequeimage = x.path.replace(/\\/g, '/') })
+        chequeDetailsImages?.map((x,i)=>{  return  chequeDetailsParse[i].chequeimage = x.path.replace(/\\/g, '/') })
        
       }
   
@@ -673,6 +673,7 @@ const createTenantContract = asyncHandler(async (req, res) => {
         return  res.status(400).json({ message: 'Invalid Tenant Contract received' , status : false })
       }
   }catch(err){
+    console.log("===========>",err)
       res.status(500).json({ message : "No Tenant found" , status : false})
   }
 
