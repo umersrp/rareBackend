@@ -626,28 +626,10 @@ const getSearchRentpurchase = asyncHandler(async (req, res) => {
         const userData = await User.find({ _id: { $in: ownerId } });
 
         const rentPurchaseWithBuilding = rentpurchase.map(rent => {
-            if(!rent.status && !rent.propertyType){
-                tenantDetails.forEach((data) => {
-                    if(data !== undefined && data.propertyid.toString() != undefined ){
-                        if(new Date(data.contractstartdate) > new Date(data.contractenddate)){
-                            RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
-                        }else{
-                            RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
-                        }
-                    }
-                })
-                Booking.forEach((data) => {
-                    if(data !== undefined && data.propertyid.toString() != undefined ){
-                        RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Short-term" }},{new : true}).then(res => res)
-                    }
-                    // else{
-                    //     RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Long-term" }},{new : true}).then(res => res)
-                    // }
-                })
-            }
+           
             const availabilityObject = rent.toObject();
-            const { porpertyid,status,propertyType, employeeid, propertyvaluation, maintenance, listingtype, key_location, noof_key, listingsource, createdAt, _id, propertystatus, unlisted, unlist_date, again_available, createdBy, updatedBy, updatedAt, multi_propertyvaluation, multivaluation, property_reference, transaction_status } = availabilityObject;
-            const updatedAvailability = { porpertyid,status,propertyType, employeeid, propertyvaluation, maintenance, listingtype, key_location, noof_key, listingsource, createdAt, _id, propertystatus, unlisted, unlist_date, again_available, createdBy, updatedBy, updatedAt, multi_propertyvaluation, multivaluation, property_reference, transaction_status };
+            const { porpertyid,keylocation, numberkeys, employeeid, propertyvaluation, maintenance, listingtype,  listingsource, createdAt, _id, propertystatus, unlisted, unlist_date, again_available, createdBy, updatedBy, updatedAt, multi_propertyvaluation, multivaluation, property_reference, transaction_status } = availabilityObject;
+            const updatedAvailability = { porpertyid, employeeid, propertyvaluation, maintenance, listingtype, keylocation, numberkeys, listingsource, createdAt, _id, propertystatus, unlisted, unlist_date, again_available, createdBy, updatedBy, updatedAt, multi_propertyvaluation, multivaluation, property_reference, transaction_status };
             if (porpertyid) {
                 const property = properties.find(property => String(property._id) === String(rent.porpertyid));
                 if (property) {
@@ -665,8 +647,7 @@ const getSearchRentpurchase = asyncHandler(async (req, res) => {
                     updatedAvailability.noparking = property.noparking;
                     updatedAvailability.builduparea = property.builduparea;
                     updatedAvailability.measure_units = property.measure_units;
-                    updatedAvailability.status = status;
-                    updatedAvailability.propertyType = propertyType;
+                    
 
                     
                    
