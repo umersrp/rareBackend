@@ -376,8 +376,8 @@ const getAllRentpurchase = asyncHandler(async (req, res) => {
                 })
             }
             const availabilityObject = rent.toObject();
-            const { porpertyid,status,propertyType, employeeid, propertyvaluation, maintenance ,listingtype, key_location, noof_key, listingsource, createdAt, _id, propertystatus, unlisted, again_available, createdBy, updatedBy, updatedAt, multi_propertyvaluation, multivaluation, property_reference, transaction_status } = availabilityObject;
-            const updatedAvailability = { porpertyid,status,propertyType, employeeid, propertyvaluation , maintenance, listingtype, key_location, noof_key, listingsource, createdAt, _id, propertystatus, unlisted, again_available, createdBy, updatedBy, updatedAt, multi_propertyvaluation, multivaluation, property_reference, transaction_status };
+            const { porpertyid,status,propertyType, employeeid, propertyvaluation, maintenance ,listingtype, keylocation, numberkeys, listingsource, createdAt, _id, propertystatus, unlisted, again_available, createdBy, updatedBy, updatedAt, multi_propertyvaluation, multivaluation, property_reference, transaction_status } = availabilityObject;
+            const updatedAvailability = { porpertyid,status,propertyType, employeeid, propertyvaluation , maintenance, listingtype, keylocation, numberkeys, listingsource, createdAt, _id, propertystatus, unlisted, again_available, createdBy, updatedBy, updatedAt, multi_propertyvaluation, multivaluation, property_reference, transaction_status };
            
             if (porpertyid) {
                 const property = properties.find(property => String(property._id) === String(rent.porpertyid));
