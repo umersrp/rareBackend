@@ -121,7 +121,7 @@ const getAllTenantContract = asyncHandler(async (req, res) => {
       $and: [
           { softdelete: { $ne: true } } // Filter out softdeleted bookings
       ]
-  }).sort({ _id: "descending" })
+  }).limit(10).sort({ _id: -1 })
   if (!tenantContract?.length) {
       return res.status(400).json({ message: "No Tenant Contract found" })
   }
@@ -575,7 +575,7 @@ const createTenantContract = asyncHandler(async (req, res) => {
       propertyid, customerid, guestname, passportnumber, customertype, 
       nationality, mobilenumber, email, contractstartdate, contractenddate, createdBy, updatedBy, 
       contractvalue, rentalamount, securitydepositamount, noofchequeorinstallment, commission, 
-      contractexecutiondate, passportpdf,contractupdation,
+      contractexecutiondate,contractupdation,
       chequeDetails
   } = req.body
      
@@ -585,6 +585,7 @@ const createTenantContract = asyncHandler(async (req, res) => {
         tenancy_contract_doc,  
         ejari_certificate_doc, 
         addendum_doc, 
+        passportpdf,
         chequeDetailsImages
       } = req.files
      
@@ -605,6 +606,7 @@ const createTenantContract = asyncHandler(async (req, res) => {
           contractenddate: {
               $gte: oneDayBeforeCheckout,
           },
+           softdelete : true
       },]  }]})
   
       // If a duplicate TenantContract already exists, return an error response
@@ -633,12 +635,11 @@ const createTenantContract = asyncHandler(async (req, res) => {
         tenancy_contract_doc : tenancy_contract_doc ? req.files.tenancy_contract_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : null ,
         ejari_certificate_doc : ejari_certificate_doc ? req.files.ejari_certificate_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : null , 
         addendum_doc : addendum_doc ? req.files.addendum_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : null ,
+        passportpdf : passportpdf ? req.files.passportpdf.map((data) => data.path.replace(/\\/g, '/')).pop() : null ,
         chequeDetails: chequeDetailsParse 
       }
 
         
-          console.log("========>",tenantContractObject)
-
           if(email ){
            //const name = guestname?.split(' ')[0]
            await User.updateOne({ email : email  },{$set: { subType : "tenant" , type : "customer"}} , { new : true})     
