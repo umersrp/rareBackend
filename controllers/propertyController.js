@@ -1332,7 +1332,7 @@ const ActiveContract = async (req,res,next) => {
             { propertyid : req.params.propertyid } , 
             { softdelete : false} , {contractupdation : {$ne : "terminated"} }
         ]} 
-         ).select("unitnumber projectname buildingname communityname ").sort({ _id : -1})
+         )
     const datesNow = allactive.filter((data) => {
         if(data.contractenddate > new Date()){
             return data
@@ -1348,7 +1348,10 @@ const ActiveContract = async (req,res,next) => {
   
     const allShorttermProperties = async (req,res,next) => {
         try{
-              const datas = await AddProperty.find({ propertyType: 'Short-term'})
+              const datas = await AddProperty
+              .find({ propertyType: 'Short-term'})
+              .select("unitnumber projectname buildingname communityname _id propertyimages")
+              .sort({ _id : -1})
               res.status(200).json({
                 total :datas.length,
                 message : "total shorterm pro",
