@@ -579,7 +579,7 @@ const createTenantContract = asyncHandler(async (req, res) => {
       chequeDetails
   } = req.body
      
-    console.log('files',req.files);
+   
       const {
         key_receipt_doc,
         tenancy_contract_doc,  
@@ -592,6 +592,9 @@ const createTenantContract = asyncHandler(async (req, res) => {
       const contractstartdateObject = new Date(contractenddate);
       const oneDayBeforeCheckout = new Date(contractenddateObject.getTime() + (24 * 60 * 60 * 1000));
       const oneDayBeforeCheckIN = new Date(contractstartdateObject.getTime() - (24 * 60 * 60 * 1000));
+
+
+
   
      
   
@@ -614,7 +617,8 @@ const createTenantContract = asyncHandler(async (req, res) => {
   
       if (chequeDetails) {
           chequeDetailsParse = JSON.parse(chequeDetails)
-          chequeDetailsImages.map((x,i)=>{  chequeDetailsParse[i].chequeimage = x.path.replace(/\\/g, '/') })
+        chequeDetailsImages.map((x,i)=>{  return  chequeDetailsParse[i].chequeimage = x.path.replace(/\\/g, '/') })
+       
       }
   
       const tenantContractObject =  { 
@@ -633,7 +637,7 @@ const createTenantContract = asyncHandler(async (req, res) => {
       }
 
         
-          console.log(customerid,"========>",guestname , customertype)
+          console.log("========>",tenantContractObject)
 
           if(email ){
            //const name = guestname?.split(' ')[0]

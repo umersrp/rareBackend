@@ -1332,7 +1332,7 @@ const ActiveContract = async (req,res,next) => {
             { propertyid : req.params.propertyid } , 
             { softdelete : false} , {contractupdation : {$ne : "terminated"} }
         ]} 
-         )
+         ).select("unitnumber projectname buildingname communityname ").sort({ _id : -1})
     const datesNow = allactive.filter((data) => {
         if(data.contractenddate > new Date()){
             return data

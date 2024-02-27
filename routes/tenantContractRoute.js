@@ -2,34 +2,34 @@ const express = require('express')
 const router = express.Router()
 const tenantContractController = require('../controllers/tenantContractController')
 const multer = require('multer')
-const { upload : uploads } = require('../utils/forImagesData')
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, 'public/chequeimage');
-    },
-    filename: function (req, file, cb) {
-      cb(null, Date.now() + "_" + file.originalname);
-    }
-  }),
-  limits: {
-    fileSize: 30 * 1024 * 1024, 
-  },
-  fileFilter: function (req, file, cb) {
-    const allowedFileTypes = /jpeg|jpg|pdf|png/;
+const { upload } = require('../utils/forImagesData')
+// const upload = multer({
+//   storage: multer.diskStorage({
+//     destination: function (req, file, cb) {
+//       cb(null, 'public/chequeimage');
+//     },
+//     filename: function (req, file, cb) {
+//       cb(null, Date.now() + "_" + file.originalname);
+//     }
+//   }),
+//   limits: {
+//     fileSize: 30 * 1024 * 1024, 
+//   },
+//   fileFilter: function (req, file, cb) {
+//     const allowedFileTypes = /jpeg|jpg|pdf|png/;
 
-    const extname = allowedFileTypes.test(file.mimetype);
-    const mimetype = allowedFileTypes.test(file.mimetype);
+//     const extname = allowedFileTypes.test(file.mimetype);
+//     const mimetype = allowedFileTypes.test(file.mimetype);
 
-    if (file.size > 30 * 1024 * 1024) {
-        cb(new Error('File size exceeds 10 MB limit!'));
-      } else if (mimetype && extname) {
-        cb(null, true);
-      } else {
-        cb(new Error('Only jpeg, jpg, pdf, and png files are allowed!'));
-      }
-  }
-}).any();
+//     if (file.size > 30 * 1024 * 1024) {
+//         cb(new Error('File size exceeds 10 MB limit!'));
+//       } else if (mimetype && extname) {
+//         cb(null, true);
+//       } else {
+//         cb(new Error('Only jpeg, jpg, pdf, and png files are allowed!'));
+//       }
+//   }
+// }).any();
 
 router.route('/updatews').get(tenantContractController.updateManys)
 router.route('/:id').get(tenantContractController.getTenantContractById)
@@ -44,7 +44,7 @@ router.route('/tenantsummaryreport/:propertyid').get(tenantContractController.te
 
 router.route('/')
     .get(tenantContractController.getAllTenantContract)
-    .post(uploads, tenantContractController.createTenantContract)
+    .post(upload, tenantContractController.createTenantContract)
     .patch(upload, tenantContractController.updateTenantContract)
     .delete(tenantContractController.deleteTenant)
 
