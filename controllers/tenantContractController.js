@@ -776,7 +776,8 @@ const updateTenantContract = asyncHandler(async (req, res) => {
           key_receipt_doc,
           tenancy_contract_doc,  
           ejari_certificate_doc, 
-          addendum_doc
+          addendum_doc,
+          chequeDetailsImages
       } = req.files;
 
       if (!_id) {
@@ -788,6 +789,16 @@ const updateTenantContract = asyncHandler(async (req, res) => {
       if (!tenantContract) {
           return res.status(400).json({ message: 'Tenant Contract not found' });
       }
+
+
+      let chequeDetailsParse
+  
+      if (chequeDetails) {
+          chequeDetailsParse = JSON.parse(chequeDetails)
+        chequeDetailsImages.map((x,i)=>{  return  chequeDetailsParse[i].chequeimage = x.path.replace(/\\/g, '/') })
+       
+      }
+  
 
       // Update tenant contract fields
       tenantContract = {
@@ -801,7 +812,7 @@ const updateTenantContract = asyncHandler(async (req, res) => {
           tenancy_contract_doc: tenancy_contract_doc ? tenancy_contract_doc.map(data => data.path.replace(/\\/g, '/')).pop() : tenantContract.tenancy_contract_doc,
           ejari_certificate_doc: ejari_certificate_doc ? ejari_certificate_doc.map(data => data.path.replace(/\\/g, '/')).pop() : tenantContract.ejari_certificate_doc,
           addendum_doc: addendum_doc ? addendum_doc.map(data => data.path.replace(/\\/g, '/')).pop() : tenantContract.addendum_doc,
-          chequeDetails: JSON.parse(chequeDetails)
+          chequeDetails: chequeDetailsParse
       };
 
       // Save updated tenant contract
