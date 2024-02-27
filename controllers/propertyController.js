@@ -23,15 +23,16 @@ const { default: mongoose } = require('mongoose')
 const getAllProperty = asyncHandler(async (req, res) => {
     // let filteringfilter = req.query.filteringfilter
     // let sort = parseInt(req.query.sort || 1
-    const allProperties = await AddProperty.find({
+    const allProperties = await AddProperty
+    .find({
         $and: [
             { owner_changed: { $ne: true } },
-            { softdelete: { $ne: true } } // Filter out softdeleted bookings
+            { softdelete: { $ne: true } } 
         ],
-        // $and: [
-        //     { owner_changed: { $ne: true } } // Filter out softdeleted bookings
-        // ]
-    }).sort({ _id: "descending" })
+       
+    })
+    .select("projectname buildingname unitnumber floor communityname")
+    .sort({ _id: -1 })
     // .sort({ filteringfilter: sort })
     if (!allProperties?.length) {
         return res.status(400).json({ message: "No Unit found" })

@@ -117,11 +117,9 @@ const Alltenants = async (req,res,next) => {
 
 
 const getAllTenantContract = asyncHandler(async (req, res) => {
-  const tenantContract = await TenantContract.find({
-      $and: [
-          { softdelete: { $ne: true } } // Filter out softdeleted bookings
-      ]
-  }).limit(10).sort({ _id: -1 })
+  const tenantContract = await TenantContract
+  .find({ softdelete: {$ne : true} })
+  .sort({ _id: -1 })
   if (!tenantContract?.length) {
       return res.status(400).json({ message: "No Tenant Contract found" })
   }
@@ -606,8 +604,10 @@ const createTenantContract = asyncHandler(async (req, res) => {
           contractenddate: {
               $gte: oneDayBeforeCheckout,
           },
-           softdelete : true
       },]  }]})
+
+
+      console.log("existingTenantContract",existingTenantContract)
   
       // If a duplicate TenantContract already exists, return an error response
       if (existingTenantContract) {
@@ -615,6 +615,8 @@ const createTenantContract = asyncHandler(async (req, res) => {
           return res.status(400).json({ message: 'Duplicate Contract for this Property' });
       }
   
+      
+
       let chequeDetailsParse
   
       if (chequeDetails) {
@@ -835,18 +837,24 @@ const updateTenantContract = asyncHandler(async (req, res) => {
 
 const updateTenantContractCancel = asyncHandler(async (req, res) => {
     // console.log(req.body, "req.body");
-    const { _id, ...updateData } = req.body;
-
-    const existingTenantContract = await TenantContract.findById(_id).exec();
+    const { id } = req.params;
+   
+    const existingTenantContract = await TenantContract.findById(id).exec();
+    
     if (!existingTenantContract) {
         return res.status(400).json({ message: 'TenantContract not found' });
     }
+    
+    await TenantContract.updateOne(
+      {_id : id },
+      {$set: { 
+        softdelete : true,
+        contractstartdate: new Date('0000-01-01T00:00:00.000Z'),
+        contractenddate: new Date('0000-01-01T00:00:00.000Z')
+       }},
+      {new : true})
 
-    Object.assign(existingTenantContract, updateData);
-
-    const updatedTenantContract = await existingTenantContract.save();
-
-    return res.json({ message: `${updatedTenantContract._id} updated` });
+    return res.json({ message: `${id} updated` });
 });
 
 const deleteTenant = asyncHandler(async (req, res) => {

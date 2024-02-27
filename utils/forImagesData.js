@@ -17,7 +17,7 @@ const multer = require('multer')
             }else if (file.fieldname === "chequeDetailsImages") {
                 cb(null, "./public/chequeimage/");
             }else if (file.fieldname === "passportpdf") {
-                cb(null, "./public/passport_pdf/");
+                cb(null, "./public/passport/");
             }
         },
         filename: function (req, file, cb) {

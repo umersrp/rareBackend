@@ -121,6 +121,10 @@ const tenantContractSchema = new mongoose.Schema({
         require: true,
         default: false
     },
+    softdelete_s: {
+        type: Boolean,
+        default: false
+    },
     contractupdation: {
         type: String,
         require: true,
