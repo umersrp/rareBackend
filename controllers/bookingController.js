@@ -2662,37 +2662,99 @@ try{
 
 const calenderBooking = async (req,res,next) => {
 try{
-    const data = [
-        {
-          '$project': {
-            'propertyid': 1, 
-            'checkindate': 1, 
-            'checkoutdate': 1, 
-            'ownerid': 1
-          }
-        }, {
-          '$lookup': {
-            'from': 'addproperties', 
-            'localField': 'propertyid', 
-            'foreignField': '_id', 
-            'as': 'propertyid'
-          }
-        }, {
-          '$unwind': {
-            'path': '$propertyid', 
-            'preserveNullAndEmptyArrays': true
-          }
-        }, {
-          '$project': {
-            'unitnumber': '$propertyid.unitnumber', 
-            'project_name': '$propertyid.projectname', 
-            'building_name': '$propertyid.buildingname', 
-            'checkindate': 1, 
-            'checkoutdate': 1, 
-            'ownerid': 1
-          }
+   const data = [
+    {
+      '$project': {
+        'propertyid': 1, 
+        'checkindate': 1, 
+        'checkoutdate': 1, 
+        'ownerid': 1, 
+        'guestname': 1, 
+        'mobilenumber': 1, 
+        'totaloccupants': 1, 
+        'confirmationcode': 1, 
+        'reservationdate': 1, 
+        'nonight': 1, 
+        'tourismfee': 1, 
+        'totalpayout': 1, 
+        'totalcollectall': 1
+      }
+    }, {
+      '$addFields': {
+        'ownerid': {
+          '$toObjectId': [
+            '$ownerid'
+          ]
         }
-      ]
+      }
+    }, {
+      '$lookup': {
+        'from': 'users', 
+        'localField': 'ownerid', 
+        'foreignField': '_id', 
+        'as': 'ownerid'
+      }
+    }, {
+      '$unwind': {
+        'path': '$ownerid', 
+        'preserveNullAndEmptyArrays': true
+      }
+    }, {
+      '$project': {
+        'owner_name': {
+          '$concat': [
+            '$ownerid.firstname', ' ', '$ownerid.lastname'
+          ]
+        }, 
+        'propertyid': 1, 
+        'checkindate': 1, 
+        'checkoutdate': 1, 
+        'ownerid': '$ownerid._id', 
+        'guestname': 1, 
+        'mobilenumber': 1, 
+        'totaloccupants': 1, 
+        'confirmationcode': 1, 
+        'reservationdate': 1, 
+        'nonight': 1, 
+        'tourismfee': 1, 
+        'totalpayout': 1, 
+        'totalcollectall': 1
+      }
+    }, {
+      '$lookup': {
+        'from': 'addproperties', 
+        'localField': 'propertyid', 
+        'foreignField': '_id', 
+        'as': 'propertyid'
+      }
+    }, {
+      '$unwind': {
+        'path': '$propertyid', 
+        'preserveNullAndEmptyArrays': true
+      }
+    }, {
+      '$project': {
+        'unitnumber': '$propertyid.unitnumber', 
+        'project_name': '$propertyid.projectname', 
+        'building_name': '$propertyid.buildingname', 
+        'owner_name': 1, 
+        'propertyid': 1, 
+        'checkindate': 1, 
+        'checkoutdate': 1, 
+        'ownerid': 1, 
+        'guestname': 1, 
+        'mobilenumber': 1, 
+        'totaloccupants': 1, 
+        'confirmationcode': 1, 
+        'reservationdate': 1, 
+        'nonight': 1, 
+        'tourismfee': 1, 
+        'totalpayout': 1, 
+        'totalcollectall': 1, 
+        'propertyid': '$propertyid._id'
+      }
+    }
+  ]
 
     const calender = await Booking.aggregate(data);
     res.status(200).json({ data :calender , status:true })
