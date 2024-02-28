@@ -1351,7 +1351,7 @@ const ActiveContract = async (req,res,next) => {
         try{
               const datas = await AddProperty
               .find({ propertyType: 'Short-term'})
-              .select("unitnumber projectname buildingname communityname _id propertyimages")
+              .select("unitnumber projectname buildingname communityname _id propertyimages customerid")
               .sort({ _id : -1})
               res.status(200).json({
                 total :datas.length,
