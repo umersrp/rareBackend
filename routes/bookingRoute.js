@@ -36,7 +36,7 @@ router.route('/api/updatebooking').patch(bookingController.updateBookingCancel)
 router.route('/api/allbooking/softdelete').get(bookingController.getAllBookingWithoutSoftdelete)
 router.route('/api/allbooking/forproperty').get(bookingController.getBookingProperty)
 router.route('/api/calenderbooking').get(bookingController.calenderBooking)
-router.route('/api/calenderbooking/:ownerid').get(bookingController.calenderBooking)
+router.route('/api/calenderbooking/:ownerid').get(bookingController.calenderBookingByOwner)
 
 
 router.route('/api/search/mobile/:key').get(bookingController.getBookingSearch)
