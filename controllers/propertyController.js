@@ -1351,7 +1351,28 @@ const ActiveContract = async (req,res,next) => {
         try{
               const datas = await AddProperty
               .find({ propertyType: 'Short-term'})
-              .select("unitnumber projectname buildingname communityname _id propertyimages customerid")
+              .select("unitnumber projectname buildingname communityname _id propertyimages")
+              .sort({ _id : -1})
+              res.status(200).json({
+                total :datas.length,
+                message : "total shorterm pro",
+                status : true,
+                data : datas
+              })
+        }catch(err){
+            res.status(500).json({
+                message : "no fetched shorterm pro",
+                status : true,
+              })
+        }
+    }
+
+    const OwnerShorttermProperties = async (req,res,next) => {
+        const userId = req.params.ownerid
+        try{
+              const datas = await AddProperty
+              .find(  {$and :[{ propertyType: 'Short-term'} , { customerid : userId }] })
+              .select("unitnumber projectname buildingname communityname _id propertyimages")
               .sort({ _id : -1})
               res.status(200).json({
                 total :datas.length,
@@ -1387,5 +1408,6 @@ module.exports = {
     getAdvanceSearchOwner,
     ChangePropertyStatus,
     ActiveContract,
-    allShorttermProperties
+    allShorttermProperties,
+    OwnerShorttermProperties
 }
