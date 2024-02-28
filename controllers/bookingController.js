@@ -2660,8 +2660,51 @@ try{
 }
 
 
+const calenderBooking = async (req,res,next) => {
+try{
+    const data = [
+        {
+          '$project': {
+            'propertyid': 1, 
+            'checkindate': 1, 
+            'checkoutdate': 1, 
+            'ownerid': 1
+          }
+        }, {
+          '$lookup': {
+            'from': 'addproperties', 
+            'localField': 'propertyid', 
+            'foreignField': '_id', 
+            'as': 'propertyid'
+          }
+        }, {
+          '$unwind': {
+            'path': '$propertyid', 
+            'preserveNullAndEmptyArrays': true
+          }
+        }, {
+          '$project': {
+            'unitnumber': '$propertyid.unitnumber', 
+            'project_name': '$propertyid.projectname', 
+            'building_name': '$propertyid.buildingname', 
+            'checkindate': 1, 
+            'checkoutdate': 1, 
+            'ownerid': 1
+          }
+        }
+      ]
+
+    const calender = await Booking.aggregate(data);
+    res.status(200).json({ data :calender , status:true })
+}catch(err){
+    res.status(500).json({ message :"No Calender booking found"  , status:true})
+}
+}
+
+
 
 module.exports = {
+    calenderBooking,
     getAllBooking,
     getSummaryOfProperty,
     getSummaryOfPropertyByDates,
