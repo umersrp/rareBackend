@@ -839,11 +839,23 @@ const updateTenantContract = asyncHandler(async (req, res) => {
 const updateTenantContractCancel = asyncHandler(async (req, res) => {
     // console.log(req.body, "req.body");
     const { id } = req.params;
-   
-    const existingTenantContract = await TenantContract.findById(id).exec();
+    const { contractupdation } = req.query;
+     const existingTenantContract = await TenantContract.findById(id).exec();
     
     if (!existingTenantContract) {
         return res.status(400).json({ message: 'TenantContract not found' });
+    }
+    
+    if(contractupdation){
+      await TenantContract.updateOne(
+        {_id : id },
+        {$set: { 
+          contractupdation : "terminated",
+          softdelete : true
+         }},
+        {new : true})
+  
+      return res.json({ message: `${id} contract terminated` });
     }
     
     await TenantContract.updateOne(
