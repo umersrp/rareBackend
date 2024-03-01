@@ -128,7 +128,7 @@ const Total_Yearly_securitydepost = filteredData.map((data) => JSON.parse(data.s
 const Total_Yearly_HostmanagementFees = filteredData.map((data) => JSON.parse(data.hostmanagementfee)).reduce((acc , data) => acc + data ,0)
 const Total_Approved_Booking = filteredData.map((data) => data.softdelete === false).reduce((acc , data) => acc + data ,0)
 const Total_Cancel_Booking = filteredData.map((data) => data.softdelete === true).reduce((acc , data) => acc + data ,0)
-const Total_Guests = filteredData.map((data) => data.guestname == undefined && data.guestname == " " ? null :  data.guestname).reduce((acc , data) => acc + data ,0)
+const Total_Guests = filteredData.filter((data) => data.guestname == undefined && data.guestname == " " ? null :  data.guestname).reduce((acc , data) => acc + data ,0)
 
 return {
     Total_Yearly_Checkin : Total_Yearly_Checkin,
