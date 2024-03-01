@@ -16,6 +16,7 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
+const {BookingDataByTomorrow,BookingDataByWeekly ,BookingDataByMonthly , BookingDataByYearly} = require('../utils/overviewData')
 //const calculateMonth = require('../utils/calculateMonth')
 
 const allShorttermProperties = async (req,res,next) => {
@@ -2870,8 +2871,42 @@ const calenderBookingByOwner = async (req,res,next) => {
     }
     }
 
+    const BookingOverwiewData = async (req,res,next) => {
+        try{
 
+            const allBookings = await Booking
+            .find()
+            .select("checkindate checkoutdate securitydeposit roomrenthostpayable roomrentamount hostmanagementfee softdelete");
+            const today = new Date();
+            const tomorrow = BookingDataByTomorrow(today , allBookings)
+            const weekly = BookingDataByWeekly(today , allBookings)
+            const monthly = BookingDataByMonthly(today , allBookings)
+            const yearly = BookingDataByYearly(today , allBookings)
+
+            res.status(200).json({
+                 message : "Data generated successfully",
+                 status : true,
+                 data : {
+                    Tommorrow: tomorrow,
+                    Weekly : weekly,
+                    Monthly : monthly,
+                    Yearly : yearly
+                 }
+                })
+
+        }catch(err){
+            console.log(err)
+            res.status(500).json({
+                message : "Data not generated",
+                status : false
+               })
+
+    }
+    }
+
+   
 module.exports = {
+    BookingOverwiewData,
     calenderBooking,
     calenderBookingByOwner,
     getAllBooking,
@@ -2910,4 +2945,4 @@ module.exports = {
 // just for the deployment on git adding this line
 // again deployment kye liye add kr raha hn
 // just for the deployment on git adding this line
-// again deployment kye liye add kr raha hn
+// again deployment kye liye add kr raha h
