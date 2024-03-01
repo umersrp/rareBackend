@@ -2876,7 +2876,7 @@ const calenderBookingByOwner = async (req,res,next) => {
 
             const allBookings = await Booking
             .find()
-            .select("checkindate checkoutdate securitydeposit roomrenthostpayable roomrentamount hostmanagementfee softdelete totaloccupants");
+            .select("checkindate checkoutdate securitydeposit roomrenthostpayable roomrentamount hostmanagementfee softdelete totaloccupants guestname");
             const today = new Date();
             const tomorrow = BookingDataByTomorrow(today , allBookings)
             const weekly = BookingDataByWeekly(today , allBookings)

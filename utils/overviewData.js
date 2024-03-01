@@ -144,10 +144,66 @@ return {
 };
 }
 
+const TenantDataOverview = (today , data) => {
+    
+    const ActiveTenantContract = data.filter((data) => new Date(data.contractenddate) > new Date() ? data : null)
+    const ExpireTenantContract = data.filter((data) =>  new Date(data.contractenddate) < new Date() ? data : null  ).length
+    
+    const next90Days = new Date();
+    next90Days.setDate(today.getDate() + 90);
+    const TotalUpcomingContractin90Days =  data.filter((data) => {
+        const startDate = new Date(data.contractstartdate)
+        return startDate >= today && startDate <= next90Days;
+    })
+
+    const previous90Days = new Date();
+    previous90Days.setDate(today.getDate() - 90);
+    const Totalexpiredcontractsin90Days =  data.filter((data) => {
+        const startDate = new Date(data.contractstartdate)
+       return startDate >= previous90Days && startDate <= today;
+    })
+   
+    const totalTerminatedContracts =  data.map((data) => data.contractupdation === "terminated").reduce((acc,data) => acc + data , 0)
+    const totalSecurityDepost = data.map((data) => data.securitydepositamount != "undefined" ? Number(data.securitydepositamount) : null).reduce((acc , data) => acc + data ,0)
+
+    const earlythreemonths = new Date()
+    earlythreemonths.setMonth(today.getMonth() - 3)
+
+    const threeMonthsRevnue = data.filter((data) => {
+        const startDate = new  Date(data.contractstartdate);
+        if(startDate >= earlythreemonths && startDate <= today){
+            return data
+        }
+    })
+
+   const totalrevnue = threeMonthsRevnue.map((data) => Number(data.rentalamount)).reduce((acc, data) => acc + data ,0)
+
+    return{
+        ActiveTenantContract : ActiveTenantContract.slice(0,4),
+        TotalActiveTenantContract : ActiveTenantContract.length,
+        TotalExpireTenantContract : ExpireTenantContract,
+        TotalUpcomingContractin90Days : TotalUpcomingContractin90Days.length,
+        UpcomingContractin90Days : TotalUpcomingContractin90Days.slice(0,4),
+        TotalnoOfexpiredcontractsin90days : Totalexpiredcontractsin90Days.length,
+        expiredcontractsin90days : Totalexpiredcontractsin90Days.slice(0,4),
+        TotalTerminatedContracts : totalTerminatedContracts,
+        TotalSecurityDeposit : totalSecurityDepost,
+        threeMonthsRevnue : threeMonthsRevnue.slice(0,4),
+        TotalThreeMonthsRevenue: totalrevnue
+    }
+}
+const TenantPropertyData = (data) => {
+   return {
+   propertiesDetails : data.slice(0,4),
+   totalProperties : data.length
+   }
+}
 
 module.exports = {
     BookingDataByTomorrow,
     BookingDataByWeekly,
     BookingDataByMonthly,
-    BookingDataByYearly
+    BookingDataByYearly,
+    TenantDataOverview,
+    TenantPropertyData
 }

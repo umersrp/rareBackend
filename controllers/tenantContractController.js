@@ -14,7 +14,7 @@ const rentpurchase =require('../models/rentpurchase')
 const Employee = require('../models/employee')
 const sendEmail = require('../utils/sendEmail');
 const moment = require('moment-timezone');
-
+const {TenantDataOverview , TenantPropertyData} = require('../utils/overviewData')
 const Alltenants = async (req,res,next) => {
   try{
     const data = [
@@ -1392,12 +1392,81 @@ const updateManys = async (req,res,next) => {
 }
 
 
+const Tenant_Overview = async (req,res,next) => {
+try{
+  const data = [
+    {
+      '$match': {
+        'softdelete': {
+          '$ne': true
+        }
+      }
+    }, {
+      '$lookup': {
+        'from': 'addproperties', 
+        'localField': 'propertyid', 
+        'foreignField': '_id', 
+        'as': 'propertyid'
+      }
+    }, {
+      '$unwind': {
+        'path': '$propertyid', 
+        'preserveNullAndEmptyArrays': true
+      }
+    }, {
+      '$match': {
+        'propertyid.status': 'Pending'
+      }
+    }, {
+      '$project': {
+        'customertype': 1, 
+        'guestname': 1, 
+        'customertype': 1, 
+        'passportnumber': 1, 
+        'nationality': 1, 
+        'tenantcontractno': 1, 
+        'tenancy_contract_doc': 1, 
+        'addendum_doc': 1, 
+        'contractexecutiondate': 1, 
+        'noofchequeorinstallment': 1, 
+        'chequeDetails': 1, 
+        'rentalamount': 1, 
+        'customertype': 1, 
+        'guestname': 1, 
+        'customertype': 1, 
+        'guestname': 1, 
+        'propertyStatus': '$propertyid.status'
+      }
+    }
+  ]
+  const tennatOverview = await TenantContract.find({softdelete: {$ne : true}});
+  const tennatOverviews = await TenantContract.aggregate(data);
+  const today = new Date();
+  const alltenantsData = TenantDataOverview(today , tennatOverview)
+  const tenantsPropertyData = TenantPropertyData(tennatOverviews)
+  res.status(200).json({
+    message : "Tenant Overview",
+    status : true,
+    data : {
+      tenantData : alltenantsData,
+      Propertydata : tenantsPropertyData
+    }
+  })
+
+}catch(err){
+  res.status(200).json({
+    message : "No Tenant found",
+    status : false
+  })
+}
+}
+
 
 
 
 
 module.exports = {
-
+  Tenant_Overview,
     getAllTenantContract,
     getTenantContractById,
     getOwnerContract,
@@ -1411,5 +1480,6 @@ module.exports = {
     tenantSummaryReport,
     tenantSummaryReportByDates,
     updateManys,
+    Tenant_Overview
     // allTenantRequest
 }
