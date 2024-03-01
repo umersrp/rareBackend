@@ -40,6 +40,7 @@ router.route('/api/tenantcontractdelete/:id').patch(tenantContractController.upd
 router.route('/report/:propertyid').get(tenantContractController.createTenantReport)
 router.route('/tenantsummaryreportbydates/:propertyid').get(tenantContractController.tenantSummaryReportByDates)
 router.route('/tenantsummaryreport/:propertyid').get(tenantContractController.tenantSummaryReport)
+router.route('/api/tenant/overview').get(tenantContractController.Tenant_Overview)
 //router.route('/update').get(tenantContractController.allTenantRequest )
 
 router.route('/')
