@@ -16,7 +16,7 @@ const BookingDataByTomorrow = (today, data) => {
     const Total_Tomorrow_HostmanagementFees = filteredData.map((data) => JSON.parse(data.hostmanagementfee)).reduce((acc , data) => acc + data ,0)
     const Total_Approved_Booking = filteredData.map((data) => data.softdelete === false).reduce((acc , data) => acc + data ,0)
     const Total_Cancel_Booking = filteredData.map((data) => data.softdelete === true).reduce((acc , data) => acc + data ,0)
-    const Total_Guests = filteredData.map((data) => data.totaloccupants == undefined && data.totaloccupants == " " ? null :  data.totaloccupants).reduce((acc , data) => acc + data ,0)
+    const Total_Guests = filteredData.map((data) => data.guestname == undefined && data.guestname == " " ? null :  data.guestname).reduce((acc , data) => acc + data ,0)
     
     return {
         Total_Tomorrow_Checkin : Total_Tomorrow_Checkin,
@@ -60,7 +60,7 @@ const checkinDate = new Date(item.checkindate);
     const Total_Weekly_HostmanagementFees = filteredData.map((data) => JSON.parse(data.hostmanagementfee)).reduce((acc , data) => acc + data ,0)
     const Total_Approved_Booking = filteredData.map((data) => data.softdelete === false).reduce((acc , data) => acc + data ,0)
     const Total_Cancel_Booking = filteredData.map((data) => data.softdelete === true).reduce((acc , data) => acc + data ,0)
-    const Total_Guests = filteredData.map((data) => data.totaloccupants == undefined && data.totaloccupants == " " ? null :  data.totaloccupants).reduce((acc , data) => acc + data ,0)
+    const Total_Guests = filteredData.map((data) => data.guestname == undefined && data.guestname == " " ? null :  data.guestname).reduce((acc , data) => acc + data ,0)
     
     return {
         Total_Weekly_Checkin : Total_Weekly_Checkin,
@@ -95,7 +95,7 @@ const Total_Monthly_securitydepost = filteredData.map((data) => JSON.parse(data.
 const Total_Monthly_HostmanagementFees = filteredData.map((data) => JSON.parse(data.hostmanagementfee)).reduce((acc , data) => acc + data ,0)
 const Total_Approved_Booking = filteredData.map((data) => data.softdelete === false).reduce((acc , data) => acc + data ,0)
 const Total_Cancel_Booking = filteredData.map((data) => data.softdelete === true).reduce((acc , data) => acc + data ,0)
-const Total_Guests = filteredData.map((data) => data.totaloccupants == undefined && data.totaloccupants == " " ? null :  data.totaloccupants).reduce((acc , data) => acc + data ,0)
+const Total_Guests = filteredData.map((data) => data.guestname == undefined && data.guestname == " " ? null :  data.guestname).reduce((acc , data) => acc + data ,0)
 
 return {
     Total_Monthly_Checkin : Total_Monthly_Checkin,
@@ -128,7 +128,7 @@ const Total_Yearly_securitydepost = filteredData.map((data) => JSON.parse(data.s
 const Total_Yearly_HostmanagementFees = filteredData.map((data) => JSON.parse(data.hostmanagementfee)).reduce((acc , data) => acc + data ,0)
 const Total_Approved_Booking = filteredData.map((data) => data.softdelete === false).reduce((acc , data) => acc + data ,0)
 const Total_Cancel_Booking = filteredData.map((data) => data.softdelete === true).reduce((acc , data) => acc + data ,0)
-const Total_Guests = filteredData.map((data) => data.totaloccupants == undefined && data.totaloccupants == " " ? null :  data.totaloccupants).reduce((acc , data) => acc + data ,0)
+const Total_Guests = filteredData.map((data) => data.guestname == undefined && data.guestname == " " ? null :  data.guestname).reduce((acc , data) => acc + data ,0)
 
 return {
     Total_Yearly_Checkin : Total_Yearly_Checkin,

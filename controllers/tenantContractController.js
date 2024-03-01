@@ -1397,50 +1397,27 @@ try{
   const data = [
     {
       '$match': {
-        'softdelete': {
-          '$ne': true
-        }
-      }
-    }, {
-      '$lookup': {
-        'from': 'addproperties', 
-        'localField': 'propertyid', 
-        'foreignField': '_id', 
-        'as': 'propertyid'
-      }
-    }, {
-      '$unwind': {
-        'path': '$propertyid', 
-        'preserveNullAndEmptyArrays': true
-      }
-    }, {
-      '$match': {
-        'propertyid.status': 'Pending'
+        'status': 'Pending'
       }
     }, {
       '$project': {
-        'customertype': 1, 
-        'guestname': 1, 
-        'customertype': 1, 
-        'passportnumber': 1, 
-        'nationality': 1, 
-        'tenantcontractno': 1, 
-        'tenancy_contract_doc': 1, 
-        'addendum_doc': 1, 
-        'contractexecutiondate': 1, 
-        'noofchequeorinstallment': 1, 
-        'chequeDetails': 1, 
-        'rentalamount': 1, 
-        'customertype': 1, 
-        'guestname': 1, 
-        'customertype': 1, 
-        'guestname': 1, 
-        'propertyStatus': '$propertyid.status'
+        'unitnumber': 1, 
+        'communityname': 1, 
+        'projectname': 1, 
+        'buildingname': 1, 
+        'floor': 1, 
+        'status': 1, 
+        'customername' : 1,
+        'propertyType': 1
+      }
+    }, {
+      '$sort': {
+        'createdAt': -1
       }
     }
   ]
   const tennatOverview = await TenantContract.find({softdelete: {$ne : true}});
-  const tennatOverviews = await TenantContract.aggregate(data);
+  const tennatOverviews = await AddProperty.aggregate(data);
   const today = new Date();
   const alltenantsData = TenantDataOverview(today , tennatOverview)
   const tenantsPropertyData = TenantPropertyData(tennatOverviews)
