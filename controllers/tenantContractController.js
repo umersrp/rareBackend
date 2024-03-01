@@ -850,8 +850,7 @@ const updateTenantContractCancel = asyncHandler(async (req, res) => {
       await TenantContract.updateOne(
         {_id : id },
         {$set: { 
-          contractupdation : "terminated",
-          softdelete : true
+          contractupdation : "terminated"
          }},
         {new : true})
   
