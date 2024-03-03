@@ -697,6 +697,12 @@ const updateTenantContract = asyncHandler(async (req, res) => {
       addendum_doc,
     } = req.files
 
+
+    console.log(req.files,"files")
+
+    console.log(req.body,"body")
+
+
     if (!_id) {
         return res.status(400).json({ message: "Id is requires" })
     }
