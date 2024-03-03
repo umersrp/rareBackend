@@ -728,6 +728,7 @@ const updateTenantContract = asyncHandler(async (req, res) => {
           if (chequeDetail && chequeDetail.chequeimage && chequeDetailsImages[index]) {
               // Assign the path of the corresponding cheque image
               chequeDetail.chequeimage = chequeDetailsImages[index].path.replace(/\\/g, '/');
+              console.log("#####",chequeDetailsImages[index].path.replace(/\\/g, '/'))
           }
       });
   }
