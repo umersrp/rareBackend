@@ -723,9 +723,9 @@ const updateTenantContract = asyncHandler(async (req, res) => {
   }
 
   // Map chequeDetailsImages to chequeDetailsParse if both are provided
-  // if (chequeDetailsParse && chequeDetailsImages) {
-  //   chequeDetailsParse.map((data) => data.push({ chequeimage : chequeDetailsImages[index].path.replace(/\\/g, '/') }))
-  // }
+  if (chequeDetailsParse && chequeDetailsImages[index]) {
+    chequeDetailsParse.map((data) => data.push({ chequeimage : chequeDetailsImages[index].path.replace(/\\/g, '/') }))
+  }
 
 
   console.log("chequeDetailsImages",chequeDetailsImages , "chequeDetailsParse",chequeDetailsParse)
