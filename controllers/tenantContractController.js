@@ -719,13 +719,18 @@ const updateTenantContract = asyncHandler(async (req, res) => {
     //     return res.status(409).json({ message: 'Duplicate customerid' })
     // }
 
-    let chequeDetailsParse
-  
-    if (chequeDetails) {
-        chequeDetailsParse = JSON.parse(chequeDetails)
-      chequeDetailsImages?.map((x,i)=>{  return  x[i].chequeimage ?  x[i].chequeimage = x.path.replace(/\\/g, '/') : x[i].chequeimage })
-     
-    }
+    
+
+    let chequeDetailsParse = chequeDetails ? JSON.parse(chequeDetails) : [];
+
+// Update cheque image paths
+if (chequeDetailsImages && chequeDetailsParse.length > 0) {
+    chequeDetailsParse.forEach((detail, index) => {
+        if (chequeDetailsImages[index] && chequeDetailsImages[index].chequeimage) {
+            detail.chequeimage = chequeDetailsImages[index].path.replace(/\\/g, '/');
+        }
+    });
+}
 
     tenantContractNames.propertyid = propertyid
     tenantContractNames.customerid = customerid
