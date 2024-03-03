@@ -721,17 +721,19 @@ const updateTenantContract = asyncHandler(async (req, res) => {
 
     let chequeDetailsParse;
 
-    if (chequeDetails) {
-      chequeDetailsParse = JSON.parse(chequeDetails);
-    
-      chequeDetailsParse.forEach((data, index) => {
-        if (data && data.chequeimage && chequeDetailsImages[index]) {
-            data.chequeimage =   chequeDetailsImages.map((data,i) => data.path.replace(/\\/g, '/')).pop()
-        }
-      });
+if (chequeDetails) {
+  chequeDetailsParse = JSON.parse(chequeDetails);
+  
+  chequeDetailsParse.forEach((data, index) => {
+    if (data && data.chequeimage && chequeDetailsImages[index]) {
+      // Assign the path of the corresponding file
+      data.chequeimage = chequeDetailsImages[index].path.replace(/\\/g, '/');
     }
-    
-    console.log("Final chequeDetailsParse:", chequeDetailsParse);
+  });
+}
+
+console.log("Final chequeDetailsParse:", chequeDetailsParse);
+
     
     
 
