@@ -725,8 +725,8 @@ const updateTenantContract = asyncHandler(async (req, res) => {
       chequeDetailsParse = JSON.parse(chequeDetails);
     
       chequeDetailsParse.forEach((data, index) => {
-        if (data && data.chequeimage) {
-            data.chequeimage = chequeDetailsImages[index].path.replace(/\\/g, '/');
+        if (data && data.chequeimage && chequeDetailsImages[index]) {
+            data.chequeimage =   chequeDetailsImages.map((data,i) => data[i].path.replace(/\\/g, '/')).pop()
         }
       });
     }
