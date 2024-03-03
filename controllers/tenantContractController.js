@@ -723,14 +723,12 @@ const updateTenantContract = asyncHandler(async (req, res) => {
   }
 
   if (chequeDetailsParse && chequeDetailsImages) {
-    chequeDetailsParse.push({ chequeimage : chequeDetailsImages.path})
-    // chequeDetailsParse.forEach((chequeDetail, index) => {
-    //     if (chequeDetail && chequeDetail.chequeimage && chequeDetailsImages[index]) {
-    //         console.log("Updating cheque image at index", chequeDetailsImages[index]);
-    //        // chequeDetail.chequeimage = chequeDetailsImages[index].path.replace(/\\/g, '/');
-    //         chequeDetail.push({ chequeimage : chequeDetailsImages[index].path.replace(/\\/g, '/')})
-    //     }
-    // });
+    chequeDetailsParse.forEach((chequeDetail, index) => {
+        if (chequeDetail && chequeDetail.chequeimage && chequeDetailsImages[index]) {
+          chequeDetail.chequeimage = chequeDetailsImages[index].path.replace(/\\/g, '/');
+          console.log("Updating cheque image at index", chequeDetail.chequeimage);
+        }
+    });
 }
 
 
