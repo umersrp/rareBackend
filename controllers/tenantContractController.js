@@ -723,7 +723,7 @@ const updateTenantContract = asyncHandler(async (req, res) => {
   }
 
   if (chequeDetailsParse && chequeDetailsImages) {
-    chequeDetailsParse.push({ chequeimage : chequeDetailsImages.path.replace(/\\/g, '/')})
+    chequeDetailsParse.push({ chequeimage : chequeDetailsImages.path})
     // chequeDetailsParse.forEach((chequeDetail, index) => {
     //     if (chequeDetail && chequeDetail.chequeimage && chequeDetailsImages[index]) {
     //         console.log("Updating cheque image at index", chequeDetailsImages[index]);
