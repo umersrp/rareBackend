@@ -712,28 +712,16 @@ const updateTenantContract = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: 'Tenant Contract not found' });
   }
 
-  // Parse chequeDetails if provided
-  let chequeDetailsParse;
+
+  let chequeDetailsParse
+  
   if (chequeDetails) {
-      try {
-          chequeDetailsParse = JSON.parse(chequeDetails);
-      } catch (error) {
-          return res.status(400).json({ message: 'Invalid chequeDetails format' });
-      }
+      chequeDetailsParse = JSON.parse(chequeDetails)
+    chequeDetailsImages?.map((x,i)=>{  return  chequeDetailsParse[i].chequeimage = x.path.replace(/\\/g, '/') })
+   
   }
 
-  // Map chequeDetailsImages to chequeDetailsParse if both are provided
-  if (chequeDetailsParse && chequeDetailsImages) {
-      chequeDetailsParse.forEach((chequeDetail, index) => {
-          if (chequeDetail && chequeDetail.chequeimage && chequeDetailsImages[index]) {
-              // Assign the path of the corresponding cheque image
-             return chequeDetail.chequeimage = chequeDetailsImages[index].path.replace(/\\/g, '/');
-             
-          }
-          console.log(chequeDetail.chequeimage,"#####",chequeDetailsImages[index].path.replace(/\\/g, '/'))
-      });
-  }
-
+ 
 
   console.log("chequeDetailsParse",chequeDetailsParse)
 
@@ -762,7 +750,7 @@ const updateTenantContract = asyncHandler(async (req, res) => {
   tenantContract.contractupdation = contractupdation;
   tenantContract.createdBy = createdBy;
   tenantContract.updatedBy = updatedBy;
-  tenantContract.chequeDetails = chequeDetailsParse || []; // Use parsed chequeDetailsParse or empty array if not provided
+  tenantContract.chequeDetails = chequeDetailsParse; // Use parsed chequeDetailsParse or empty array if not provided
 
   // Save the updated tenant contract
   const updatedTenantContract = await tenantContract.save();
