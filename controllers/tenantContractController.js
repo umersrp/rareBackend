@@ -735,17 +735,8 @@ if (chequeDetailsParse && chequeDetailsImages) {
     });
 
     // Wait for all update promises to complete
-    Promise.all(updatePromises)
-        .then((results) => {
-            console.log("All cheque images updated successfully");
-            // Handle response
-            res.json({ message: `Tenant Contract ${_id} updated`, results });
-        })
-        .catch((error) => {
-            console.error("Error updating cheque images:", error);
-            // Handle error
-            res.status(500).json({ message: 'Error updating cheque images', error });
-        });
+   await Promise.all(updatePromises)
+        
 }
 
 
