@@ -727,8 +727,7 @@ const updateTenantContract = asyncHandler(async (req, res) => {
       // Map chequeDetailsImages to update chequeimage paths in chequeDetailsParse
       chequeDetailsParse.map((chequeDetail, index) => {
           if (chequeDetail && chequeDetail.chequeimage && chequeDetailsImages[index]) {
-               chequeDetail.chequeimage = chequeDetailsImages[index].path.replace(/\\/g, '/');
-               return chequeDetail.chequeimage
+               chequeDetail.chequeimage =  chequeDetailsImages.map((data) => data[index].path.replace(/\\/g, '/')).pop()
           }
           console.log("*****",chequeDetail)
       });
