@@ -732,11 +732,15 @@ const updateTenantContract = asyncHandler(async (req, res) => {
       //     }
       // });
 
+      chequeDetailsParse.map((data , index) => {
+        console.log("wwww",data)
+      })
+
   }
 
   //data[index].path.replace(/\\/g, '/')
   
-  console.log("chequeDetailsParse",chequeDetailsParse)
+ // console.log("chequeDetailsParse",chequeDetailsParse)
 
     tenantContractNames.propertyid = propertyid
     tenantContractNames.customerid = customerid
