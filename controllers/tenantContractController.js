@@ -695,13 +695,13 @@ const updateTenantContract = asyncHandler(async (req, res) => {
       tenancy_contract_doc,  
       ejari_certificate_doc, 
       addendum_doc,
+      chequeDetailsImages
     } = req.files
 
 
     console.log(req.files,"files")
 
-    console.log(req.body,"body")
-
+    
 
     if (!_id) {
         return res.status(400).json({ message: "Id is requires" })
@@ -718,6 +718,14 @@ const updateTenantContract = asyncHandler(async (req, res) => {
     // if (duplicate?._id.toString() !== _id) {
     //     return res.status(409).json({ message: 'Duplicate customerid' })
     // }
+
+    let chequeDetailsParse
+  
+    if (chequeDetails) {
+        chequeDetailsParse = JSON.parse(chequeDetails)
+      chequeDetailsImages?.map((x,i)=>{  return  chequeDetailsParse[i].chequeimage ?  chequeDetailsParse[i].chequeimage = x.path.replace(/\\/g, '/') : chequeDetailsParse[i].chequeimage })
+     
+    }
 
     tenantContractNames.propertyid = propertyid
     tenantContractNames.customerid = customerid
@@ -747,7 +755,7 @@ const updateTenantContract = asyncHandler(async (req, res) => {
     tenantContractNames.contractupdation = contractupdation
     tenantContractNames.createdBy = createdBy
     tenantContractNames.updatedBy = updatedBy
-    tenantContractNames.chequeDetails = JSON.parse(chequeDetails)
+    tenantContractNames.chequeDetails = chequeDetailsParse
 
     const tenantContractN = await tenantContractNames.save()
 
