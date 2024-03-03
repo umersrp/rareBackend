@@ -760,7 +760,8 @@ if (chequeDetailsImages && chequeDetailsParse.length > 0) {
     tenantContractNames.contractupdation = contractupdation
     tenantContractNames.createdBy = createdBy
     tenantContractNames.updatedBy = updatedBy
-    tenantContractNames.chequeDetails = chequeDetailsParse
+    tenantContractNames.chequeDetails = chequeDetailsParse.length > 0 ? chequeDetailsParse : [];
+
 
     const tenantContractN = await tenantContractNames.save()
 
