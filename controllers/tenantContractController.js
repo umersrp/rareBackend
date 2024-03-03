@@ -712,26 +712,41 @@ const updateTenantContract = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: 'Tenant Contract not found' });
   }
 
-  // Parse chequeDetails if provided
   let chequeDetailsParse;
-  if (chequeDetails) {
-      try {
-          chequeDetailsParse = JSON.parse(chequeDetails);
-      } catch (error) {
-          return res.status(400).json({ message: 'Invalid chequeDetails format' });
-      }
-  }
 
-  if (chequeDetailsParse && chequeDetailsImages) {
-    chequeDetailsParse.forEach((chequeDetail, index) => {
-        if (chequeDetail && chequeDetail.chequeimage && chequeDetailsImages[index]) {
-          chequeDetail.chequeimage = chequeDetailsImages[index].path.replace(/\\/g, '/');
-          TenantContract.updateOne({_id : _id},{chequeDetails : chequeDetails.map((data) => data.chequeDetail.chequeimage)},{new : true}).then((res) => res)
-          console.log(chequeDetail,"Updating cheque image at index", chequeDetail.chequeimage);
-        }
-    });
+if (chequeDetails) {
+    try {
+        chequeDetailsParse = JSON.parse(chequeDetails);
+    } catch (error) {
+        return res.status(400).json({ message: 'Invalid chequeDetails format' });
+    }
 }
 
+if (chequeDetailsParse && chequeDetailsImages) {
+    const updatePromises = chequeDetailsParse.map((chequeDetail, index) => {
+        if (chequeDetail && chequeDetail.chequeimage && chequeDetailsImages[index]) {
+            chequeDetail.chequeimage = chequeDetailsImages[index].path.replace(/\\/g, '/');
+            // Return the update operation as a promise
+            return TenantContract.updateOne(
+                { _id: _id },
+                { $set: { [`chequeDetails.${index}.chequeimage`]: chequeDetail.chequeimage } }
+            );
+        }
+    });
+
+    // Wait for all update promises to complete
+    Promise.all(updatePromises)
+        .then((results) => {
+            console.log("All cheque images updated successfully");
+            // Handle response
+            res.json({ message: `Tenant Contract ${_id} updated`, results });
+        })
+        .catch((error) => {
+            console.error("Error updating cheque images:", error);
+            // Handle error
+            res.status(500).json({ message: 'Error updating cheque images', error });
+        });
+}
 
 
   console.log("chequeDetailsParse",chequeDetailsParse)
