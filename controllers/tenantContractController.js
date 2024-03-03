@@ -733,6 +733,7 @@ const updateTenantContract = asyncHandler(async (req, res) => {
       });
   }
   
+  console.log("chequeDetailsParse",chequeDetailsParse)
 
     tenantContractNames.propertyid = propertyid
     tenantContractNames.customerid = customerid
