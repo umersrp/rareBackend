@@ -722,19 +722,29 @@ const updateTenantContract = asyncHandler(async (req, res) => {
     let chequeDetailsParse;
 
     if (chequeDetails) {
-        chequeDetailsParse = JSON.parse(chequeDetails);
+      chequeDetailsParse = JSON.parse(chequeDetails);
     
-        chequeDetailsParse.forEach((data, index) => {
-            if (data && data.chequeimage && chequeDetailsImages[index] && chequeDetailsImages[index].path) {
-                data.chequeimage = chequeDetailsImages[index].path.replace(/\\/g, '/');
-            }
-        });
+      chequeDetailsParse.forEach((data, index) => {
+        if (data && data.chequeimage && chequeDetailsImages[index] && chequeDetailsImages[index].path) {
+          // Log the path before assignment
+          console.log("Path before assignment:", chequeDetailsImages[index].path);
+    
+          // Assign the path to chequeimage property
+          data.chequeimage = chequeDetailsImages[index].path.replace(/\\/g, '/');
+    
+          // Log the updated chequeDetailsParse
+          console.log("Updated chequeDetailsParse:", chequeDetailsParse);
+        }
+      });
     }
+    
+    console.log("Final chequeDetailsParse:", chequeDetailsParse);
+    
     
 
   //data[index].path.replace(/\\/g, '/')
   
-  console.log("chequeDetailsParse",chequeDetailsParse)
+
 
     tenantContractNames.propertyid = propertyid
     tenantContractNames.customerid = customerid
