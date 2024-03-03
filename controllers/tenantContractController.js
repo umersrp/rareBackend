@@ -740,10 +740,10 @@ const updateTenantContract = asyncHandler(async (req, res) => {
     tenantContractNames.noofchequeorinstallment = noofchequeorinstallment
     tenantContractNames.commission = commission
     tenantContractNames.passportpdf = passportpdf
-    tenantContractNames.ejari_certificate_doc = ejari_certificate_doc ? req.files.ejari_certificate_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : ejari_certificate_doc , 
-    tenantContractNames.tenancy_contract_doc = tenancy_contract_doc ? req.files.tenancy_contract_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : tenancy_contract_doc ,
-    tenantContractNames.addendum_doc = addendum_doc ? req.files.addendum_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : addendum_doc ,
-    tenantContractNames.key_receipt_doc = key_receipt_doc ?  req.files.key_receipt_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : key_receipt_doc , 
+    tenantContractNames.ejari_certificate_doc = ejari_certificate_doc ? req.files.ejari_certificate_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : tenantContractNames.ejari_certificate_doc , 
+    tenantContractNames.tenancy_contract_doc = tenancy_contract_doc ? req.files.tenancy_contract_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : tenantContractNames.tenancy_contract_doc ,
+    tenantContractNames.addendum_doc = addendum_doc ? req.files.addendum_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : tenantContractNames.addendum_doc ,
+    tenantContractNames.key_receipt_doc = key_receipt_doc ?  req.files.key_receipt_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : tenantContractNames.key_receipt_doc , 
     tenantContractNames.contractupdation = contractupdation
     tenantContractNames.createdBy = createdBy
     tenantContractNames.updatedBy = updatedBy
