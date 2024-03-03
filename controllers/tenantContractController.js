@@ -763,6 +763,7 @@ const updateTenantContract = asyncHandler(async (req, res) => {
     tenantContractNames.updatedBy = updatedBy
     tenantContractNames.chequeDetails = chequeDetailsParse.length > 0 ? chequeDetailsParse : [];
 
+    console.log("dddddd",tenantContractNames.chequeDetails)
 
     const tenantContractN = await tenantContractNames.save()
 
