@@ -730,7 +730,7 @@ const updateTenantContract = asyncHandler(async (req, res) => {
           console.log("Path before assignment:", chequeDetailsImages[index].path);
     
           // Assign the path to chequeimage property
-          data.chequeimage = chequeDetailsImages[index].path.replace(/\\/g, '/');
+          data.chequeimage = JSON.parse(chequeDetailsImages[index].path.replace(/\\/g, '/'));
     
           // Log the updated chequeDetailsParse
           console.log("Updated chequeDetailsParse:", chequeDetailsParse);
