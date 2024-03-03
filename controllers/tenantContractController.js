@@ -724,11 +724,18 @@ const updateTenantContract = asyncHandler(async (req, res) => {
 
   // Map chequeDetailsImages to chequeDetailsParse if both are provided
   if (chequeDetailsParse && chequeDetailsImages) {
-    chequeDetailsParse.map((data) => data.push({ chequeimage : chequeDetailsImages.map((data,i) => data.path.replace(/\\/g, '/')).pop() }))
+      chequeDetailsParse.forEach((chequeDetail, index) => {
+          if (chequeDetail && chequeDetail.chequeimage && chequeDetailsImages[index]) {
+            
+             return chequeDetail.chequeimage = chequeDetailsImages[index].path.replace(/\\/g, '/');
+             
+          }
+          console.log(chequeDetail)
+      });
   }
 
 
-  console.log("chequeDetailsImages",chequeDetailsImages , "chequeDetailsParse",chequeDetailsParse)
+  console.log("chequeDetailsParse",chequeDetailsParse)
 
   // Update tenant contract fields
   tenantContract.propertyid = propertyid;
