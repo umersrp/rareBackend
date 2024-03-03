@@ -724,7 +724,7 @@ const updateTenantContract = asyncHandler(async (req, res) => {
     if (chequeDetails) {
         chequeDetailsParse = JSON.parse(chequeDetails)
         console.log("========>",chequeDetailsParse)
-      chequeDetailsImages?.map((x,i)=>{  return  chequeDetailsParse[i].chequeimage ?  chequeDetailsParse[i].chequeimage = x.path.replace(/\\/g, '/') : chequeDetailsParse[i].chequeimage })
+      chequeDetailsImages?.map((x,i)=>{  return  chequeDetailsParse[i].chequeimage ?  JSON.parse(chequeDetailsParse[i].chequeimage = x.path.replace(/\\/g, '/')) : chequeDetailsParse[i].chequeimage })
      
     }
 
