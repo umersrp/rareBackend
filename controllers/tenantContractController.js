@@ -730,6 +730,7 @@ const updateTenantContract = asyncHandler(async (req, res) => {
              return chequeDetail.chequeimage = chequeDetailsImages[index].path.replace(/\\/g, '/');
            
           }
+          console.log("*****",chequeDetail)
       });
   }
   
