@@ -680,119 +680,90 @@ const createTenantContract = asyncHandler(async (req, res) => {
 
 })
 
+
+
 const updateTenantContract = asyncHandler(async (req, res) => {
-    const { 
-      _id, propertyid, customerid, guestname, 
-      passportnumber, customertype, nationality, mobilenumber, 
-      email, contractstartdate, contractenddate, createdBy, updatedBy, 
-      contractvalue, rentalamount, securitydepositamount, noofchequeorinstallment, 
-      commission, contractexecutiondate, passportpdf, 
-      contractupdation,  
-      chequeDetails, } = req.body
+  // Destructure request body and files
+  const { 
+    _id, propertyid, customerid, guestname, 
+    passportnumber, customertype, nationality, mobilenumber, 
+    email, contractstartdate, contractenddate, createdBy, updatedBy, 
+    contractvalue, rentalamount, securitydepositamount, noofchequeorinstallment, 
+    commission, contractexecutiondate, passportpdf, 
+    contractupdation, chequeDetails,
+  } = req.body;
 
-    const {
-      key_receipt_doc,
-      tenancy_contract_doc,  
-      ejari_certificate_doc, 
-      addendum_doc,
-      chequeDetailsImages
-    } = req.files
+  const {
+    key_receipt_doc,
+    tenancy_contract_doc,  
+    ejari_certificate_doc, 
+    addendum_doc,
+    chequeDetailsImages
+  } = req.files;
 
+  // Check if _id is provided
+  if (!_id) {
+      return res.status(400).json({ message: "Id is required" });
+  }
 
-    console.log(req.files,"files")
+  // Find the tenant contract by _id
+  const tenantContract = await TenantContract.findById(_id).exec();
+  if (!tenantContract) {
+      return res.status(404).json({ message: 'Tenant Contract not found' });
+  }
 
-    
+  // Parse chequeDetails if provided
+  let chequeDetailsParse;
+  if (chequeDetails) {
+      try {
+          chequeDetailsParse = JSON.parse(chequeDetails);
+      } catch (error) {
+          return res.status(400).json({ message: 'Invalid chequeDetails format' });
+      }
+  }
 
-    if (!_id) {
-        return res.status(400).json({ message: "Id is requires" })
-    }
+  // Map chequeDetailsImages to chequeDetailsParse if both are provided
+  if (chequeDetailsParse && chequeDetailsImages) {
+      chequeDetailsParse.forEach((chequeDetail, index) => {
+          if (chequeDetail && chequeDetail.chequeimage && chequeDetailsImages[index]) {
+              // Assign the path of the corresponding cheque image
+              chequeDetail.chequeimage = chequeDetailsImages[index].path.replace(/\\/g, '/');
+          }
+      });
+  }
 
-    const tenantContractNames = await TenantContract.findById(_id).exec()
+  // Update tenant contract fields
+  tenantContract.propertyid = propertyid;
+  tenantContract.customerid = customerid;
+  tenantContract.guestname = guestname;
+  tenantContract.passportnumber = passportnumber;
+  tenantContract.nationality = nationality;
+  tenantContract.mobilenumber = mobilenumber;
+  tenantContract.email = email;
+  tenantContract.contractstartdate = new Date(contractstartdate).toISOString();
+  tenantContract.contractenddate = new Date(contractenddate).toISOString();
+  tenantContract.contractexecutiondate = new Date(contractexecutiondate).toISOString();
+  tenantContract.contractvalue = contractvalue;
+  tenantContract.customertype = customertype;
+  tenantContract.rentalamount = rentalamount;
+  tenantContract.securitydepositamount = securitydepositamount;
+  tenantContract.noofchequeorinstallment = noofchequeorinstallment;
+  tenantContract.commission = commission;
+  tenantContract.passportpdf = passportpdf;
+  tenantContract.ejari_certificate_doc = ejari_certificate_doc ? ejari_certificate_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : tenantContract.ejari_certificate_doc;
+  tenantContract.tenancy_contract_doc = tenancy_contract_doc ? tenancy_contract_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : tenantContract.tenancy_contract_doc;
+  tenantContract.addendum_doc = addendum_doc ? addendum_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : tenantContract.addendum_doc;
+  tenantContract.key_receipt_doc = key_receipt_doc ? key_receipt_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : tenantContract.key_receipt_doc;
+  tenantContract.contractupdation = contractupdation;
+  tenantContract.createdBy = createdBy;
+  tenantContract.updatedBy = updatedBy;
+  tenantContract.chequeDetails = chequeDetailsParse || []; // Use parsed chequeDetailsParse or empty array if not provided
 
-    if (!tenantContractNames) {
-        res.status(400).json({ message: 'Tenant Contract not found' })
-    }
+  // Save the updated tenant contract
+  const updatedTenantContract = await tenantContract.save();
 
-    // const duplicate = await TenantContract.findOne({ customerid }).lean().exec()
-
-    // if (duplicate?._id.toString() !== _id) {
-    //     return res.status(409).json({ message: 'Duplicate customerid' })
-    // }
-
-    let chequeDetailsParse;
-
-if (chequeDetails) {
-  chequeDetailsParse = JSON.parse(chequeDetails);
-  
-  chequeDetailsParse.forEach((data, index) => {
-    if (data && data.chequeimage && chequeDetailsImages[index]) {
-      // Assign the path of the corresponding file
-      data.chequeimage = chequeDetailsImages[index].path.replace(/\\/g, '/');
-    }
-  });
-}
-
-console.log("Final chequeDetailsParse:", chequeDetailsParse);
-
-    
-    
-
-  //data[index].path.replace(/\\/g, '/')
-  
-
-
-    tenantContractNames.propertyid = propertyid
-    tenantContractNames.customerid = customerid
-    tenantContractNames.guestname = guestname
-    tenantContractNames.passportnumber = passportnumber
-    tenantContractNames.nationality = nationality
-    tenantContractNames.mobilenumber = mobilenumber
-    tenantContractNames.email = email
-    tenantContractNames.contractstartdate = new Date( contractstartdate).toISOString()
-    tenantContractNames.contractenddate =  new Date (contractenddate).toISOString()
-    tenantContractNames.contractexecutiondate = new Date (contractexecutiondate).toISOString()
-    tenantContractNames.contractvalue = contractvalue
-    // tenantContractNames.chequenumbe = chequenumbe
-    // tenantContractNames.chequedate = chequedate
-    // tenantContractNames.totalamount = totalamount
-    // tenantContractNames.chequeimage = chequeimage
-    tenantContractNames.customertype = customertype
-    tenantContractNames.rentalamount = rentalamount
-    tenantContractNames.securitydepositamount = securitydepositamount
-    tenantContractNames.noofchequeorinstallment = noofchequeorinstallment
-    tenantContractNames.commission = commission
-    tenantContractNames.passportpdf = passportpdf
-    tenantContractNames.ejari_certificate_doc = ejari_certificate_doc ? req.files.ejari_certificate_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : tenantContractNames.ejari_certificate_doc , 
-    tenantContractNames.tenancy_contract_doc = tenancy_contract_doc ? req.files.tenancy_contract_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : tenantContractNames.tenancy_contract_doc ,
-    tenantContractNames.addendum_doc = addendum_doc ? req.files.addendum_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : tenantContractNames.addendum_doc ,
-    tenantContractNames.key_receipt_doc = key_receipt_doc ?  req.files.key_receipt_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : tenantContractNames.key_receipt_doc , 
-    tenantContractNames.contractupdation = contractupdation
-    tenantContractNames.createdBy = createdBy
-    tenantContractNames.updatedBy = updatedBy
-    tenantContractNames.chequeDetails = chequeDetailsParse.length > 0 ? chequeDetailsParse : [];
-
-    //console.log("dddddd",tenantContractNames.chequeDetails)
-
-    const tenantContractN = await tenantContractNames.save()
-
-    // if (tenantContractN?.propertyid) {
-    //     const properties = await AddProperty.find({ _id: { $in: tenantContractN?.propertyid } });
-    //     const property = properties.find(property => property._id.toHexString() === tenantContractN?.propertyid?.toHexString());
-    //     const userData = await User.find({ _id: { $in: property?.customerid } });
-    //     const user = userData.find(owner => owner._id.toHexString() === property?.customerid?.toHexString());
-    //     const owner_email = user?.email
-    //     let contentPara = `A recent update has been made to your property unit number "${property?.unitnumber}" tenancy contract. We kindly ask you to take a moment to verify the current status of your property's tenancy contract by accessing the provided link.`
-    //     if (owner_email) {
-    //         const owner_name = user?.firstname + " " + user?.lastname
-    //         let contentHeading = `Hello ${owner_name},`
-    //         const url = `${process.env.BASE_URL}view-tenantcontract/${tenantContractN?._id}`
-    //         let property = true
-    //         await sendEmail(owner_email, "Your Property Tenancy Contract Updated Recently", url, property, contentHeading, contentPara)
-    //     }
-    // }
-
-    res.json({ message: `Tenant Contract ${tenantContractN?._id} updated` })
-})
+  res.json({ message: `Tenant Contract ${updatedTenantContract._id} updated` });
+});
 
 
 // const updateTenantContract = asyncHandler(async (req, res) => {
