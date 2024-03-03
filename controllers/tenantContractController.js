@@ -725,10 +725,10 @@ const updateTenantContract = asyncHandler(async (req, res) => {
       chequeDetailsParse = JSON.parse(chequeDetails);
   
       // Map chequeDetailsImages to update chequeimage paths in chequeDetailsParse
-      chequeDetailsParse.map((chequeDetail, index) => {
+      chequeDetailsParse.foreach((chequeDetail, index) => {
           if (chequeDetail && chequeDetail.chequeimage && chequeDetailsImages[index]) {
             chequeDetail.chequeimage = chequeDetailsImages[index].path.replace(/\\/g, '/');
-            console.log("kkkk",chequeDetail.chequeimage ,"33311111111113" ,chequeDetailsImages[index])
+            console.log("kkkk",chequeDetail.chequeimage ,"33311111111113" ,typeof chequeDetailsImages[index] , "111",chequeDetailsImages[index])
           }
       });
   }
