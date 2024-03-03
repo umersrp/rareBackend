@@ -712,32 +712,27 @@ const updateTenantContract = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: 'Tenant Contract not found' });
   }
 
+  // Parse chequeDetails if provided
   let chequeDetailsParse;
+  if (chequeDetails) {
+      try {
+          chequeDetailsParse = JSON.parse(chequeDetails);
+      } catch (error) {
+          return res.status(400).json({ message: 'Invalid chequeDetails format' });
+      }
+  }
 
-if (chequeDetails) {
-    try {
-        chequeDetailsParse = JSON.parse(chequeDetails);
-    } catch (error) {
-        return res.status(400).json({ message: 'Invalid chequeDetails format' });
-    }
-}
-
-if (chequeDetailsParse && chequeDetailsImages) {
-    const updatePromises = chequeDetailsParse.map((chequeDetail, index) => {
-        if (chequeDetail && chequeDetail.chequeimage && chequeDetailsImages[index]) {
-            chequeDetail.chequeimage = chequeDetailsImages[index].path.replace(/\\/g, '/');
-            // Return the update operation as a promise
-            return TenantContract.updateOne(
-                { _id: _id },
-                { $set: { [`chequeDetails.${index}.chequeimage`]: chequeDetail.chequeimage } }
-            );
-        }
-    });
-
-    // Wait for all update promises to complete
-   await Promise.all(updatePromises)
-        
-}
+  // Map chequeDetailsImages to chequeDetailsParse if both are provided
+  if (chequeDetailsParse && chequeDetailsImages) {
+      chequeDetailsParse.forEach((chequeDetail, index) => {
+          if (chequeDetail && chequeDetail.chequeimage && chequeDetailsImages[index]) {
+              // Assign the path of the corresponding cheque image
+             return chequeDetail.chequeimage = chequeDetailsImages[index].path.replace(/\\/g, '/');
+             
+          }
+          console.log(chequeDetail.chequeimage,"#####",chequeDetailsImages[index].path.replace(/\\/g, '/'))
+      });
+  }
 
 
   console.log("chequeDetailsParse",chequeDetailsParse)
