@@ -725,15 +725,8 @@ const updateTenantContract = asyncHandler(async (req, res) => {
       chequeDetailsParse = JSON.parse(chequeDetails);
     
       chequeDetailsParse.forEach((data, index) => {
-        if (data && data.chequeimage && chequeDetailsImages[index] && chequeDetailsImages[index].path) {
-          // Log the path before assignment
-          console.log("Path before assignment:", chequeDetailsImages[index].path);
-    
-          // Assign the path to chequeimage property
-          data.chequeimage = JSON.parse(chequeDetailsImages[index].path.replace(/\\/g, '/'));
-    
-          // Log the updated chequeDetailsParse
-          console.log("Updated chequeDetailsParse:", chequeDetailsParse);
+        if (data && data.chequeimage) {
+            data.chequeimage = chequeDetailsImages[index].path.replace(/\\/g, '/');
         }
       });
     }
