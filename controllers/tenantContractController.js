@@ -729,7 +729,7 @@ const updateTenantContract = asyncHandler(async (req, res) => {
           if (chequeDetail && chequeDetail.chequeimage && chequeDetailsImages[index]) {
               let img = chequeDetailsImages.map((data) => data.path.replace(/\\/g, '/')).pop()
                chequeDetail.chequeimage =  img
-               console.log("1111",img),
+               console.log("1111",img)
             
           }
           console.log("*****",chequeDetail)
