@@ -36,6 +36,8 @@ router.route('/api/availability/').patch(upload, propertyController.updateProper
 router.route('/api/status/:propertyid').put(propertyController.ChangePropertyStatus)
 router.route('/activecontract/:propertyid').get(propertyController.ActiveContract)
 
+router.route('/api/ownerproperty/:customerid').get(propertyController.getownerProperty)
+
 router.route('/')
     .get(propertyController.getAllProperty)
     .post(upload, propertyController.createProperty)

@@ -1388,7 +1388,28 @@ const ActiveContract = async (req,res,next) => {
         }
     }
 
+
+    const getownerProperty = async (req,res,next) => {
+        const ownerid = req.params.customerid
+        try{
+          const  ownerProperty = await TenantContract.find({ customerid : ownerid})
+
+          res.status(200).json({
+            message: "Owner property found",
+            status:true,
+            data : ownerProperty
+          })
+
+        }catch(err){
+            res.status(200).json({
+                message: "no Owner property found",
+                status:false
+              })
+        }
+    }
+
 module.exports = {
+    getownerProperty,
     getAllProperty,
     getPropertyById,
     createProperty,
