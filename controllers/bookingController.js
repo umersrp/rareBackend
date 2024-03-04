@@ -2904,8 +2904,64 @@ const calenderBookingByOwner = async (req,res,next) => {
     }
     }
 
+    const OwnerBookingOverviewData = async (req,res,next) => {
+        const ownerid = req.params.ownerid
+        try{
+          const data =  [
+                {
+                  '$match': {
+                    'ownerid': ownerid, 
+                    'softdelete': {
+                      '$ne': true
+                    }
+                  }
+                }, {
+                  '$project': {
+                    'checkindate': 1, 
+                    'checkoutdate': 1, 
+                    'securitydeposit': 1, 
+                    'roomrenthostpayable': 1, 
+                    'roomrentamount': 1, 
+                    'hostmanagementfee': 1, 
+                    'softdelete': 1, 
+                    'totaloccupants': 1, 
+                    'guestname': 1
+                  }
+                }, {
+                  '$sort': {
+                    'checkindate': -1
+                  }
+                }
+              ]
+
+              const allBookings = await Booking.aggregate(data)
+              const today = new Date();
+              const tomorrow = BookingDataByTomorrow(today , allBookings)
+            const weekly = BookingDataByWeekly(today , allBookings)
+            const monthly = BookingDataByMonthly(today , allBookings)
+            const yearly = BookingDataByYearly(today , allBookings)
+
+            res.status(200).json({
+                 message : "Data generated successfully",
+                 status : true,
+                 data : {
+                    Tommorrow: tomorrow,
+                    Weekly : weekly,
+                    Monthly : monthly,
+                    Yearly : yearly
+                 }
+                })  
+        }catch(err){
+            console.log(err)
+            res.status(500).json({
+                message : "Data not generated",
+                status : false
+               })
+        }
+    }
    
 module.exports = {
+    OwnerBookingOverviewData,
     BookingOverwiewData,
     calenderBooking,
     calenderBookingByOwner,
