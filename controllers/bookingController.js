@@ -2904,6 +2904,38 @@ const calenderBookingByOwner = async (req,res,next) => {
     }
     }
 
+    const OwnerBookingOverviewData = () => {
+        try{
+          const data =  [
+                {
+                  '$match': {
+                    'ownerid': '64058ffb8beb69ec5ba1be8a', 
+                    'softdelete': {
+                      '$ne': true
+                    }
+                  }
+                }, {
+                  '$project': {
+                    'checkindate': 1, 
+                    'checkoutdate': 1, 
+                    'securitydeposit': 1, 
+                    'roomrenthostpayable': 1, 
+                    'roomrentamount': 1, 
+                    'hostmanagementfee': 1, 
+                    'softdelete': 1, 
+                    'totaloccupants': 1, 
+                    'guestname': 1
+                  }
+                }, {
+                  '$sort': {
+                    'checkindate': -1
+                  }
+                }
+              ]
+        }catch(err){
+
+        }
+    }
    
 module.exports = {
     BookingOverwiewData,
