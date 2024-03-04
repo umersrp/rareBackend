@@ -118,7 +118,7 @@ nextYear.setFullYear(nextYear.getFullYear() + 1);
 
 const filteredData = data.filter((item) => {
     const checkinDate = new Date(item.checkindate);
-    return checkinDate >= today && checkinDate < nextYear;
+    return checkinDate > today && checkinDate <= nextYear;
 });
 
 const Total_Yearly_Checkin = filteredData.map(date => ({ [date.checkindate]: 1 })).reduce((acc, obj) => {const [date, count] = Object.entries(obj)[0]; return acc + count; }, 0);
