@@ -38,7 +38,7 @@ router.route('/api/allbooking/forproperty').get(bookingController.getBookingProp
 router.route('/api/calenderbooking').get(bookingController.calenderBooking)
 router.route('/api/calenderbooking/:ownerid').get(bookingController.calenderBookingByOwner)
 router.route('/api/allbookings/overview').get(bookingController.BookingOverwiewData);
-
+router.route('/api/ownerbookings/overview/:ownerid').get(bookingController.OwnerBookingOverviewData);
 router.route('/api/search/mobile/:key').get(bookingController.getBookingSearch)
 router.route('/api/sendpdf').post(bookingController.sendEmailPDF)
 router.route('/api/test').get(bookingController.getAllBookingTest)

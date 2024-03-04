@@ -2904,12 +2904,13 @@ const calenderBookingByOwner = async (req,res,next) => {
     }
     }
 
-    const OwnerBookingOverviewData = () => {
+    const OwnerBookingOverviewData = async (req,res,next) => {
+        const ownerid = req.params.ownerid
         try{
           const data =  [
                 {
                   '$match': {
-                    'ownerid': '64058ffb8beb69ec5ba1be8a', 
+                    'ownerid': ownerid, 
                     'softdelete': {
                       '$ne': true
                     }
@@ -2932,12 +2933,35 @@ const calenderBookingByOwner = async (req,res,next) => {
                   }
                 }
               ]
-        }catch(err){
 
+              const allBookings = await Booking.aggregate(data)
+              const today = new Date();
+              const tomorrow = BookingDataByTomorrow(today , allBookings)
+            const weekly = BookingDataByWeekly(today , allBookings)
+            const monthly = BookingDataByMonthly(today , allBookings)
+            const yearly = BookingDataByYearly(today , allBookings)
+
+            res.status(200).json({
+                 message : "Data generated successfully",
+                 status : true,
+                 data : {
+                    Tommorrow: tomorrow,
+                    Weekly : weekly,
+                    Monthly : monthly,
+                    Yearly : yearly
+                 }
+                })  
+        }catch(err){
+            console.log(err)
+            res.status(500).json({
+                message : "Data not generated",
+                status : false
+               })
         }
     }
    
 module.exports = {
+    OwnerBookingOverviewData,
     BookingOverwiewData,
     calenderBooking,
     calenderBookingByOwner,
