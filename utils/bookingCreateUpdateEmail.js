@@ -478,7 +478,7 @@ const bookingCreateUpdateEmail = async (subject, contentHeading, contentPara, ur
         // console.log('template aya?')
         const data123 = await transporter.sendMail({
             from: 'notification@rarehomes.ae',
-            to: process.env.OWN_SERVER === "http://dev-rare.srp.ai" ? ["accounts@rarehomes.ae", "finance@rarehomes.ae" , 'saifahmedsrp@gmail.com'] : ['saifahmedsrp@gmail.com'],
+            to: process.env.OWN_SERVER === "http://dev-rare.srp.ai" ? ["accounts@rarehomes.ae", "finance@rarehomes.ae" , 'saifahmedsrp@gmail.com'] : process.env.OWN_SERVER === "http://portals.rarehomesgroup.com/" ? ["accounts@rarehomes.ae", "finance@rarehomes.ae" , 'saifahmedsrp@gmail.com']  :   ['saifahmedsrp@gmail.com'],
             subject: subject,
             html: htmlToSend,
             attachments: [
