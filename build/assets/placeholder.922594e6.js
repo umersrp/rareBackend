@@ -1,1 +1,0 @@
-import{c as t,j as e,f as a}from"./index.8a3fa8e4.js";import{G as r,S as l}from"./Table.de58c4fc.js";import{L as i}from"./ListLoading.30d313a6.js";const n=()=>t("div",{className:"space-y-5",children:[e(a,{title:"Example One",children:e(r,{count:3})}),e(a,{title:"Example Two",children:e(l,{count:3})}),e(a,{title:"Example Three",children:e(i,{count:3})})]});export{n as default};
