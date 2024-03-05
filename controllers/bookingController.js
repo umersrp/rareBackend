@@ -2003,7 +2003,12 @@ const createBooking = asyncHandler(async (req, res) => {
             checkoutdate: formattedcheckoutdate,
         };
 
-        const url = process.env.BASE_URL === "http://dev-rare.srp.ai/" ? "http://dev-rare.srp.ai/update-booking/" + bookingProperty?._id :  "http://portals.rarehomesgroup.com/update-booking/" + bookingProperty?._id
+        const url = process.env.BASE_URL === 
+         "http://dev-rare.srp.ai/" ? 
+         "http://dev-rare.srp.ai/update-booking/" + bookingProperty?._id : 
+         "http://portals.rarehomesgroup.com/" ?
+         "http://portals.rarehomesgroup.com/update-booking/" + bookingProperty?._id : 
+         "http://portals.rarehomesgroup.com/update-booking/" + bookingProperty?._id
         // console.log(owner_email, "owner_email")
         let contentPara = `This is to inform you about an upcoming booking for one of our holiday homes. Details have been attached.  Please ensure that the necessary arrangements are made by the maintenance department.`
         if (url) {
