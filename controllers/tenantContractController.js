@@ -1177,13 +1177,13 @@ try{
 
 const tenantSummaryReport = async (req,res,next) => {
   const propertyid = req.params.propertyid;
-
+  console.log("propertyid",propertyid)
 try{
   const data = [
     {
       '$match': {
           'propertyid': new mongoose.Types.ObjectId(propertyid),
-          'softdelete' : false
+           'softdelete' : false
       }
     }, {
       '$lookup': {

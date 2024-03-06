@@ -11,7 +11,7 @@ const BookingDataByTomorrow = (today, data) => {
     const Total_Tomorrow_Checkin = filteredData.map(date => ({ [date.checkindate]: 1 })).reduce((acc, obj) => {const [date, count] = Object.entries(obj)[0]; return acc + count; }, 0);
     const Total_Tomorrow_Checkout = filteredData.map(date => ({ [date.Total_Tomorrow_Checkout]: 1 })).reduce((acc, obj) => {const [date, count] = Object.entries(obj)[0]; return acc + count; }, 0);
     const Total_Tomorrow_Roomtrentamount = filteredData.map((data) => JSON.parse(data.roomrentamount)).reduce((acc , data) => acc + data ,0)
-    const Total_Tomorrow_Hostpayble = filteredData.map((data) => JSON.parse(data.roomrenthostpayable)).reduce((acc , data) => acc + data ,0)
+    const Total_Tomorrow_Hostpayble = filteredData.map((data) => data.roomrenthostpayable == "undefined" && data.roomrenthostpayable == " " ? null : data.roomrenthostpayable).reduce((acc , data) => acc + data ,0)
     const Total_Tomorrow_securitydepost = filteredData.map((data) => JSON.parse(data.securitydeposit)).reduce((acc , data) => acc + data ,0)
     const Total_Tomorrow_HostmanagementFees = filteredData.map((data) => JSON.parse(data.hostmanagementfee)).reduce((acc , data) => acc + data ,0)
     const Total_Approved_Booking = filteredData.map((data) => data.softdelete === false).reduce((acc , data) => acc + data ,0)
@@ -22,7 +22,7 @@ const BookingDataByTomorrow = (today, data) => {
         Total_Tomorrow_Checkin : Total_Tomorrow_Checkin,
         Total_Tomorrow_Checkout : Total_Tomorrow_Checkout,
         Total_Tomorrow_Roomtrentamount : JSON.parse(Number(Total_Tomorrow_Roomtrentamount).toFixed(2)),
-        Total_Tomorrow_Hostpayble : JSON.parse(Number(Total_Tomorrow_Hostpayble).toFixed(2)),
+        Total_Tomorrow_Hostpayble : Number(Total_Tomorrow_Hostpayble).toFixed(2),
         Total_Tomorrow_securitydepost : JSON.parse(Number(Total_Tomorrow_securitydepost).toFixed(2)),
         Total_Tomorrow_HostmanagementFees : JSON.parse(Number(Total_Tomorrow_HostmanagementFees).toFixed(2)),
         Total_Approved_Booking : Total_Approved_Booking,
