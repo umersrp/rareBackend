@@ -119,6 +119,7 @@ const Alltenants = async (req,res,next) => {
 const getAllTenantContract = asyncHandler(async (req, res) => {
   const tenantContract = await TenantContract
   .find({ softdelete: {$ne : true} })
+  .limit(10)
   .sort({ _id: -1 })
   if (!tenantContract?.length) {
       return res.status(400).json({ message: "No Tenant Contract found" })
