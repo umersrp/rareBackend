@@ -9,7 +9,6 @@ const BookingDataByTomorrow = (today, data) => {
         return checkinDate.toISOString().split('T')[0] === tomorrow.toISOString().split('T')[0] ? item : null;
     });
     const Total_Tomorrow_Checkin = filteredData.map(date => ({ [date.checkindate]: 1 })).reduce((acc, obj) => {const [date, count] = Object.entries(obj)[0]; return acc + count; }, 0);
-    const Total_Tomorrow_Checkout = filteredData.map(date => ({ [date.Total_Tomorrow_Checkout]: 1 })).reduce((acc, obj) => {const [date, count] = Object.entries(obj)[0]; return acc + count; }, 0);
     const Total_Tomorrow_Roomtrentamount = filteredData.map((data) => JSON.parse(data.roomrentamount)).reduce((acc , data) => acc + data ,0)
     const Total_Tomorrow_Hostpayble = filteredData.map((data) => data.roomrenthostpayable == "undefined" && data.roomrenthostpayable == " " ? null : data.roomrenthostpayable).reduce((acc , data) => acc + data ,0)
     const Total_Tomorrow_securitydepost = filteredData.map((data) => JSON.parse(data.securitydeposit)).reduce((acc , data) => acc + data ,0)
@@ -24,6 +23,7 @@ const BookingDataByTomorrow = (today, data) => {
         return checkoutDate.toISOString().split('T')[0] === tomorrow.toISOString().split('T')[0] ? item : null;
     });
 
+    const Total_Tomorrow_Checkout = checkoutfilteredData.map(date => ({ [date.checkoutdate]: 1 })).reduce((acc, obj) => {const [date, count] = Object.entries(obj)[0]; return acc + count; }, 0);
     const Total_Checkout_Tomorrow_Roomtrentamount = checkoutfilteredData.map((data) => JSON.parse(data.roomrentamount)).reduce((acc , data) => acc + data ,0)
     const Total_Checkout_Tomorrow_Hostpayble = checkoutfilteredData.map((data) => data.roomrenthostpayable == "undefined" && data.roomrenthostpayable == " " ? null : data.roomrenthostpayable).reduce((acc , data) => acc + data ,0)
     const Total_Checkout_Tomorrow_securitydepost = checkoutfilteredData.map((data) => JSON.parse(data.securitydeposit)).reduce((acc , data) => acc + data ,0)
@@ -34,7 +34,6 @@ const BookingDataByTomorrow = (today, data) => {
     const checkoutData = checkoutfilteredData.filter((data) => data.softdelete === false).sort((a,b) =>  b._id - a._id).slice(0,4)
     return {
         Total_Tomorrow_Checkin : Total_Tomorrow_Checkin,
-        Total_Tomorrow_Checkout : Total_Tomorrow_Checkout,
         Total_Tomorrow_Roomtrentamount : JSON.parse(Number(Total_Tomorrow_Roomtrentamount).toFixed(2)),
         Total_Tomorrow_Hostpayble : Number(Total_Tomorrow_Hostpayble).toFixed(2),
         Total_Tomorrow_securitydepost : JSON.parse(Number(Total_Tomorrow_securitydepost).toFixed(2)),
@@ -43,6 +42,7 @@ const BookingDataByTomorrow = (today, data) => {
         Total_Cancel_Booking : Total_Cancel_Booking,
         Total_Guests : Total_Guests.length,
         data: datas,
+        Total_Tomorrow_Checkout : Total_Tomorrow_Checkout,
         Total_Checkout_Tomorrow_Roomtrentamount : Total_Checkout_Tomorrow_Roomtrentamount,
         Total_Tomorrow_Roomtrentamount : JSON.parse(Number(Total_Tomorrow_Roomtrentamount).toFixed(2)),
         Total_Checkout_Tomorrow_Hostpayble : Number(Total_Checkout_Tomorrow_Hostpayble).toFixed(2),
@@ -83,7 +83,6 @@ const Checkout_filteredData =  data.filter((item) => {
     })
 
     const Total_Weekly_Checkin = filteredData.map(date => ({ [date.checkindate]: 1 })).reduce((acc, obj) => {const [date, count] = Object.entries(obj)[0]; return acc + count; }, 0);
-    const Total_Weekly_Checkout = filteredData.map(date => ({ [date.Total_Tomorrow_Checkout]: 1 })).reduce((acc, obj) => {const [date, count] = Object.entries(obj)[0]; return acc + count; }, 0);
     const Total_Weekly_Roomtrentamount = filteredData.map((data) => JSON.parse(data.roomrentamount)).reduce((acc , data) => acc + data ,0)
     const Total_Weekly_Hostpayble = filteredData.map((data) => data.roomrenthostpayable == "undefined" ? null : JSON.parse(data.roomrenthostpayable)).reduce((acc , data) => acc + data ,0)
     const Total_Weekly_securitydepost = filteredData.map((data) => JSON.parse(data.securitydeposit)).reduce((acc , data) => acc + data ,0)
@@ -94,6 +93,7 @@ const Checkout_filteredData =  data.filter((item) => {
     const datas = filteredData.filter((data) => data.softdelete === false).sort((a,b) =>  b._id - a._id).slice(0,4)
 
 
+    const Total_Weekly_Checkout = Checkout_filteredData.map(date => ({ [date.checkoutdate]: 1 })).reduce((acc, obj) => {const [date, count] = Object.entries(obj)[0]; return acc + count; }, 0);
     const Total_Weekly_Checkout_Roomtrentamount = Checkout_filteredData.map((data) => JSON.parse(data.roomrentamount)).reduce((acc , data) => acc + data ,0)
     const Total_Weekly_Checkout_Hostpayble = Checkout_filteredData.map((data) => data.roomrenthostpayable == "undefined" ? null : JSON.parse(data.roomrenthostpayable)).reduce((acc , data) => acc + data ,0)
     const Total_Weekly_Checkout_securitydepost = Checkout_filteredData.map((data) => JSON.parse(data.securitydeposit)).reduce((acc , data) => acc + data ,0)
@@ -106,7 +106,6 @@ const Checkout_filteredData =  data.filter((item) => {
 
     return {
         Total_Weekly_Checkin : Total_Weekly_Checkin,
-        Total_Weekly_Checkout : Total_Weekly_Checkout,
         Total_Weekly_Roomtrentamount : JSON.parse(Number(Total_Weekly_Roomtrentamount).toFixed(2)),
         Total_Weekly_Hostpayble : JSON.parse(Number(Total_Weekly_Hostpayble).toFixed(2)),
         Total_Weekly_securitydepost : JSON.parse(Number(Total_Weekly_securitydepost).toFixed(2)),
@@ -115,6 +114,7 @@ const Checkout_filteredData =  data.filter((item) => {
         Total_Cancel_Booking : Total_Cancel_Booking,
         Total_Guests :  Total_Guests.length,
         data: datas,
+        Total_Weekly_Checkout : Total_Weekly_Checkout,
         Total_Weekly_Checkout_Roomtrentamount : JSON.parse(Number(Total_Weekly_Checkout_Roomtrentamount).toFixed(2)),
         Total_Weekly_Checkout_Hostpayble : JSON.parse(Number(Total_Weekly_Checkout_Hostpayble).toFixed(2)),
         Total_Weekly_Checkout_securitydepost : JSON.parse(Number(Total_Weekly_Checkout_securitydepost).toFixed(2)),
@@ -143,7 +143,6 @@ const CheckoutfilteredData = data.filter((item) => {
 });
 
 const Total_Monthly_Checkin = filteredData.map(date => ({ [date.checkindate]: 1 })).reduce((acc, obj) => {const [date, count] = Object.entries(obj)[0]; return acc + count; }, 0);
-const Total_Monthly_Checkout = filteredData.map(date => ({ [date.Total_Tomorrow_Checkout]: 1 })).reduce((acc, obj) => {const [date, count] = Object.entries(obj)[0]; return acc + count; }, 0);
 const Total_Monthly_Roomtrentamount = filteredData.map((data) => JSON.parse(data.roomrentamount)).reduce((acc , data) => acc + data ,0)
 const Total_Monthly_Hostpayble = filteredData.map((data) => data.roomrenthostpayable == "undefined" ? null : JSON.parse(data.roomrenthostpayable)).reduce((acc , data) => acc + data ,0)
 const Total_Monthly_securitydepost = filteredData.map((data) => JSON.parse(data.securitydeposit)).reduce((acc , data) => acc + data ,0)
@@ -154,6 +153,7 @@ const Total_Guests = filteredData.map((data) => data.guestname == undefined && d
 const datas = filteredData.filter((data) => data.softdelete === false).sort((a,b) =>  b._id - a._id).slice(0,4)
 
 
+const Total_Monthly_Checkout = CheckoutfilteredData.map(date => ({ [date.checkoutdate]: 1 })).reduce((acc, obj) => {const [date, count] = Object.entries(obj)[0]; return acc + count; }, 0);
 const Total_Monthly_Checkout_Roomtrentamount = CheckoutfilteredData.map((data) => JSON.parse(data.roomrentamount)).reduce((acc , data) => acc + data ,0)
 const Total_Monthly_Checkout_Hostpayble = CheckoutfilteredData.map((data) => data.roomrenthostpayable == "undefined" ? null : JSON.parse(data.roomrenthostpayable)).reduce((acc , data) => acc + data ,0)
 const Total_Monthly_Checkout_securitydepost = CheckoutfilteredData.map((data) => JSON.parse(data.securitydeposit)).reduce((acc , data) => acc + data ,0)
@@ -165,7 +165,6 @@ const checkoutData = CheckoutfilteredData.filter((data) => data.softdelete === f
 
 return {
     Total_Monthly_Checkin : Total_Monthly_Checkin,
-    Total_Monthly_Checkout : Total_Monthly_Checkout,
     Total_Monthly_Roomtrentamount : JSON.parse(Number(Total_Monthly_Roomtrentamount).toFixed(2)),
     Total_Monthly_Hostpayble : JSON.parse(Number(Total_Monthly_Hostpayble).toFixed(2)),
     Total_Monthly_securitydepost : JSON.parse(Number(Total_Monthly_securitydepost).toFixed(2)),
@@ -174,6 +173,7 @@ return {
     Total_Cancel_Booking : Total_Cancel_Booking,
     Total_Guests :  Total_Guests.length,
     data: datas,
+    Total_Monthly_Checkout : Total_Monthly_Checkout,
     Total_Monthly_Checkout_Roomtrentamount : JSON.parse(Number(Total_Monthly_Checkout_Roomtrentamount).toFixed(2)),
     Total_Monthly_Checkout_Hostpayble : JSON.parse(Number(Total_Monthly_Checkout_Hostpayble).toFixed(2)),
     Total_Monthly_Checkout_securitydepost : JSON.parse(Number(Total_Monthly_Checkout_securitydepost).toFixed(2)),
@@ -200,7 +200,6 @@ const Checkout_filteredData = data.filter((item) => {
 });
 
 const Total_Yearly_Checkin = filteredData.map(date => ({ [date.checkindate]: 1 })).reduce((acc, obj) => {const [date, count] = Object.entries(obj)[0]; return acc + count; }, 0);
-const Total_Yearly_Checkout = filteredData.map(date => ({ [date.Total_Tomorrow_Checkout]: 1 })).reduce((acc, obj) => {const [date, count] = Object.entries(obj)[0]; return acc + count; }, 0);
 const Total_Yearly_Roomtrentamount = filteredData.map((data) => JSON.parse(data.roomrentamount)).reduce((acc , data) => acc + data ,0)
 const Total_Yearly_Hostpayble = filteredData.map((data) => data.roomrenthostpayable == "undefined" ? null : JSON.parse(data.roomrenthostpayable)).reduce((acc , data) => acc + data ,0)
 const Total_Yearly_securitydepost = filteredData.map((data) => JSON.parse(data.securitydeposit)).reduce((acc , data) => acc + data ,0)
@@ -210,6 +209,7 @@ const Total_Cancel_Booking = filteredData.map((data) => data.softdelete === true
 const Total_Guests = filteredData.map((data) => data.guestname == undefined && data.guestname == " " ? null :  data.guestname)
 const datas = filteredData.filter((data) => data.softdelete === false).sort((a,b) =>  Date.parse(b.checkindate) - Date.parse(a.checkindate)).slice(0,4)
 
+const Total_Yearly_Checkout = Checkout_filteredData.map(date => ({ [date.checkoutdate]: 1 })).reduce((acc, obj) => {const [date, count] = Object.entries(obj)[0]; return acc + count; }, 0);
 const Total_Yearly_Checkout_Roomtrentamount = Checkout_filteredData.map((data) => JSON.parse(data.roomrentamount)).reduce((acc , data) => acc + data ,0)
 const Total_Yearly_Checkout_Hostpayble = Checkout_filteredData.map((data) => data.roomrenthostpayable == "undefined" ? null : JSON.parse(data.roomrenthostpayable)).reduce((acc , data) => acc + data ,0)
 const Total_Yearly_Checkout_securitydepost = Checkout_filteredData.map((data) => JSON.parse(data.securitydeposit)).reduce((acc , data) => acc + data ,0)
@@ -222,7 +222,6 @@ const Checkout = Checkout_filteredData.filter((data) => data.softdelete === fals
 
 return {
     Total_Yearly_Checkin : Total_Yearly_Checkin,
-    Total_Yearly_Checkout : Total_Yearly_Checkout,
     Total_Yearly_Roomtrentamount : JSON.parse(Number(Total_Yearly_Roomtrentamount).toFixed(2)),
     Total_Yearly_Hostpayble : JSON.parse(Number(Total_Yearly_Hostpayble).toFixed(2)),
     Total_Yearly_securitydepost : JSON.parse(Number(Total_Yearly_securitydepost).toFixed(2)),
@@ -231,6 +230,7 @@ return {
     Total_Cancel_Booking : Total_Cancel_Booking,
     Total_Guests :  Total_Guests.length,
     data: datas,
+    Total_Yearly_Checkout : Total_Yearly_Checkout,
     Total_Yearly_Checkout_Roomtrentamount : JSON.parse(Number(Total_Yearly_Checkout_Roomtrentamount).toFixed(2)),
     Total_Yearly_Checkout_Hostpayble : JSON.parse(Number(Total_Yearly_Checkout_Hostpayble).toFixed(2)),
     Total_Yearly_Checkout_securitydepost : JSON.parse(Number(Total_Yearly_Checkout_securitydepost).toFixed(2)),
