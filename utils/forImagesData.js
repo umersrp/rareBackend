@@ -18,6 +18,12 @@ const multer = require('multer')
                 cb(null, "./public/chequeimage/");
             }else if (file.fieldname === "passportpdf") {
                 cb(null, "./public/passport/");
+            }else if (file.fieldname === "titledeeddocument") {
+                cb(null, "./public/titledeeddocument/");
+            }else if (file.fieldname === "propertyimages") {
+                cb(null, "./public/propertyimages/");
+            }else if (file.fieldname === "unitplanattachment") {
+                cb(null, "./public/unitplanattachment/");
             }
         },
         filename: function (req, file, cb) {
@@ -40,6 +46,15 @@ const multer = require('multer')
                 const filename = file.originalname.split(" ").join("-");
                 cb(null, `${filename}`);
             }else if (file.fieldname === "passportpdf") {
+                const filename = file.originalname.split(" ").join("-");
+                cb(null, `${filename}`);
+            }else if (file.fieldname === "titledeeddocument") {
+                const filename = file.originalname.split(" ").join("-");
+                cb(null, `${filename}`);
+            }else if (file.fieldname === "propertyimages") {
+                const filename = file.originalname.split(" ").join("-");
+                cb(null, `${filename}`);
+            }else if (file.fieldname === "unitplanattachment") {
                 const filename = file.originalname.split(" ").join("-");
                 cb(null, `${filename}`);
             }
@@ -74,11 +89,14 @@ const upload = multer({
   { name: "ejari_certificate_doc", maxCount: 8 },
   { name: "addendum_doc", maxCount: 8 },
   { name: "chequeDetailsImages", maxCount: 8 },
-  { name: "passportpdf", maxCount: 8 }
+  { name: "passportpdf", maxCount: 8 },
+  { name: "titledeeddocument", maxCount: 8 },
+  { name: "propertyimages", maxCount: 20 },
+  { name: "unitplanattachment", maxCount: 8 },
 ]);
 
 // const singleupload = multer({
 //     storage: storage,
 // }).single('expenseAttachment')
 
-module.exports = { upload};
+module.exports = { upload };
