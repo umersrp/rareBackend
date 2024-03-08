@@ -929,6 +929,11 @@ const createProperty = asyncHandler(async (req, res) => {
     if (!unitnumber || !communityid || !projectnameid) {
         return res.status(400).json({ message: 'All fields are required' })
     }
+
+
+
+
+    
     // console.log(req),
     // console.log(req.body)
     // if (!unitnumber) {
