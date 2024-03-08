@@ -21,6 +21,7 @@ app.use(cors({ origin: "*" }))
 // app.use(express.json())
 // app.use(express.json()); 
 app.use(cookieParser())
+app.use('/public', express.static(path.join(__dirname, 'public')));
 // app.use(upload.any());
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
@@ -49,7 +50,9 @@ app.use('/powerattorney', require('./routes/PowerAttorneyRoute'))
 app.use('/bankdetails', require('./routes/BankDetailsRoute'))
 app.use('/expense', require('./routes/expenseRoute'))
 app.use('/purpose', require('./routes/purposeRoute'))
-app.use('/public', express.static(path.join('public')));
+// app.use('/public', express.static(path.join('public')));
+
+
 app.use(express.static(path.join(__dirname, "./build")));
 app.get('/*', function (req, res) {
     return res.sendFile(path.resolve(__dirname, './build', 'index.html'));

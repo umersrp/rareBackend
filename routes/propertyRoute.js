@@ -1,20 +1,21 @@
 const express = require('express')
 const router = express.Router()
 const propertyController = require('../controllers/propertyController')
-const multer = require('multer')
+const { upload } = require('../utils/forImagesData')
+// const multer = require('multer')
 
 
-const upload = multer({
-    storage: multer.diskStorage({
-        destination: function (req, file, cd) {
-            cd(null, 'public/propertyimages')
-        },
-        filename: function (req, file, cb) {
+// const upload = multer({
+//     storage: multer.diskStorage({
+//         destination: function (req, file, cd) {
+//             cd(null, 'public/propertyimages')
+//         },
+//         filename: function (req, file, cb) {
 
-            cb(null, Date.now() + "_" + file.originalname)
-        }
-    })
-}).any()
+//             cb(null, Date.now() + "_" + file.originalname)
+//         }
+//     })
+// }).any()
 
 
 
