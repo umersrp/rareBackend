@@ -42,7 +42,7 @@ router.route('/api/ownerproperty/:customerid').get(propertyController.getownerPr
 router.route('/')
     .get(propertyController.getAllProperty)
     .post(upload, propertyController.createProperty)
-    .patch(upload, propertyController.updateProperty)
+    .put(upload, propertyController.updateProperty)
     .delete(propertyController.deleteProperty)
 
 module.exports = router
