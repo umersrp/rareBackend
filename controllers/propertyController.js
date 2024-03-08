@@ -980,9 +980,9 @@ const createProperty = asyncHandler(async (req, res) => {
         maidroom, driverroom, storeroom, otherroom, ensuite, bedroomensuite, totalbedroom, streetnumber, 
         is_available, available_for, unlisted, available_id, owner_representative_name, owner_representative_id, 
         createdBy, updatedBy,  no_ownernamedeed, OwnerNameAsPerDeed: OwnerNameAsPerDeedParse,
-        propertyimages : propertyimages ? req.files.propertyimages.map((data) => data.path.replace(/\\/g, '/'))  : " " , 
-        titledeeddocument : titledeeddocument ? req.files.titledeeddocument.map((data) => data.path.replace(/\\/g, '/')).pop() : " " , 
-        unitplanattachment : unitplanattachment ? req.files.unitplanattachment.map((data) => data.path.replace(/\\/g, '/')) : " ",
+        propertyimages : propertyimages ? req.files.propertyimages.map((data) => data.path.replace(/\\/g, '/'))  : "" , 
+        titledeeddocument : titledeeddocument ? req.files.titledeeddocument.map((data) => data.path.replace(/\\/g, '/')).pop() : "" , 
+        unitplanattachment : unitplanattachment ? req.files.unitplanattachment.map((data) => data.path.replace(/\\/g, '/')) : "",
         propertyType : propertyType ? propertyType : "Long-term"
     }
     await User.updateOne({_id : customerid} , { $set:{ subType : "owner"}})
