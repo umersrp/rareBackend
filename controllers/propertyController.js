@@ -929,7 +929,7 @@ const createProperty = asyncHandler(async (req, res) => {
             titledeeddocument,propertyimages,unitplanattachment
         } = req.files
 
-        console.log(req.files)
+       
        
     if (!unitnumber || !communityid || !projectnameid) {
         return res.status(400).json({ message: 'All fields are required' })
