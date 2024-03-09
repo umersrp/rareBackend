@@ -1168,7 +1168,7 @@ const updateNewProperty = asyncHandler(async (req, res) => {
             titledeeddocument,propertyimages,unitplanattachment
         } = req.files
 
-        console.log("titledeeddocument",titledeeddocument,propertyimages,unitplanattachment)
+        //console.log("titledeeddocument",titledeeddocument,propertyimages,unitplanattachment)
 
     // if (!_id || !usage || !propertytype || !projectstatus || !transactiontype || !projectname || !buildingname || !tenancystatus || !floor || !unitnumber || !sizearea || !communityname || !develpoername || !nobathroom || !furnished || !kitchen || !noparking || !dewapremises || !district) {
     //     return res.status(400).json({ message: 'All fields are required' })
