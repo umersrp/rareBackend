@@ -36,13 +36,17 @@ router.route('/api/app/search/:key').get(propertyController.getAdvanceSearchOwne
 router.route('/api/availability/').patch(upload, propertyController.updatePropertyAvailability)
 router.route('/api/status/:propertyid').put(propertyController.ChangePropertyStatus)
 router.route('/activecontract/:propertyid').get(propertyController.ActiveContract)
+router.route('/api/softdelete/:id').put(propertyController.Softdeleted)
+
 
 router.route('/api/ownerproperty/:customerid').get(propertyController.getownerProperty)
 
 router.route('/')
     .get(propertyController.getAllProperty)
     .post(upload, propertyController.createProperty)
-    .put(upload, propertyController.updateProperty)
+    .patch(upload, propertyController.updateProperty)
     .delete(propertyController.deleteProperty)
+
+    router.route('/update/:id').put(upload,propertyController.updateNewProperty)
 
 module.exports = router
