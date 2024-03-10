@@ -1041,7 +1041,13 @@ const getRentpurchaseById = asyncHandler(async (req, res) => {
 })
 
 const createRentpurchase = asyncHandler(async (req, res) => {
-    const { porpertyid, propertystatus, propertyvaluation, employeeid, employeename, listingsource, listingtype, noof_key, key_location, keylocation, numberkeys, numberaccesscard, maintenance, wardrobe, remarks, trakheesipermit, contractA, parking, unlisted, createdBy, updatedBy, multi_propertyvaluation, multivaluation, property_reference, transaction_status } = req.body
+    const { 
+        
+        porpertyid, propertystatus, propertyvaluation, employeeid, employeename, 
+        listingsource, listingtype, noof_key, key_location, keylocation, numberkeys, 
+        numberaccesscard, maintenance, wardrobe, remarks, trakheesipermit, contractA, 
+        parking, unlisted, createdBy, updatedBy, multi_propertyvaluation, multivaluation, 
+        property_reference, transaction_status } = req.body
     if (!porpertyid || !propertystatus) {
         return res.status(400).json({ message: "All Fields are requires" })
     }
@@ -1126,7 +1132,10 @@ const createRentpurchase = asyncHandler(async (req, res) => {
     }
 
     const rentpurchaseObject = { porpertyid, propertystatus, propertyvaluation, employeeid, employeename, listingsource, listingtype, noof_key, key_location, keylocation, numberkeys, numberaccesscard, maintenance, wardrobe, remarks, trakheesipermit, contractA, parking, unlisted, createdBy, updatedBy, multi_propertyvaluation, multivaluation, property_reference, transaction_status }
+
+    
     const rentpurchases = await RentPurchase.create(rentpurchaseObject)
+    
 
     const formData = new URLSearchParams();
     formData.append('_id', porpertyid);
@@ -1134,7 +1143,7 @@ const createRentpurchase = asyncHandler(async (req, res) => {
     formData.append('available_for', propertystatus);
     formData.append('available_id', rentpurchases?._id);
     formData.append('unlisted', false);
-
+    
     try {
         const header = {
             "Content-Type": "application/json"
@@ -1142,6 +1151,8 @@ const createRentpurchase = asyncHandler(async (req, res) => {
 
         // Make the PATCH request to the specified endpoint 
         const response = await axios.patch(`${process.env.OWN_SERVER}/property/api/availability/`, formData.toString(), header);
+        await RentPurchase.updateOne({_id : rentpurchases?._id},{ $set : { unlisted : false }},{new : true})
+        
 
         if (response.status === 200) {
             if (rentpurchases) {

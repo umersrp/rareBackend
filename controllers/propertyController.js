@@ -980,9 +980,9 @@ const createProperty = asyncHandler(async (req, res) => {
         maidroom, driverroom, storeroom, otherroom, ensuite, bedroomensuite, totalbedroom, streetnumber, 
         is_available, available_for, unlisted, available_id, owner_representative_name, owner_representative_id, 
         createdBy, updatedBy,  no_ownernamedeed, OwnerNameAsPerDeed: OwnerNameAsPerDeedParse,
-        propertyimages : propertyimages ? req.files.propertyimages.map((data) => data.path.replace(/\\/g, '/'))  : " " , 
-        titledeeddocument : titledeeddocument ? req.files.titledeeddocument.map((data) => data.path.replace(/\\/g, '/')).pop() : " " , 
-        unitplanattachment : unitplanattachment ? req.files.unitplanattachment.map((data) => data.path.replace(/\\/g, '/')) : " ",
+        propertyimages : propertyimages ? req.files.propertyimages.map((data) => data.path.replace(/\\/g, '/'))  : "" , 
+        titledeeddocument : titledeeddocument ? req.files.titledeeddocument.map((data) => data.path.replace(/\\/g, '/')).pop() : "" , 
+        unitplanattachment : unitplanattachment ? req.files.unitplanattachment.map((data) => data.path.replace(/\\/g, '/')) : "",
         propertyType : propertyType ? propertyType : "Long-term"
     }
     await User.updateOne({_id : customerid} , { $set:{ subType : "owner"}})
@@ -1051,6 +1051,8 @@ const updateProperty = asyncHandler(async (req, res) => {
         const {
             titledeeddocument,propertyimages,unitplanattachment
         } = req.files
+
+        console.log("titledeeddocument",titledeeddocument)
 
     // if (!_id || !usage || !propertytype || !projectstatus || !transactiontype || !projectname || !buildingname || !tenancystatus || !floor || !unitnumber || !sizearea || !communityname || !develpoername || !nobathroom || !furnished || !kitchen || !noparking || !dewapremises || !district) {
     //     return res.status(400).json({ message: 'All fields are required' })
@@ -1146,6 +1148,123 @@ const updateProperty = asyncHandler(async (req, res) => {
     return res.json({ message: `${updatedPropertyN.unitnumber} updated` })
 })
 
+const updateNewProperty = asyncHandler(async (req, res) => {
+    const id = req.params.id
+    const { 
+        _id, usage, propertytype, projectstatus, transactiontype, projectname,propertyType, 
+        buildingname, subtype, typelayout, tenancystatus, floor, unitnumber, sizearea, plotsize, 
+        communityname, ownerassociation, develpoername, amenities, nobathroom, halfbathroom, 
+        propertycountry, propertycity, furnished, kitchen, noparking, balcony, dewapremises, 
+        district, parkingbay, youtubelink, propertyview,  propertylocation, 
+        floorplan, typicalfloorplan, buildingelevation, amenitiesimages,  
+        plotplanattachment, builduparea, customerid, measure_units, customername, purchasedate, 
+        ownernamedeed, purchasevaue, communityid, projectnameid, buildingid, subtypeid, developerid, 
+        totalbathroom, bathroomensuite, maidroom, driverroom, storeroom, otherroom, ensuite, 
+        bedroomensuite, totalbedroom, streetnumber, is_available, available_for, unlisted, 
+        available_id, owner_representative_name, owner_representative_id, createdBy, 
+        updatedBy,  owner_changed, no_ownernamedeed, OwnerNameAsPerDeed } = req.body
+
+        const {
+            titledeeddocument,propertyimages,unitplanattachment
+        } = req.files
+
+        //console.log("titledeeddocument",titledeeddocument,propertyimages,unitplanattachment)
+
+    // if (!_id || !usage || !propertytype || !projectstatus || !transactiontype || !projectname || !buildingname || !tenancystatus || !floor || !unitnumber || !sizearea || !communityname || !develpoername || !nobathroom || !furnished || !kitchen || !noparking || !dewapremises || !district) {
+    //     return res.status(400).json({ message: 'All fields are required' })
+    // }
+
+    const updateProperty = await AddProperty.findById(id).exec()
+    if (!updateProperty) {
+        return res.status(400).json({ message: 'Property not found' })
+    }
+
+    // const duplicate = await AddProperty.findOne({ unitnumber }).lean().exec()
+    // if (duplicate && duplicate?._id.toString() !== _id) {
+    //     return res.status(400).json({ message: 'Duplicate Property' })
+    // }
+
+    // updateProperty.propertname = propertname
+    updateProperty.usage = usage
+    updateProperty.propertytype = propertytype
+    updateProperty.propertyType = propertyType
+    updateProperty.projectstatus = projectstatus
+    updateProperty.transactiontype = transactiontype
+    updateProperty.projectname = projectname
+    updateProperty.subtype = subtype
+    updateProperty.typelayout = typelayout
+    updateProperty.tenancystatus = tenancystatus
+    updateProperty.floor = floor
+    updateProperty.unitnumber = unitnumber
+    updateProperty.sizearea = sizearea
+    updateProperty.plotsize = plotsize
+    updateProperty.communityname = communityname
+    updateProperty.buildingname = buildingname
+    updateProperty.ownerassociation = ownerassociation
+    updateProperty.develpoername = develpoername
+    updateProperty.amenities = amenities
+    updateProperty.nobathroom = nobathroom
+    updateProperty.halfbathroom = halfbathroom
+    updateProperty.propertycountry = propertycountry
+    updateProperty.propertycity = propertycity
+    updateProperty.furnished = furnished
+    updateProperty.kitchen = kitchen
+    updateProperty.noparking = noparking
+    updateProperty.balcony = balcony
+    updateProperty.dewapremises = dewapremises
+    updateProperty.district = district
+    updateProperty.youtubelink = youtubelink
+    updateProperty.parkingbay = parkingbay
+    updateProperty.propertyview = propertyview
+    updateProperty.propertyimages = propertyimages ? req.files.propertyimages.map((data) => data.path.replace(/\\/g, '/')) : propertyimages
+
+    updateProperty.propertylocation = propertylocation
+    updateProperty.floorplan = floorplan
+    updateProperty.typicalfloorplan = typicalfloorplan
+    updateProperty.buildingelevation = buildingelevation
+    updateProperty.amenitiesimages = amenitiesimages
+    updateProperty.unitplanattachment =  unitplanattachment ? req.files.unitplanattachment.map((data) => data.path.replace(/\\/g, '/')) : unitplanattachment,
+    updateProperty.plotplanattachment = plotplanattachment
+    updateProperty.customerid = customerid
+    updateProperty.customername = customername
+    updateProperty.purchasedate = purchasedate
+    updateProperty.ownernamedeed = ownernamedeed
+    updateProperty.purchasevaue = purchasevaue
+    updateProperty.communityid = communityid
+    updateProperty.projectnameid = projectnameid
+    updateProperty.buildingid = buildingid
+    updateProperty.subtypeid = subtypeid
+    updateProperty.developerid = developerid
+    updateProperty.totalbathroom = totalbathroom
+    updateProperty.bathroomensuite = bathroomensuite
+    updateProperty.maidroom = maidroom
+    updateProperty.driverroom = driverroom
+    updateProperty.storeroom = storeroom
+    updateProperty.otherroom = otherroom
+    updateProperty.ensuite = ensuite
+    updateProperty.totalbedroom = totalbedroom
+    updateProperty.bedroomensuite = bedroomensuite
+    updateProperty.streetnumber = streetnumber
+    updateProperty.is_available = is_available
+    updateProperty.available_for = available_for
+    updateProperty.unlisted = unlisted
+    updateProperty.available_id = available_id
+    updateProperty.owner_changed = owner_changed
+    updateProperty.owner_representative_id = owner_representative_id
+    updateProperty.owner_representative_name = owner_representative_name
+    updateProperty.titledeeddocument = titledeeddocument ? req.files.titledeeddocument.map((data) => data.path.replace(/\\/g, '/')).pop() : titledeeddocument,
+    updateProperty.builduparea = builduparea
+    updateProperty.no_ownernamedeed = no_ownernamedeed
+    updateProperty.createdBy = createdBy
+    updateProperty.updatedBy = updatedBy
+    updateProperty.measure_units = measure_units
+   // updateProperty.OwnerNameAsPerDeed = JSON.parse(OwnerNameAsPerDeed) || []
+
+    const updatedPropertyN =  await AddProperty.findByIdAndUpdate( {_id : id } , { $set : updateProperty } , { new : true})
+
+    return res.json({ message: `${updatedPropertyN.unitnumber} updated` })
+})
+
 const updatePropertyAvailability = asyncHandler(async (req, res) => {
     // console.log(req.body);
     const { _id, OwnerNameAsPerDeed, ...updateData } = req.body;
@@ -1214,6 +1333,7 @@ const updatePropertyAvailability = asyncHandler(async (req, res) => {
         //     // console.log('comming into else portion')
         //       return res.status(200).json({ message: `Property ${updatedProperty.unitnumber} updated` })
         // }
+        
         return res.status(200).json({ message: `Property ${updatedProperty.unitnumber} updated` })
     } else {
         return res.status(400).json({ message: 'Invalid Property data received' })
@@ -1360,7 +1480,13 @@ const ChangePropertyStatus = async (req,res,next) => {
     }
 }
 
-
+const Softdeleted = async (req,res,next) => {
+    try{
+        await AddProperty.updateOne({_id : req.params.id},{$set:{ softdelete : true}},{new : true})
+    }catch(err){
+        console.log("ERror")
+    }
+}
 
 const ActiveContract = async (req,res,next) => {
     try{
@@ -1448,6 +1574,7 @@ const ActiveContract = async (req,res,next) => {
 
 module.exports = {
     getownerProperty,
+    updateNewProperty,
     getAllProperty,
     getPropertyById,
     createProperty,
@@ -1468,5 +1595,6 @@ module.exports = {
     ChangePropertyStatus,
     ActiveContract,
     allShorttermProperties,
-    OwnerShorttermProperties
+    OwnerShorttermProperties,
+    Softdeleted
 }
