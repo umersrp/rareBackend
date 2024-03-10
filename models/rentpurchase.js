@@ -78,7 +78,7 @@ const rentPurchaseSchema = new mongoose.Schema({
     },
     unlisted: {
         type: Boolean,
-        require: true,
+        // require: true,
         default: false
     },
     unlist_date: {
