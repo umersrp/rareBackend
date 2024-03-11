@@ -26,7 +26,7 @@ const getAllProperty = asyncHandler(async (req, res) => {
     const allProperties = await AddProperty
     .find({
         $and: [
-            { owner_changed: { $ne: true } },
+            // { owner_changed: { $ne: true } },
             { softdelete: { $ne: true } } 
         ],
        
@@ -1258,7 +1258,7 @@ const updateNewProperty = asyncHandler(async (req, res) => {
     updateProperty.createdBy = createdBy
     updateProperty.updatedBy = updatedBy
     updateProperty.measure_units = measure_units
-   // updateProperty.OwnerNameAsPerDeed = JSON.parse(OwnerNameAsPerDeed) || []
+    updateProperty.OwnerNameAsPerDeed = JSON.parse(OwnerNameAsPerDeed)
 
     const updatedPropertyN =  await AddProperty.findByIdAndUpdate( {_id : id } , { $set : updateProperty } , { new : true})
 
@@ -1482,7 +1482,7 @@ const ChangePropertyStatus = async (req,res,next) => {
 
 const Softdeleted = async (req,res,next) => {
     try{
-        await AddProperty.updateOne({_id : req.params.id},{$set:{ softdelete : true}},{new : true})
+        await AddProperty.updateOne({_id : req.params.id},{$set:{ owner_changed : true}},{new : true})
     }catch(err){
         console.log("ERror")
     }
