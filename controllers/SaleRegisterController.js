@@ -154,7 +154,7 @@ const createSaleRegister = asyncHandler(async (req, res) => {
        check_option_cash, 
        check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, 
        title_deed_fee, seller_id, seller_new, seller_type, 
-       contract_A_attachment , contract_B_attachment , sales_contract_attachment 
+       contract_A_attachment , contract_B_attachment , sales_contract_attachment ,
        notes } = req.body
 
       // const {contract_A_attachment , contract_B_attachment , sales_contract_attachment } = req.files

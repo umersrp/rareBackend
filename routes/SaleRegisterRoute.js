@@ -8,7 +8,7 @@ router.route('/api/search').get(SaleRegisterController.SearchSaleRegisterByQuery
 router.route('/api/total').get(SaleRegisterController.AllCounts)
 router.route('/')
     .get(SaleRegisterController.getAllSaleRegister)
-    .post( upload ,SaleRegisterController.createSaleRegister)
+    .post( SaleRegisterController.createSaleRegister)
     .patch(upload ,SaleRegisterController.updateSaleRegister)
     .delete(SaleRegisterController.deleteSaleRegister)
 
