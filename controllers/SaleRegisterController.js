@@ -285,7 +285,7 @@ const deleteSaleRegister = asyncHandler(async (req, res) => {
 
 const SearchSaleRegisterByQuery = async (req, res, next) => {
     try {
-        const { unitnumber, seller_email, buyer_email, communityid, projectnameid, buildingid } = req.query;
+        const { unitnumber, seller_email, buyer_email, communityid, projectnameid, buildingid , transaction_type } = req.query;
         console.log(req.query)
         // Constructing match conditions
         const matchConditions = {
@@ -298,6 +298,7 @@ const SearchSaleRegisterByQuery = async (req, res, next) => {
         if (communityid) matchConditions['propertyid.communityid'] = new mongoose.Types.ObjectId(communityid);
         if (projectnameid) matchConditions['propertyid.projectnameid'] = new mongoose.Types.ObjectId(projectnameid);
         if (buildingid) matchConditions['propertyid.buildingid'] = new mongoose.Types.ObjectId(buildingid);
+        if (transaction_type) matchConditions['transaction_type'] = transaction_type;
 
         
         
@@ -330,6 +331,7 @@ const SearchSaleRegisterByQuery = async (req, res, next) => {
                     'floor': 1,
                     'sold_for': 1,
                     'noc_charges': 1,
+                    'transaction_type' : 1,
                     'trustee_fee_amount': 1,
                     'commission_amount': 1,
                     'title_deed_fee': 1,
