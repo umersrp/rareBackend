@@ -298,7 +298,7 @@ const SearchSaleRegisterByQuery = async (req, res, next) => {
         if (communityid) matchConditions['propertyid.communityid'] = new mongoose.Types.ObjectId(communityid);
         if (projectnameid) matchConditions['propertyid.projectnameid'] = new mongoose.Types.ObjectId(projectnameid);
         if (buildingid) matchConditions['propertyid.buildingid'] = new mongoose.Types.ObjectId(buildingid);
-        if (transaction_type) matchConditions['propertyid.transaction_type'] = new mongoose.Types.ObjectId(transaction_type);
+        if (transaction_type) matchConditions['transaction_type'] = new mongoose.Types.ObjectId(transaction_type);
 
         
         
