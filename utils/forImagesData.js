@@ -24,6 +24,12 @@ const multer = require('multer')
                 cb(null, "./public/propertyimages/");
             }else if (file.fieldname === "unitplanattachment") {
                 cb(null, "./public/unitplanattachment/");
+            }else if (file.fieldname === "contract_A_attachment") {
+                cb(null, "./public/contractA/");
+            }else if (file.fieldname === "contract_B_attachment") {
+                cb(null, "./public/contractB/");
+            }else if (file.fieldname === "sales_contract_attachment") {
+                cb(null, "./public/sales_contract/");
             }
         },
         filename: function (req, file, cb) {
@@ -55,6 +61,15 @@ const multer = require('multer')
                 const filename = file.originalname.split(" ").join("-");
                 cb(null, `${filename}`);
             }else if (file.fieldname === "unitplanattachment") {
+                const filename = file.originalname.split(" ").join("-");
+                cb(null, `${filename}`);
+            }else if (file.fieldname === "contract_A_attachment") {
+                const filename = file.originalname.split(" ").join("-");
+                cb(null, `${filename}`);
+            }else if (file.fieldname === "contract_B_attachment") {
+                const filename = file.originalname.split(" ").join("-");
+                cb(null, `${filename}`);
+            }else if (file.fieldname === "sales_contract_attachment") {
                 const filename = file.originalname.split(" ").join("-");
                 cb(null, `${filename}`);
             }
@@ -93,6 +108,9 @@ const upload = multer({
   { name: "titledeeddocument", maxCount: 8 },
   { name: "propertyimages", maxCount: 20 },
   { name: "unitplanattachment", maxCount: 8 },
+  { name: "contract_A_attachment", maxCount: 8 },
+  { name: "contract_B_attachment", maxCount: 8 },
+  { name: "sales_contract_attachment", maxCount: 8 },
 ]);
 
 // const singleupload = multer({
