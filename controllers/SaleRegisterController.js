@@ -111,7 +111,7 @@ const getAllSaleRegister = asyncHandler(async (req, res) => {
 
         res.json(allSaleRegisterAllData);
     } catch (error) {
-        console.log("======>",error);
+        console.error(error);
         res.status(500).json({ message: "Server Error" });
     }
 })
@@ -153,12 +153,9 @@ const createSaleRegister = asyncHandler(async (req, res) => {
        buyer_id ,
        check_option_cash, 
        check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, 
-       title_deed_fee, seller_id, seller_new, seller_type, 
-       contract_A_attachment , contract_B_attachment , sales_contract_attachment ,
-       notes } = req.body
-
-      // const {contract_A_attachment , contract_B_attachment , sales_contract_attachment } = req.files
-    // if (!SaleRegister) { 
+       contract_B_attachment, title_deed_fee, seller_id, seller_new, seller_type, 
+       contract_A_attachment, sales_contract_attachment, notes } = req.body
+    // if (!SaleRegister) {
     //     return res.status(400).json({ message: 'All fields are required' })
     // }
 
@@ -173,12 +170,8 @@ const createSaleRegister = asyncHandler(async (req, res) => {
       trustee_fee_amount, trustee_buyer, trustee_seller, trustee_both, transfer_fee_amount, transfer_buyer, transfer_seller, 
       transfer_both, commission_amount, vat_on_commission, buyer_name, buyer_inhouse_agent_name, buyer_outside_agent_name, 
       transaction_type, exoected_transfer_date, createdBy, updatedBy, property_new, buyer_new, buyer_type, buyer_id : buyer_id || "000000000000000000000000" ,  
-      check_option_cash, check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, contract_A_attachment,contract_B_attachment,sales_contract_attachment,
-      // contract_A_attachment : contract_A_attachment ? req.files.contract_A_attachment.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : contract_A_attachment, 
-      // contract_B_attachment  : contract_B_attachment ? req.files.contract_B_attachment.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : contract_B_attachment,
-      // sales_contract_attachment : sales_contract_attachment ? req.files.sales_contract_attachment.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : sales_contract_attachment, 
-      title_deed_fee, seller_id, seller_new, seller_type, 
-       notes }
+      check_option_cash, check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, contract_B_attachment, 
+      title_deed_fee, seller_id, seller_new, seller_type, contract_A_attachment, sales_contract_attachment, notes }
 
     const createSaleRegister = await SaleRegister.create(SaleRegisterObject)
 
@@ -190,17 +183,7 @@ const createSaleRegister = asyncHandler(async (req, res) => {
 })
 
 const updateSaleRegister = asyncHandler(async (req, res) => {
-    const { _id, propertyid, property_type, unitnumber, communityname, projectname, 
-      buildingname, floor, sold_for, noc_charges, trustee_fee_amount, trustee_buyer, 
-      trustee_seller, trustee_both, transfer_fee_amount, transfer_buyer, transfer_seller, 
-      transfer_both, commission_amount, vat_on_commission, buyer_name, buyer_inhouse_agent_name, 
-      buyer_outside_agent_name, transaction_type, exoected_transfer_date, createdBy, updatedBy,
-       property_new, buyer_new, buyer_type, buyer_id, check_option_cash, check_option_mortage, 
-       noccharges_both, noccharges_buyer, noccharges_seller, title_deed_fee, seller_id, 
-       seller_new, seller_type,  notes,contract_A_attachment , contract_B_attachment , sales_contract_attachment
-       } = req.body
-
-      //  const {contract_A_attachment , contract_B_attachment , sales_contract_attachment } = req.files
+    const { _id, propertyid, property_type, unitnumber, communityname, projectname, buildingname, floor, sold_for, noc_charges, trustee_fee_amount, trustee_buyer, trustee_seller, trustee_both, transfer_fee_amount, transfer_buyer, transfer_seller, transfer_both, commission_amount, vat_on_commission, buyer_name, buyer_inhouse_agent_name, buyer_outside_agent_name, transaction_type, exoected_transfer_date, createdBy, updatedBy, property_new, buyer_new, buyer_type, buyer_id, check_option_cash, check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, contract_B_attachment, title_deed_fee, seller_id, seller_new, seller_type, contract_A_attachment, sales_contract_attachment, notes } = req.body
 
     if (!_id) {
         return res.status(400).json({ message: '_id is required' })
@@ -251,16 +234,13 @@ const updateSaleRegister = asyncHandler(async (req, res) => {
     updateSaleRegister.noccharges_buyer = noccharges_buyer
     updateSaleRegister.noccharges_seller = noccharges_seller
     updateSaleRegister.noccharges_both = noccharges_both
+    updateSaleRegister.contract_B_attachment = contract_B_attachment
     updateSaleRegister.title_deed_fee = title_deed_fee
     updateSaleRegister.seller_id = seller_id
     updateSaleRegister.seller_new = seller_new
     updateSaleRegister.seller_type = seller_type
     updateSaleRegister.sales_contract_attachment = sales_contract_attachment
     updateSaleRegister.contract_A_attachment = contract_A_attachment
-    updateSaleRegister.contract_B_attachment = contract_B_attachment
-    // updateSaleRegister.sales_contract_attachment = sales_contract_attachment ? req.files.sales_contract_attachment.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : sales_contract_attachment, 
-    // updateSaleRegister.contract_A_attachment = contract_A_attachment ? req.files.contract_A_attachment.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : contract_A_attachment, 
-    // updateSaleRegister.contract_B_attachment = contract_B_attachment ? req.files.contract_B_attachment.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : contract_B_attachment,
     updateSaleRegister.notes = notes
 
     await updateSaleRegister.save()
@@ -305,7 +285,7 @@ const deleteSaleRegister = asyncHandler(async (req, res) => {
 
 const SearchSaleRegisterByQuery = async (req, res, next) => {
     try {
-        const { unitnumber, seller_email, buyer_email, communityid, projectnameid, buildingid , transaction_type } = req.query;
+        const { unitnumber, seller_email, buyer_email, communityid, projectnameid, buildingid } = req.query;
         console.log(req.query)
         // Constructing match conditions
         const matchConditions = {
@@ -318,7 +298,6 @@ const SearchSaleRegisterByQuery = async (req, res, next) => {
         if (communityid) matchConditions['propertyid.communityid'] = new mongoose.Types.ObjectId(communityid);
         if (projectnameid) matchConditions['propertyid.projectnameid'] = new mongoose.Types.ObjectId(projectnameid);
         if (buildingid) matchConditions['propertyid.buildingid'] = new mongoose.Types.ObjectId(buildingid);
-        if (transaction_type) matchConditions['transaction_type'] = transaction_type;
 
         
         
@@ -351,7 +330,6 @@ const SearchSaleRegisterByQuery = async (req, res, next) => {
                     'floor': 1,
                     'sold_for': 1,
                     'noc_charges': 1,
-                    'transaction_type' : 1,
                     'trustee_fee_amount': 1,
                     'commission_amount': 1,
                     'title_deed_fee': 1,
