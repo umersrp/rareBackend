@@ -293,77 +293,79 @@ const deleteSaleRegister = asyncHandler(async (req, res) => {
 })
 
 const SearchSaleRegisterByQuery = async (req, res, next) => {
-    try {
-        const { unitnumber, seller_email, buyer_email, communityid, projectnameid, buildingid } = req.query;
-        console.log(req.query)
-        // Constructing match conditions
-        const matchConditions = {
-            'softdelete': false
-        };
+  try {
+      const { unitnumber, seller_email, buyer_email, communityid, projectnameid, buildingid , transaction_type } = req.query;
+      console.log(req.query)
+      // Constructing match conditions
+      const matchConditions = {
+          'softdelete': false
+      };
 
-        if (unitnumber) matchConditions['propertyid.unitnumber'] = unitnumber;
-        if (seller_email) matchConditions['seller_id.email'] = seller_email;
-        if (buyer_email) matchConditions['buyer_id.email'] = buyer_email;
-        if (communityid) matchConditions['propertyid.communityid'] = new mongoose.Types.ObjectId(communityid);
-        if (projectnameid) matchConditions['propertyid.projectnameid'] = new mongoose.Types.ObjectId(projectnameid);
-        if (buildingid) matchConditions['propertyid.buildingid'] = new mongoose.Types.ObjectId(buildingid);
+      if (unitnumber) matchConditions['propertyid.unitnumber'] = unitnumber;
+      if (seller_email) matchConditions['seller_id.email'] = seller_email;
+      if (buyer_email) matchConditions['buyer_id.email'] = buyer_email;
+      if (communityid) matchConditions['propertyid.communityid'] = new mongoose.Types.ObjectId(communityid);
+      if (projectnameid) matchConditions['propertyid.projectnameid'] = new mongoose.Types.ObjectId(projectnameid);
+      if (buildingid) matchConditions['propertyid.buildingid'] = new mongoose.Types.ObjectId(buildingid);
+      if (transaction_type) matchConditions['transaction_type'] = transaction_type
 
-        
-        
-        const data = [
-           
-            { '$lookup': { 'from': 'addproperties', 'localField': 'propertyid', 'foreignField': '_id', 'as': 'propertyid' } },
-            { '$lookup': { 'from': 'users', 'localField': 'buyer_id', 'foreignField': '_id', 'as': 'buyer_id' } },
-            { '$lookup': { 'from': 'users', 'localField': 'seller_id', 'foreignField': '_id', 'as': 'seller_id' } },
-            { '$unwind': { 'path': '$propertyid', 'preserveNullAndEmptyArrays': true } },
-            { '$unwind': { 'path': '$buyer_id', 'preserveNullAndEmptyArrays': true } },
-            { '$unwind': { 'path': '$seller_id', 'preserveNullAndEmptyArrays': true } },
-            { '$match': matchConditions },
-            {
-                '$project': {
-                    'unitnumber': '$propertyid.unitnumber',
-                    'communityid': '$propertyid.communityid',
-                    'buildingid': '$propertyid.buildingid',
-                    'projectnameid': '$propertyid.projectnameid',
-                    'seller_name': { '$concat': ['$seller_id.firstname', ' ', '$seller_id.lastname'] },
-                    'seller_email': '$seller_id.email',
-                    'seller_mobilenumber': '$seller_id.contactno',
-                    'seller_nationality': '$seller_id.countryofresidence',
-                    'seller_passportnumber': '$seller_id.passportidno',
-                    'buyer_name': { '$concat': ['$buyer_id.firstname', ' ', '$buyer_id.lastname'] },
-                    'buyer_email': '$buyer_id.email',
-                    'buyer_mobilenumber': '$buyer_id.contactno',
-                    'communityname': 1,
-                    'projectname': 1,
-                    'buildingname': 1,
-                    'floor': 1,
-                    'sold_for': 1,
-                    'noc_charges': 1,
-                    'trustee_fee_amount': 1,
-                    'commission_amount': 1,
-                    'title_deed_fee': 1,
-                    'buyer_inhouse_agent_name': 1,
-                    'buyer_outside_agent_name': 1,
-                    'createdAt': 1
-                }
-            },
-            { '$sort': { 'createdAt': -1 } }
-        ];
+      
+      
+      const data = [
+         
+          { '$lookup': { 'from': 'addproperties', 'localField': 'propertyid', 'foreignField': '_id', 'as': 'propertyid' } },
+          { '$lookup': { 'from': 'users', 'localField': 'buyer_id', 'foreignField': '_id', 'as': 'buyer_id' } },
+          { '$lookup': { 'from': 'users', 'localField': 'seller_id', 'foreignField': '_id', 'as': 'seller_id' } },
+          { '$unwind': { 'path': '$propertyid', 'preserveNullAndEmptyArrays': true } },
+          { '$unwind': { 'path': '$buyer_id', 'preserveNullAndEmptyArrays': true } },
+          { '$unwind': { 'path': '$seller_id', 'preserveNullAndEmptyArrays': true } },
+          { '$match': matchConditions },
+          {
+              '$project': {
+                  'unitnumber': '$propertyid.unitnumber',
+                  'communityid': '$propertyid.communityid',
+                  'buildingid': '$propertyid.buildingid',
+                  'projectnameid': '$propertyid.projectnameid',
+                  'seller_name': { '$concat': ['$seller_id.firstname', ' ', '$seller_id.lastname'] },
+                  'seller_email': '$seller_id.email',
+                  'seller_mobilenumber': '$seller_id.contactno',
+                  'seller_nationality': '$seller_id.countryofresidence',
+                  'seller_passportnumber': '$seller_id.passportidno',
+                  'buyer_name': { '$concat': ['$buyer_id.firstname', ' ', '$buyer_id.lastname'] },
+                  'buyer_email': '$buyer_id.email',
+                  'buyer_mobilenumber': '$buyer_id.contactno',
+                  'communityname': 1,
+                  'projectname': 1,
+                  'buildingname': 1,
+                  'floor': 1,
+                  'sold_for': 1,
+                  'noc_charges': 1,
+                  'trustee_fee_amount': 1,
+                  'transaction_type' : 1,
+                  'commission_amount': 1,
+                  'title_deed_fee': 1,
+                  'buyer_inhouse_agent_name': 1,
+                  'buyer_outside_agent_name': 1,
+                  'createdAt': 1
+              }
+          },
+          { '$sort': { 'createdAt': -1 } }
+      ];
 
-        const search_sale_register = await SaleRegister.aggregate(data);
-        res.status(200).json({
-            total: search_sale_register.length,
-            message: "Search results",
-            status: true,
-            data: search_sale_register
-        });
-    } catch (err) {
-        console.error("Error:", err);
-        res.status(500).json({
-            message: "No Search results",
-            status: false
-        });
-    }
+      const search_sale_register = await SaleRegister.aggregate(data);
+      res.status(200).json({
+          total: search_sale_register.length,
+          message: "Search results",
+          status: true,
+          data: search_sale_register
+      });
+  } catch (err) {
+      console.error("Error:", err);
+      res.status(500).json({
+          message: "No Search results",
+          status: false
+      });
+  }
 };
 
 
