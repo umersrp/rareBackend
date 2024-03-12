@@ -153,8 +153,12 @@ const createSaleRegister = asyncHandler(async (req, res) => {
        buyer_id ,
        check_option_cash, 
        check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, 
-       contract_B_attachment, title_deed_fee, seller_id, seller_new, seller_type, 
-       contract_A_attachment, sales_contract_attachment, notes } = req.body
+       title_deed_fee, seller_id, seller_new, seller_type, 
+        notes } = req.body
+
+       const {contract_A_attachment , contract_B_attachment , sales_contract_attachment } = req.files;
+
+       
     // if (!SaleRegister) {
     //     return res.status(400).json({ message: 'All fields are required' })
     // }
@@ -170,8 +174,13 @@ const createSaleRegister = asyncHandler(async (req, res) => {
       trustee_fee_amount, trustee_buyer, trustee_seller, trustee_both, transfer_fee_amount, transfer_buyer, transfer_seller, 
       transfer_both, commission_amount, vat_on_commission, buyer_name, buyer_inhouse_agent_name, buyer_outside_agent_name, 
       transaction_type, exoected_transfer_date, createdBy, updatedBy, property_new, buyer_new, buyer_type, buyer_id : buyer_id || "000000000000000000000000" ,  
-      check_option_cash, check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, contract_B_attachment, 
-      title_deed_fee, seller_id, seller_new, seller_type, contract_A_attachment, sales_contract_attachment, notes }
+      check_option_cash, check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, 
+      title_deed_fee, seller_id, notes,
+      seller_new, seller_type, 
+      contract_A_attachment : contract_A_attachment ? req.files.contract_A_attachment.map((data) =>"/"+data.path.replace(/\\/g, '/')).pop() : "" , 
+      contract_B_attachment : contract_B_attachment ? req.files.contract_B_attachment.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : "" , 
+      sales_contract_attachment : sales_contract_attachment ? req.files.sales_contract_attachment.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : ""
+     }
 
     const createSaleRegister = await SaleRegister.create(SaleRegisterObject)
 
