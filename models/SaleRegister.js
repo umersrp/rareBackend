@@ -139,14 +139,17 @@ const SaleRegisterSchema = new mongoose.Schema({
     },
     contract_B_attachment: {
         type: String,
+        default :""
         // require: true,
     },
     sales_contract_attachment: {
         type: String,
+        default :""
         // require: true,
     },
     contract_A_attachment: {
         type: String,
+        default :""
         // require: true,
     },
     title_deed_fee: {
