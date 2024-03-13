@@ -48,5 +48,8 @@ router.route('/')
     .delete(propertyController.deleteProperty)
 
     router.route('/update/:id').put(upload,propertyController.updateNewProperty)
+    router.route('/ownerchanged').put(upload,propertyController.PropertyOwnerChanged)
+    router.route('/api/property/:id').get(upload,propertyController.getProprtybyId)
+    
 
 module.exports = router

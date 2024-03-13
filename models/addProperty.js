@@ -323,6 +323,14 @@ const addPropertySchema = new mongoose.Schema({
         require: true,
         ref: 'employee'
     },
+    OwnerChangedList:[
+        {
+            previousownerId : { type : mongoose.Schema.Types.ObjectId ,  ref: 'User'},
+            previousownername : { type : String},
+            unitnumber : { type : String},
+            date : { type : Date}
+        }
+    ]
 }, {
     timestamps: true,
 })

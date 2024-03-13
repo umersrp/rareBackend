@@ -26,7 +26,7 @@ const getAllProperty = asyncHandler(async (req, res) => {
     const allProperties = await AddProperty
     .find({
         $and: [
-            // { owner_changed: { $ne: true } },
+             { owner_changed: { $ne: true } },
             { softdelete: { $ne: true } } 
         ],
        
@@ -1258,7 +1258,7 @@ const updateNewProperty = asyncHandler(async (req, res) => {
     updateProperty.createdBy = createdBy
     updateProperty.updatedBy = updatedBy
     updateProperty.measure_units = measure_units
-    updateProperty.OwnerNameAsPerDeed = JSON.parse(OwnerNameAsPerDeed)
+    updateProperty.OwnerNameAsPerDeed = OwnerNameAsPerDeed ? JSON.parse(OwnerNameAsPerDeed) : []
 
     const updatedPropertyN =  await AddProperty.findByIdAndUpdate( {_id : id } , { $set : updateProperty } , { new : true})
 
@@ -1572,6 +1572,79 @@ const ActiveContract = async (req,res,next) => {
         }
     }
 
+    const PropertyOwnerChanged = async (req,res,next) => {
+        try{
+
+            const { 
+                usage, propertytype, projectstatus, transactiontype, projectname, propertyType,
+                buildingname, subtype, typelayout, tenancystatus, floor, unitnumber, sizearea, 
+                plotsize, communityname, ownerassociation, develpoername, amenities, nobathroom, 
+                halfbathroom, propertycountry, propertycity, furnished, kitchen, noparking, balcony, 
+                dewapremises, district, parkingbay, youtubelink, propertyview, propertylocation, 
+                floorplan, typicalfloorplan, buildingelevation, amenitiesimages, plotplanattachment,
+                 builduparea, customerid, measure_units, customername, purchasedate, ownernamedeed, purchasevaue, communityid, 
+                 projectnameid, buildingid, subtypeid, developerid, totalbathroom, bathroomensuite, maidroom, driverroom, storeroom, 
+                 otherroom, ensuite, bedroomensuite, totalbedroom, streetnumber, is_available, available_for, unlisted, available_id,
+                  owner_representative_name, owner_representative_id, createdBy, updatedBy, 
+                  OwnerNameAsPerDeed, no_ownernamedeed ,OwnerChangedList,owner_changed
+                } = req.body
+
+        
+                const {
+                    titledeeddocument,propertyimages,unitplanattachment
+                } = req.files
+
+                let OwnerNameAsPerDeedParse
+
+                if (OwnerNameAsPerDeed) {
+                    OwnerNameAsPerDeedParse = JSON.parse(OwnerNameAsPerDeed)
+                }
+            
+
+                const propertyObject = { 
+                    usage, propertytype, projectstatus, transactiontype, 
+                    projectname, buildingname, subtype, typelayout, tenancystatus, floor, unitnumber, 
+                    sizearea, plotsize, communityname, ownerassociation, develpoername, amenities, nobathroom, 
+                    halfbathroom, propertycountry, propertycity, furnished, kitchen, noparking, balcony, dewapremises, 
+                    district, parkingbay, youtubelink, propertyview, propertylocation, floorplan, 
+                    typicalfloorplan, buildingelevation, amenitiesimages, plotplanattachment, 
+                    builduparea, customerid, measure_units, customername, purchasedate, ownernamedeed, purchasevaue, 
+                    communityid, projectnameid, buildingid, subtypeid, developerid, totalbathroom, bathroomensuite, 
+                    maidroom, driverroom, storeroom, otherroom, ensuite, bedroomensuite, totalbedroom, streetnumber, 
+                    is_available, available_for, unlisted, available_id, owner_representative_name, owner_representative_id, 
+                    createdBy, updatedBy,  no_ownernamedeed, OwnerNameAsPerDeed: OwnerNameAsPerDeedParse,
+                    propertyimages : propertyimages ? req.files.propertyimages.map((data) => "/"+data.path.replace(/\\/g, '/'))  : "" , 
+                    titledeeddocument : titledeeddocument ? req.files.titledeeddocument.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : "" , 
+                    unitplanattachment : unitplanattachment ? req.files.unitplanattachment.map((data) => "/"+data.path.replace(/\\/g, '/')) : "",
+                    propertyType : propertyType ? propertyType : "Long-term",
+                    owner_changed ,
+                    OwnerChangedList  :  JSON.parse(OwnerChangedList)
+                }
+                await User.updateOne({_id : customerid} , { $set:{ subType : "owner"}})
+            
+                 await AddProperty.create(propertyObject)
+
+               res.status(201).json({ message : "proprty created with new owner"})
+            
+           
+        }catch(err){
+            console.log("============>",err)
+            res.status(500).json({
+                message : "No property added",
+                status : false
+            })
+        }
+    }
+
+    const getProprtybyId = async (req,res,next) => {
+        const id = req.params.id
+        try{
+            const property = await AddProperty.findOne({ _id : id}).select("customerid customername unitnumber")
+            res.status(200).json({data : property})
+        }catch(err){
+            res.status(500).json({message:"No data found"})
+        }
+    }
 module.exports = {
     getownerProperty,
     updateNewProperty,
@@ -1596,5 +1669,7 @@ module.exports = {
     ActiveContract,
     allShorttermProperties,
     OwnerShorttermProperties,
-    Softdeleted
+    Softdeleted,
+    PropertyOwnerChanged,
+    getProprtybyId
 }
