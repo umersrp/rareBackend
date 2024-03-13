@@ -32,7 +32,6 @@ const getAllProperty = asyncHandler(async (req, res) => {
        
     })
     .select("projectname buildingname unitnumber floor communityname")
-    .limit(3)
     .sort({ _id: -1 })
     // .sort({ filteringfilter: sort })
     if (!allProperties?.length) {
