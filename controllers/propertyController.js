@@ -1645,7 +1645,70 @@ const ActiveContract = async (req,res,next) => {
             res.status(500).json({message:"No data found"})
         }
     }
+
+
+    const ownerProperty = async (req,res,next) => {
+        try{
+          const data =  [
+                {
+                  '$match': {
+                    'customerid': new mongoose.Types.ObjectId(req.params.customerid), 
+                    'propertyType': 'Short-term'
+                  }
+                }, {
+                  '$sort': {
+                    'createdAt': -1
+                  }
+                }
+              ]
+              const ownerproperty = await AddProperty.aggregate(data)
+              res.status(200).json({
+                 total : ownerproperty.length , 
+                 message : "Owner Property fetched" , 
+                 status:true ,
+                  data : ownerproperty
+                })
+        }catch(err){
+            res.status(500).json({
+                message : "no Owner Property fetched" , 
+                status:false
+               })
+        }
+    }
+
+
+    const ownerBookingWithProperty = async (req,res,next) => {
+        try{
+          const data =  [
+                {
+                  '$match': {
+                    'propertyid': new mongoose.Types.ObjectId(req.params.propertyid),
+                  }
+                }, {
+                  '$sort': {
+                    'createdAt': -1
+                  }
+                }
+              ]
+
+            const ownerbookingwithpropertyid = await Bookings.aggregate(data)
+            res.status(200).json({
+                total : ownerbookingwithpropertyid.length , 
+                message : "Owner Property fetched" , 
+                status:true ,
+                 data : ownerbookingwithpropertyid
+               })
+        }catch(err){
+            res.status(500).json({
+                message : "no Owner Property fetched" , 
+                status:false
+               })
+        }
+    }
+
 module.exports = {
+    ownerProperty,
+    ownerBookingWithProperty,
     getownerProperty,
     updateNewProperty,
     getAllProperty,
