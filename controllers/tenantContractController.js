@@ -1422,13 +1422,111 @@ try{
   })
 
 }catch(err){
-  res.status(200).json({
+  res.status(500).json({
     message : "No Tenant found",
     status : false
   })
 }
 }
 
+
+const Tenant_Overview_Owner = async (req,res,next) => {
+  const ownerid = req.params.ownerid
+try{
+  const data = [
+    {
+      '$lookup': {
+        'from': 'addproperties', 
+        'localField': 'propertyid', 
+        'foreignField': '_id', 
+        'as': 'propertyid'
+      }
+    }, {
+      '$unwind': {
+        'path': '$propertyid', 
+        'preserveNullAndEmptyArrays': true
+      }
+    }, {
+      '$project': {
+        'ownerid': '$propertyid.customerid', 
+        'tenantcontractno': 1, 
+        'tenancy_contract_doc': 1, 
+        'ejari_certificate_doc': 1, 
+        'addendum_doc': 1, 
+        'contractexecutiondate': 1, 
+        'createdAt': 1, 
+        'commission': 1, 
+        'noofchequeorinstallment': 1, 
+        'securitydepositamount': 1, 
+        'rentalamount': 1, 
+        'chequeDetails': 1, 
+        'contractstartdate': 1, 
+        'contractenddate': 1, 
+        'email': 1, 
+        'mobilenumber': 1, 
+        'customerid': 1, 
+        'customertype': 1, 
+        'guestname': 1, 
+        'passportnumber': 1
+      }
+    }, {
+      '$match': {
+        'softdelete': {
+          '$ne': true
+        }, 
+        'ownerid': new mongoose.Types.ObjectId(ownerid),
+      }
+    }
+  ]
+
+  const datas = [
+    {
+      '$match': {
+        '$or':[
+          {'status': 'Pending'},
+          {'customerid' : new mongoose.Types.ObjectId(ownerid)}
+
+        ]
+      }
+    }, {
+      '$project': {
+        'unitnumber': 1, 
+        'communityname': 1, 
+        'projectname': 1, 
+        'buildingname': 1, 
+        'floor': 1, 
+        'status': 1, 
+        'customername' : 1,
+        'propertyType': 1
+      }
+    }, {
+      '$sort': {
+        'createdAt': -1
+      }
+    }
+  ]
+
+  const ownerTenant = await TenantContract.aggregate(data)
+  const ownertennatOverviews = await AddProperty.aggregate(datas);
+
+  const today = new Date();
+  const alltenantsData = TenantDataOverview(today , ownerTenant)
+  const tenantsPropertyData = TenantPropertyData(ownertennatOverviews)
+  res.status(200).json({
+    message : "Tenant Overview",
+    status : true,
+    data : {
+      tenantData : alltenantsData,
+      Propertydata : tenantsPropertyData
+    }
+  })
+}catch(err){
+  res.status(500).json({
+    message : "No Tenant found",
+    status : false
+  })
+}
+}
 
 
 
@@ -1448,6 +1546,7 @@ module.exports = {
     tenantSummaryReport,
     tenantSummaryReportByDates,
     updateManys,
-    Tenant_Overview
+    Tenant_Overview,
+    Tenant_Overview_Owner
     // allTenantRequest
 }
