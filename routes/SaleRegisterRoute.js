@@ -10,7 +10,7 @@ router.route('/api/total').get(SaleRegisterController.AllCounts)
 router.route('/')
     .get(SaleRegisterController.getAllSaleRegister)
     .post(upload , SaleRegisterController.createSaleRegister)
-    .patch(SaleRegisterController.updateSaleRegister)
+    .patch(upload , SaleRegisterController.updateSaleRegister)
     .delete(SaleRegisterController.deleteSaleRegister)
 
 module.exports = router
