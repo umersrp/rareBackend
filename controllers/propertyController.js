@@ -1677,12 +1677,12 @@ const ActiveContract = async (req,res,next) => {
     }
 
 
-    const ownerBookingWithProperty = async (req,res,next) => {
+    const ownerBookings = async (req,res,next) => {
         try{
           const data =  [
                 {
                   '$match': {
-                    'propertyid': new mongoose.Types.ObjectId(req.params.propertyid),
+                    'ownerid': req.params.ownerid,
                   }
                 }, {
                   '$sort': {
@@ -1708,7 +1708,7 @@ const ActiveContract = async (req,res,next) => {
 
 module.exports = {
     ownerProperty,
-    ownerBookingWithProperty,
+    ownerBookings,
     getownerProperty,
     updateNewProperty,
     getAllProperty,

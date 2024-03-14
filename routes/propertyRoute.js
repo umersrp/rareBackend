@@ -53,6 +53,6 @@ router.route('/')
 
 
     router.route('/api/ownerpropertiesbyownerId/:customerid').get(propertyController.ownerProperty)
-    router.route('/api/ownerbookingdbypropertyId/:propertyid').get(propertyController.ownerBookingWithProperty)
+    router.route('/api/ownerbookingdbyownerId/:ownerid').get(propertyController.ownerBookings)
 
 module.exports = router
