@@ -1681,8 +1681,93 @@ const ActiveContract = async (req,res,next) => {
         try{
           const data =  [
                 {
+                  '$addFields': {
+                    'ownerid': {
+                      '$toObjectId': [
+                        '$ownerid'
+                      ]
+                    }
+                  }
+                }, {
+                  '$lookup': {
+                    'from': 'users', 
+                    'localField': 'ownerid', 
+                    'foreignField': '_id', 
+                    'as': 'ownerid'
+                  }
+                }, {
+                  '$unwind': {
+                    'path': '$ownerid', 
+                    'preserveNullAndEmptyArrays': true
+                  }
+                }, {
+                  '$project': {
+                    'owneremail': '$ownerid.email', 
+                    'propertyid': 1, 
+                    'unitnumber': 1, 
+                    'buildingname': 1, 
+                    'floor': 1, 
+                    'buildingnumber': 1, 
+                    'communityname': 1, 
+                    'guestname': 1, 
+                    'passportnumber': 1, 
+                    'nationality': 1, 
+                    'mobilenumber': 1, 
+                    'email': 1, 
+                    'checkintype': 1, 
+                    'noadults': 1, 
+                    'totaloccupants': 1, 
+                    'confirmationcode': 1, 
+                    'bookingagent': 1, 
+                    'checkindate': 1, 
+                    'nonight': 1, 
+                    'reservationdate': 1, 
+                    'modepayment': 1, 
+                    'checkoutdate': 1, 
+                    'tourismfee': 1, 
+                    'totalpayout': 1, 
+                    'securitydeposit': 1, 
+                    'hostservicefee': 1, 
+                    'cleaningfee': 1, 
+                    'tourismfeetillmonth': 1, 
+                    'totaladditionalfee': 1, 
+                    'totalcollectall': 1, 
+                    'totalroomrent': 1, 
+                    'roomrentamount': 1, 
+                    'totalguestservices': 1, 
+                    'vatperbookingrent': 1, 
+                    'vatperservicefee': 1, 
+                    'vatpercleaningfee': 1, 
+                    'vatperguestmanagementfee': 1, 
+                    'totalvatper': 1, 
+                    'customertype': 1, 
+                    'passportpdf': 1, 
+                    'ownerid': 1, 
+                    'guestpercentage': 1, 
+                    'hostmanagementfee': 1, 
+                    'firstdays': 1, 
+                    'moremonths': 1, 
+                    'cancelled': 1, 
+                    'hostmanagementpercent': 1, 
+                    'roomrenthostpayable': 1, 
+                    'dtcm_uploaded': 1, 
+                    'passortid_collected': 1, 
+                    'sign_verified': 1, 
+                    'smartcode_provided': 1, 
+                    'payment_collected': 1, 
+                    'payment_received': 1, 
+                    'softdelete': 1, 
+                    'new_customer': 1, 
+                    'other_passports': 1, 
+                    'createdBy': 1, 
+                    'createdAt': 1, 
+                    'updatedAt': 1, 
+                    '__v': 1, 
+                    'bookingnumber': 1
+                  }
+                }, {
                   '$match': {
-                    'ownerid': req.params.ownerid,
+                    'owneremail': `${req.params.owneremail}`
                   }
                 }, {
                   '$sort': {
@@ -1699,6 +1784,7 @@ const ActiveContract = async (req,res,next) => {
                  data : ownerbookingwithpropertyid
                })
         }catch(err){
+            console.log("======>",err)
             res.status(500).json({
                 message : "no Owner Property fetched" , 
                 status:false
