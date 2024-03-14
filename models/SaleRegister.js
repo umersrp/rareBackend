@@ -179,15 +179,15 @@ const SaleRegisterSchema = new mongoose.Schema({
     },
     transaction_type: {
         type: String,
-        require: true,
+        // require: true,
     },
     exoected_transfer_date: {
         type: String,
-        require: true,
+        // require: true,
     },
     softdelete: {
         type: Boolean,
-        require: true,
+        // require: true,
         default: false
     },
     createdBy: {
