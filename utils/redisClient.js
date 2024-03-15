@@ -7,7 +7,7 @@ const redisClient = redis.createClient({
     password: process.env.REDIS_PASSWORD,
   });
 
-  console.log("redisClients",redisClient.ping().then((res) => res))
+//   console.log("redisClients",redisClient.ping().then((res) => res))
 
 redisClient.on('error', (err,data) => {
     console.log(data)
