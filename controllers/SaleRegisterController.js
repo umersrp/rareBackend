@@ -310,7 +310,7 @@ const deleteSaleRegister = asyncHandler(async (req, res) => {
 const SearchSaleRegisterByQuery = async (req, res, next) => {
   try {
       const { unitnumber, seller_email, buyer_email, communityid, projectnameid, buildingid , transaction_type } = req.query;
-      console.log(req.query)
+     // console.log(req.query)
       // Constructing match conditions
       const matchConditions = {
           'softdelete': false
