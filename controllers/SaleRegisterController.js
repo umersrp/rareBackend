@@ -174,7 +174,8 @@ const createSaleRegister = asyncHandler(async (req, res) => {
       propertyid, property_type, unitnumber, communityname, projectname, buildingname, floor, sold_for, noc_charges, 
       trustee_fee_amount, trustee_buyer, trustee_seller, trustee_both, transfer_fee_amount, transfer_buyer, transfer_seller, 
       transfer_both, commission_amount, vat_on_commission, buyer_name, buyer_inhouse_agent_name, buyer_outside_agent_name, 
-      transaction_type : transaction, exoected_transfer_date, createdBy, updatedBy, property_new, buyer_new, buyer_type, buyer_id : buyerId ,  
+      transaction_type : transaction, exoected_transfer_date, createdBy, updatedBy, property_new, buyer_new, buyer_type, 
+      buyer_id : buyerId ,  
       check_option_cash, check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, 
       title_deed_fee, seller_id, notes,
       seller_new, seller_type, 
@@ -206,6 +207,9 @@ const updateSaleRegister = asyncHandler(async (req, res) => {
     } = req.body
 
       const {contract_A_attachment , contract_B_attachment , sales_contract_attachment } = req.files;
+
+      const buyerId = buyer_id || null;
+      const transaction = transaction_type || "Not Available"
 
 
      // console.log("contract_A_attachment",contract_A_attachment,contract_B_attachment,sales_contract_attachment)
@@ -246,14 +250,14 @@ const updateSaleRegister = asyncHandler(async (req, res) => {
     updateSaleRegister.buyer_name = buyer_name
     updateSaleRegister.buyer_inhouse_agent_name = buyer_inhouse_agent_name
     updateSaleRegister.buyer_outside_agent_name = buyer_outside_agent_name
-    updateSaleRegister.transaction_type = transaction_type
+    updateSaleRegister.transaction_type = transaction_type ? transaction_type : transaction,
     updateSaleRegister.exoected_transfer_date = exoected_transfer_date
     updateSaleRegister.createdBy = createdBy
     updateSaleRegister.updatedBy = updatedBy
     updateSaleRegister.property_new = property_new
     updateSaleRegister.buyer_new = buyer_new
     updateSaleRegister.buyer_type = buyer_type
-    updateSaleRegister.buyer_id = buyer_id
+    updateSaleRegister.buyer_id = buyer_id ? buyer_id : buyerId 
     updateSaleRegister.check_option_cash = check_option_cash
     updateSaleRegister.check_option_mortage = check_option_mortage
     updateSaleRegister.noccharges_buyer = noccharges_buyer
