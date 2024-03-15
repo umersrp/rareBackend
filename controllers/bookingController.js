@@ -12,6 +12,7 @@ const sendEmail = require('../utils/sendEmail')
 const guestBooking = require('../utils/guestBooking')
 const moment = require('moment-timezone');
 const bookingCreateUpdateEmail = require('../utils/bookingCreateUpdateEmail')
+const redisClient = require('../utils/redisClient')
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
@@ -353,6 +354,7 @@ const getAllBooking = asyncHandler(async (req, res) => {
             return { ...bookingDateSet, reservation_date: formattedreservationdate, checkout_date: formattedcheckoutdate, Created_At: formattedCreatedAt, checkin_date: formattedcheckindate, updated_At: formattedupdatedAt, createdAt: formattedCreatedAt, updatedAt: formattedupdatedAt, reservationdate: formattedreservationdate, checkindate: formattedcheckindate, checkoutdate: formattedcheckoutdate }
         })
 
+        //redisClient.setex(key, 3600, JSON.stringify(formattedDate));
 
         res.json(formattedDate);
     } catch (error) {
