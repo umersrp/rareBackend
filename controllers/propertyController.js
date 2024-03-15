@@ -1777,12 +1777,7 @@ const ActiveContract = async (req,res,next) => {
               ]
 
             const ownerbookingwithpropertyid = await Bookings.aggregate(data)
-            res.status(200).json({
-                total : ownerbookingwithpropertyid.length , 
-                message : "Owner Property fetched" , 
-                status:true ,
-                 data : ownerbookingwithpropertyid
-               })
+            res.status(200).json(ownerbookingwithpropertyid)
         }catch(err){
             console.log("======>",err)
             res.status(500).json({

@@ -354,7 +354,7 @@ const getAllBooking = asyncHandler(async (req, res) => {
             return { ...bookingDateSet, reservation_date: formattedreservationdate, checkout_date: formattedcheckoutdate, Created_At: formattedCreatedAt, checkin_date: formattedcheckindate, updated_At: formattedupdatedAt, createdAt: formattedCreatedAt, updatedAt: formattedupdatedAt, reservationdate: formattedreservationdate, checkindate: formattedcheckindate, checkoutdate: formattedcheckoutdate }
         })
 
-        //redisClient.setex(key, 3600, JSON.stringify(formattedDate));
+       // redisClient.setEx(key, 3600, JSON.stringify(formattedDate));
 
         res.json(formattedDate);
     } catch (error) {
