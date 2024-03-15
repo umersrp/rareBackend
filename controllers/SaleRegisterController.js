@@ -158,6 +158,7 @@ const createSaleRegister = asyncHandler(async (req, res) => {
 
        const {contract_A_attachment , contract_B_attachment , sales_contract_attachment } = req.files;
        const buyerId = buyer_id || null;
+       const transaction = transaction_type || "Not Available"
        
     // if (!SaleRegister) {
     //     return res.status(400).json({ message: 'All fields are required' })
@@ -173,7 +174,7 @@ const createSaleRegister = asyncHandler(async (req, res) => {
       propertyid, property_type, unitnumber, communityname, projectname, buildingname, floor, sold_for, noc_charges, 
       trustee_fee_amount, trustee_buyer, trustee_seller, trustee_both, transfer_fee_amount, transfer_buyer, transfer_seller, 
       transfer_both, commission_amount, vat_on_commission, buyer_name, buyer_inhouse_agent_name, buyer_outside_agent_name, 
-      transaction_type, exoected_transfer_date, createdBy, updatedBy, property_new, buyer_new, buyer_type, buyer_id : buyerId ,  
+      transaction_type : transaction, exoected_transfer_date, createdBy, updatedBy, property_new, buyer_new, buyer_type, buyer_id : buyerId ,  
       check_option_cash, check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, 
       title_deed_fee, seller_id, notes,
       seller_new, seller_type, 

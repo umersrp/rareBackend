@@ -179,8 +179,8 @@ const SaleRegisterSchema = new mongoose.Schema({
     },
     transaction_type: {
         type: String,
-        enum : ["Successful" , "InProgress" , "Unsuccessful" ],
-        default : "Unsuccessful"
+        enum : ["Successful" , "InProgress" , "Unsuccessful" , "Not Available" ],
+        default : "Not Available"
         // require: true,
     },
     exoected_transfer_date: {
