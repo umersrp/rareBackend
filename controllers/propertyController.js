@@ -58,7 +58,7 @@ const getAllPropertyConnect = asyncHandler(async (req, res) => {
     const employeeCreatedBy = allProperties.map(employee => employee.createdBy);
     const employeeIdsUpdatedBy = allProperties.map(employee => employee.updatedBy);
     const propertyIdss = allProperties.map(data => data._id)
-    
+
 
     const buildingData = await BuildingName.find({ _id: { $in: propertyIds } });
     const userData = await User.find({ _id: { $in: ownerId } });
@@ -72,44 +72,44 @@ const getAllPropertyConnect = asyncHandler(async (req, res) => {
     const employeeDataUpdatedBy = await Employee.find({ _id: { $in: employeeIdsUpdatedBy } });
 
 
-    const compareproperty = allProperties.map(data =>({ id : data._id.toString()}))
-    const tenantDetails = await tenantContract.find({ propertyid: { $in: propertyIdss } }).sort({ createdAt : -1})
-    const Booking = await  Bookings.find({  propertyid : {$in : propertyIdss }}).sort({ createdAt : -1})
+    const compareproperty = allProperties.map(data => ({ id: data._id.toString() }))
+    const tenantDetails = await tenantContract.find({ propertyid: { $in: propertyIdss } }).sort({ createdAt: -1 })
+    const Booking = await Bookings.find({ propertyid: { $in: propertyIdss } }).sort({ createdAt: -1 })
 
-        if(!tenantDetails.length) {
-            rentpurchase.updateOne({porpertyid : compareproperty.map((data) => data.id).pop()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
+    if (!tenantDetails.length) {
+        rentpurchase.updateOne({ porpertyid: compareproperty.map((data) => data.id).pop() }, { $set: { status: "Pending" } }, { new: true }).then(res => res)
+    }
+
+    tenantDetails.forEach((data) => {
+
+        if (data !== undefined && data.propertyid.toString() != undefined && data.softdelete === true) {
+
+            rentpurchase.updateOne({ porpertyid: data.propertyid.toString() }, { $set: { status: "Pending" } }, { new: true }).then(res => res)
         }
 
-        tenantDetails.forEach((data) => {
-
-            if(data !== undefined && data.propertyid.toString() != undefined && data.softdelete === true){
-                
-                rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
+        if (data !== undefined && data.propertyid.toString() != undefined && data.softdelete === false) {
+            if (new Date(data.contractenddate) > new Date()) {
+                rentpurchase.updateOne({ porpertyid: data.propertyid.toString() }, { $set: { status: "Occupied" } }, { new: true }).then(res => res)
+            } else if (new Date(data.contractenddate) < new Date()) {
+                rentpurchase.updateOne({ porpertyid: data.propertyid.toString() }, { $set: { status: "Vacant" } }, { new: true }).then(res => res)
             }
-          
-            if(data !== undefined && data.propertyid.toString() != undefined && data.softdelete === false ){
-                if(new Date(data.contractenddate) > new Date()){
-                    rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true}).then(res => res)
-                }else if(new Date(data.contractenddate) < new Date()){
-                    rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true}).then(res => res)
-                }
 
-                // else{
-                //     rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
-                // }
-            }
-           
-
-         
-        })
-        Booking.forEach((data) => {
-            if(data !== undefined && data.propertyid.toString() != undefined ){
-                rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Short-term" }},{new : true}).then(res => res)
-            }
             // else{
-            //     RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Long-term" }},{new : true}).then(res => res)
+            //     rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
             // }
-        })
+        }
+
+
+
+    })
+    Booking.forEach((data) => {
+        if (data !== undefined && data.propertyid.toString() != undefined) {
+            rentpurchase.updateOne({ porpertyid: data.propertyid.toString() }, { $set: { propertyType: "Short-term" } }, { new: true }).then(res => res)
+        }
+        // else{
+        //     RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Long-term" }},{new : true}).then(res => res)
+        // }
+    })
 
     const updatedProperties = allProperties.map(property => {
         const propertyObject = property.toObject();
@@ -154,7 +154,7 @@ const getAllPropertyConnect = asyncHandler(async (req, res) => {
         }
 
         if (availableId) {
-            const avaiability  = avaiabilityData.find(avaiability =>avaiability?.porpertyid === _id.toString());
+            const avaiability = avaiabilityData.find(avaiability => avaiability?.porpertyid === _id.toString());
             updatedProperty.multivaluation = avaiability?.multivaluation?.filter(data => data.unlisted === false ? data : null);
             updatedProperty.propertystatus = avaiability?.propertystatus;
             updatedProperty.unlisted = avaiability?.unlisted;
@@ -547,7 +547,7 @@ const getAdvanceSearch = asyncHandler(async (req, res) => {
 
         const propertyIdForTenant = allProperties.map(property => property._id);
         const propertyIdForavailityId = allProperties.map(property => property.available_id);
-       // console.log(propertyIdForTenant,"propertyIdForTenant",propertyIdForavailityId)
+        // console.log(propertyIdForTenant,"propertyIdForTenant",propertyIdForavailityId)
         const propertyIds = allProperties.map(property => property.buildingid);
         const ownerId = allProperties.map(property => property.customerid);
         const ownerRepresentativeId = allProperties.map(property => property.owner_representative_id);
@@ -573,7 +573,7 @@ const getAdvanceSearch = asyncHandler(async (req, res) => {
         const employeeDataCreatedBy = await Employee.find({ _id: { $in: employeeCreatedBy } });
         const employeeDataUpdatedBy = await Employee.find({ _id: { $in: employeeIdsUpdatedBy } });
         // const tenantDataIds = await tenantContract.find({ propertyid: { $in: employeeIdsUpdatedBy } });
-      
+
         const updatedProperties = allProperties.map(property => {
             const propertyObject = property.toObject();
             const { buildingid, customerid, communityid, projectnameid, subtypeid, developerid, unitnumber, createdAt, _id, usage, propertytype, projectstatus, transactiontype, typelayout, tenancystatus, floor, sizearea, plotsize, ownerassociation, nobathroom, halfbathroom, furnished, kitchen, noparking, balcony, dewapremises, district, parkingbay, propertyview, purchasedate, ownernamedeed, purchasevaue, totalbathroom, totalbedroom, streetnumber, maidroom, storeroom, bedroomensuite, bathroomensuite, driverroom, otherroom, ensuite, is_available, available_for, unlisted, available_id, propertylocation, owner_representative_name, owner_representative_id, titledeeddocument, propertyimages, floorplan, typicalfloorplan, buildingelevation, amenitiesimages, youtubelink, unitplanattachment, plotplanattachment, builduparea, no_ownernamedeed, measure_units, OwnerNameAsPerDeed, createdBy, updatedBy, updatedAt } = propertyObject;
@@ -626,9 +626,9 @@ const getAdvanceSearch = asyncHandler(async (req, res) => {
                 const developer = developerData.find(developer => developer._id.toHexString() === developerid.toHexString());
                 updatedProperty.developer_name = developer?.developername
             }
-         
+
             if (availableId) {
-                 const avaiability  = avaiabilityData.find(avaiability =>avaiability?.porpertyid === _id.toString());
+                const avaiability = avaiabilityData.find(avaiability => avaiability?.porpertyid === _id.toString());
 
 
 
@@ -636,7 +636,7 @@ const getAdvanceSearch = asyncHandler(async (req, res) => {
                 // updatedProperty.propertystatus = avaiability?.propertystatus;
                 // updatedProperty.unlisted = avaiability?.unlisted;
                 // updatedProperty.multi_propertyvaluation = avaiability?.multi_propertyvaluation;
-               
+
                 if (avaiability) {
                     // Condition 1: avaiability with property ID found
                     updatedProperty.multivaluation = avaiability?.multivaluation?.filter(data => data.unlisted === false ? data : null);
@@ -666,6 +666,146 @@ const getAdvanceSearch = asyncHandler(async (req, res) => {
         })
     }
 })
+
+const getWebListing = async(filter = {}) => {
+
+    try {
+        const allProperties = await AddProperty
+            .find({
+                $and: [
+                    { owner_changed: { $ne: true } },
+                    { softdelete: { $ne: true } }
+                ]
+            })
+            .or([
+                filter,
+            ])
+            .sort({ _id: -1 }).limit(50); 
+        if (!allProperties?.length) {
+            return res.status(400).json({ message: "No Unit found" });
+        }
+
+        const propertyIdForTenant = allProperties.map(property => property._id);
+        const propertyIdForavailityId = allProperties.map(property => property.available_id);
+        // console.log(propertyIdForTenant,"propertyIdForTenant",propertyIdForavailityId)
+        const propertyIds = allProperties.map(property => property.buildingid);
+        const ownerId = allProperties.map(property => property.customerid);
+        const ownerRepresentativeId = allProperties.map(property => property.owner_representative_id);
+        const communityId = allProperties.map(property => property.communityid);
+        const projectnameId = allProperties.map(property => property.projectnameid);
+        const subtypeId = allProperties.map(property => property.subtypeid);
+        const develpoerId = allProperties.map(property => property?.developerid);
+        const employeeCreatedBy = allProperties.map(employee => employee.createdBy);
+        const employeeIdsUpdatedBy = allProperties.map(employee => employee.updatedBy);
+        const availableId = allProperties.map(property => property?._id);
+
+        const avaiabilityData = await rentpurchase.find({ _id: { $in: propertyIdForavailityId } });
+        const propertyIdTenant = await TenantContract.find({ propertyid: { $in: propertyIdForTenant } });
+        const propertyIdManagementContract = await managementContract.find({ propertyid: { $in: propertyIdForTenant } });
+        const propertyIdAvailability = await rentpurchase.find({ porpertyid: { $in: propertyIdForTenant } });
+        const buildingData = await BuildingName.find({ _id: { $in: propertyIds } });
+        const userData = await User.find({ _id: { $in: ownerId } });
+        const RepresentativeId = await User.find({ _id: { $in: ownerRepresentativeId } });
+        const communityData = await CommunityName.find({ _id: { $in: communityId } });
+        const projectnameData = await ProjectName.find({ _id: { $in: projectnameId } });
+        const subtypeData = await SubType.find({ _id: { $in: subtypeId } });
+        const developerData = await DeveloperName.find({ _id: { $in: develpoerId } });
+        const employeeDataCreatedBy = await Employee.find({ _id: { $in: employeeCreatedBy } });
+        const employeeDataUpdatedBy = await Employee.find({ _id: { $in: employeeIdsUpdatedBy } });
+        // const tenantDataIds = await tenantContract.find({ propertyid: { $in: employeeIdsUpdatedBy } });
+
+        const updatedProperties = allProperties.map(property => {
+            const propertyObject = property.toObject();
+            const { buildingid, customerid, communityid, projectnameid, subtypeid, developerid, unitnumber, createdAt, _id, usage, propertytype, projectstatus, transactiontype, typelayout, tenancystatus, floor, sizearea, plotsize, ownerassociation, nobathroom, halfbathroom, furnished, kitchen, noparking, balcony, dewapremises, district, parkingbay, propertyview, purchasedate, ownernamedeed, purchasevaue, totalbathroom, totalbedroom, streetnumber, maidroom, storeroom, bedroomensuite, bathroomensuite, driverroom, otherroom, ensuite, is_available, available_for, unlisted, available_id, propertylocation, owner_representative_name, owner_representative_id, titledeeddocument, propertyimages, floorplan, typicalfloorplan, buildingelevation, amenitiesimages, youtubelink, unitplanattachment, plotplanattachment, builduparea, no_ownernamedeed, measure_units, OwnerNameAsPerDeed, createdBy, updatedBy, updatedAt } = propertyObject;
+            const updatedProperty = { buildingid, customerid, communityid, projectnameid, subtypeid, developerid, unitnumber, createdAt, _id, usage, propertytype, projectstatus, transactiontype, typelayout, tenancystatus, floor, sizearea, plotsize, ownerassociation, nobathroom, halfbathroom, furnished, kitchen, noparking, balcony, dewapremises, district, parkingbay, propertyview, purchasedate, ownernamedeed, purchasevaue, totalbathroom, totalbedroom, streetnumber, maidroom, storeroom, bedroomensuite, bathroomensuite, driverroom, otherroom, ensuite, is_available, available_for, unlisted, available_id, propertylocation, owner_representative_name, owner_representative_id, titledeeddocument, propertyimages, floorplan, typicalfloorplan, buildingelevation, youtubelink, amenitiesimages, unitplanattachment, plotplanattachment, builduparea, no_ownernamedeed, measure_units, OwnerNameAsPerDeed, createdBy, updatedBy, updatedAt };
+
+            if (_id) {
+                const tenancy_id = propertyIdTenant.find(tenancy => tenancy.propertyid.toHexString() === _id.toHexString());
+                updatedProperty.tenant_id = tenancy_id?._id;
+                const management_id = propertyIdManagementContract.find(management => management.propertyid.toHexString() === _id.toHexString());
+                updatedProperty.management_id = management_id?._id;
+                const avaiability_id = propertyIdAvailability.find(avaiability => avaiability.porpertyid === _id.toHexString());
+                if (avaiability_id?.propertystatus !== "Multiple" && (avaiability_id?.propertystatus === "Sale" || avaiability_id?.propertystatus === "Rent") && avaiability_id?.unlisted === false && avaiability_id?.softdelete === false) {
+                    updatedProperty.propertyvaluation = avaiability_id?.propertyvaluation;
+                }
+            }
+
+            if (buildingid) {
+                const building = buildingData.find(building => building._id.toHexString() === buildingid.toHexString());
+                updatedProperty.building_name = building?.buildingname;
+            }
+
+            if (customerid) {
+                const user = userData.find(owner => owner._id.toHexString() === customerid.toHexString());
+                updatedProperty.owner_name = user?.firstname + " " + user?.lastname;
+                updatedProperty.owner_email = user?.email;
+            }
+
+            if (owner_representative_id) {
+                const user = RepresentativeId.find(owner => owner._id.toHexString() === owner_representative_id.toHexString());
+                updatedProperty.owner_representative_name = user?.firstname + " " + user?.lastname;
+                updatedProperty.owner_representative_email = user?.email;
+            }
+
+            if (communityid) {
+                const community = communityData.find(community => community._id.toHexString() === communityid.toHexString());
+                updatedProperty.community_name = community?.communityname
+            }
+
+            if (projectnameid) {
+                const projectname = projectnameData.find(projectname => projectname._id.toHexString() === projectnameid.toHexString());
+                updatedProperty.project_name = projectname?.projectName
+            }
+
+            if (subtypeid) {
+                const subtype = subtypeData.find(subtype => subtype._id.toHexString() === subtypeid.toHexString());
+                updatedProperty.subtype_name = subtype?.subtypename
+            }
+
+            if (developerid) {
+                const developer = developerData.find(developer => developer._id.toHexString() === developerid.toHexString());
+                updatedProperty.developer_name = developer?.developername
+            }
+
+            if (availableId) {
+                const avaiability = avaiabilityData.find(avaiability => avaiability?.porpertyid === _id.toString());
+
+
+
+                // updatedProperty.multivaluation = avaiability?.multivaluation;
+                // updatedProperty.propertystatus = avaiability?.propertystatus;
+                // updatedProperty.unlisted = avaiability?.unlisted;
+                // updatedProperty.multi_propertyvaluation = avaiability?.multi_propertyvaluation;
+
+                if (avaiability) {
+                    // Condition 1: avaiability with property ID found
+                    updatedProperty.multivaluation = avaiability?.multivaluation?.filter(data => data.unlisted === false ? data : null);
+                    updatedProperty.propertystatus = avaiability?.propertystatus;
+                    updatedProperty.unlisted = avaiability?.unlisted;
+                    updatedProperty.multi_propertyvaluation = avaiability?.multi_propertyvaluation;
+                }
+
+            }
+
+            const employeeCreatedBy = employeeDataCreatedBy.find(employee => String(employee._id) === String(createdBy));
+            if (employeeCreatedBy) {
+                updatedProperty.employee_email_createdBy = employeeCreatedBy?.email;
+            }
+            const employeeUpdatedBy = employeeDataUpdatedBy.find(employee => String(employee._id) === String(updatedBy));
+            if (employeeUpdatedBy) {
+                updatedProperty.employee_email_updatedBy = employeeUpdatedBy?.email;
+            }
+            return updatedProperty;
+        });
+
+        return updatedProperties;
+
+    } catch (err) {
+        res.status(400).json({
+            err: `Error getting data: ${err.message}`
+        })
+    }
+}
 
 
 
@@ -893,19 +1033,19 @@ const getPropertyByIdConnect = asyncHandler(async (req, res) => {
 
 
 const createProperty = asyncHandler(async (req, res) => {
-    const { 
-        usage, propertytype, projectstatus, transactiontype, projectname, 
-        buildingname, subtype, typelayout, tenancystatus, floor, unitnumber, sizearea, 
-        plotsize, communityname, ownerassociation, develpoername, amenities, nobathroom, 
-        halfbathroom, propertycountry, propertycity, furnished, kitchen, noparking, balcony, 
-        dewapremises, district, parkingbay, youtubelink, propertyview, propertyimages, propertylocation, 
+    const {
+        usage, propertytype, projectstatus, transactiontype, projectname,
+        buildingname, subtype, typelayout, tenancystatus, floor, unitnumber, sizearea,
+        plotsize, communityname, ownerassociation, develpoername, amenities, nobathroom,
+        halfbathroom, propertycountry, propertycity, furnished, kitchen, noparking, balcony,
+        dewapremises, district, parkingbay, youtubelink, propertyview, propertyimages, propertylocation,
         floorplan, typicalfloorplan, buildingelevation, amenitiesimages, unitplanattachment, plotplanattachment,
-         builduparea, customerid, measure_units, customername, purchasedate, ownernamedeed, purchasevaue, communityid, 
-         projectnameid, buildingid, subtypeid, developerid, totalbathroom, bathroomensuite, maidroom, driverroom, storeroom, 
-         otherroom, ensuite, bedroomensuite, totalbedroom, streetnumber, is_available, available_for, unlisted, available_id,
-          owner_representative_name, owner_representative_id, createdBy, updatedBy, titledeeddocument, 
-          OwnerNameAsPerDeed, no_ownernamedeed 
-        } = req.body
+        builduparea, customerid, measure_units, customername, purchasedate, ownernamedeed, purchasevaue, communityid,
+        projectnameid, buildingid, subtypeid, developerid, totalbathroom, bathroomensuite, maidroom, driverroom, storeroom,
+        otherroom, ensuite, bedroomensuite, totalbedroom, streetnumber, is_available, available_for, unlisted, available_id,
+        owner_representative_name, owner_representative_id, createdBy, updatedBy, titledeeddocument,
+        OwnerNameAsPerDeed, no_ownernamedeed
+    } = req.body
 
 
     if (!unitnumber || !communityid || !projectnameid) {
@@ -946,7 +1086,7 @@ const createProperty = asyncHandler(async (req, res) => {
     }
 
     const propertyObject = { usage, propertytype, projectstatus, transactiontype, projectname, buildingname, subtype, typelayout, tenancystatus, floor, unitnumber, sizearea, plotsize, communityname, ownerassociation, develpoername, amenities, nobathroom, halfbathroom, propertycountry, propertycity, furnished, kitchen, noparking, balcony, dewapremises, district, parkingbay, youtubelink, propertyview, propertyimages, propertylocation, floorplan, typicalfloorplan, buildingelevation, amenitiesimages, unitplanattachment, plotplanattachment, builduparea, customerid, measure_units, customername, purchasedate, ownernamedeed, purchasevaue, communityid, projectnameid, buildingid, subtypeid, developerid, totalbathroom, bathroomensuite, maidroom, driverroom, storeroom, otherroom, ensuite, bedroomensuite, totalbedroom, streetnumber, is_available, available_for, unlisted, available_id, owner_representative_name, owner_representative_id, createdBy, updatedBy, titledeeddocument, no_ownernamedeed, OwnerNameAsPerDeed: OwnerNameAsPerDeedParse }
-    await User.updateOne({_id : customerid} , { $set:{ subType : "owner"}})
+    await User.updateOne({ _id: customerid }, { $set: { subType: "owner" } })
     const createProperty = await AddProperty.create(propertyObject)
 
     if (createProperty) {
@@ -1095,9 +1235,9 @@ const updatePropertyAvailability = asyncHandler(async (req, res) => {
 
     const existingProperty = await AddProperty.findById(_id).exec();
 
- 
-    await AddProperty.updateOne({_id : _id.toString()},{$set:{ unlisted : true }},{new : true})
-    await rentpurchase.updateOne({porpertyid : _id},{$set:{ unlisted : true }},{ new : true})
+
+    await AddProperty.updateOne({ _id: _id.toString() }, { $set: { unlisted: true } }, { new: true })
+    await rentpurchase.updateOne({ porpertyid: _id }, { $set: { unlisted: true } }, { new: true })
 
 
     if (!existingProperty) {
@@ -1288,4 +1428,5 @@ module.exports = {
     updatePropertyAvailability,
     getSearchPropertyMobile,
     getAdvanceSearchOwner,
+    getWebListing
 }

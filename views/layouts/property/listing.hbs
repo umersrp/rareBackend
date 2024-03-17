@@ -1,0 +1,44 @@
+<!-- Content-->
+
+    <div class="card-columns">
+        {{#each properties}}
+            <!-- Card-->
+            <div class="card border-0">
+                <div class="position-relative text-white">
+                    {{#if offer}}
+                    <div class="card-img-overlay three"><span class="badge badge-light text-uppercase">{{building_name}}</span></div>
+                    {{/if}}
+
+
+                    <div class="card-smooth-caption">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="mr-auto">
+                                <h5 class="card-title text-white">{{owner_name}}</h5>
+                                <h6 class="card-subtitle text-white">{{community_name}}, {{project_name}}</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    {{#if description}}
+                    <p class="card-text">{{description}}</p>
+                    {{else}}
+                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                    {{/if}}
+                </div>
+
+                <div class="card-footer">
+                    <div class="media align-items-center">
+                        <div class="media-body"><a class="card-link text-primary read-more" href="javascript://">Read
+                                More</a></div>
+                        <div class="footerright">
+                            <div class="tnlink3"><i class="fas fa-heart" aria-hidden="true"></i></div>
+                            <div class="tnlink3"><i class="fas fa-share-nodes" aria-hidden="true"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        {{/each}}
+    </div>
