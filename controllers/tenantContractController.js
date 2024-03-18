@@ -633,11 +633,11 @@ const createTenantContract = asyncHandler(async (req, res) => {
         contractexecutiondate : new Date(contractexecutiondate).toISOString(),
         createdBy, updatedBy, contractvalue, rentalamount, 
         securitydepositamount, noofchequeorinstallment, commission, passportpdf,  contractupdation,
-        key_receipt_doc : key_receipt_doc ?  req.files.key_receipt_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : null , 
-        tenancy_contract_doc : tenancy_contract_doc ? req.files.tenancy_contract_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : null ,
-        ejari_certificate_doc : ejari_certificate_doc ? req.files.ejari_certificate_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : null , 
-        addendum_doc : addendum_doc ? req.files.addendum_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : null ,
-        passportpdf : passportpdf ? req.files.passportpdf.map((data) => data.path.replace(/\\/g, '/')).pop() : null ,
+        key_receipt_doc : key_receipt_doc ?  req.files.key_receipt_doc.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : null , 
+        tenancy_contract_doc : tenancy_contract_doc ? req.files.tenancy_contract_doc.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : null ,
+        ejari_certificate_doc : ejari_certificate_doc ? req.files.ejari_certificate_doc.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : null , 
+        addendum_doc : addendum_doc ? req.files.addendum_doc.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : null ,
+        passportpdf : passportpdf ? req.files.passportpdf.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : null ,
         chequeDetails: chequeDetailsParse 
       }
 
@@ -739,10 +739,10 @@ const updateTenantContract = asyncHandler(async (req, res) => {
   tenantContract.noofchequeorinstallment = noofchequeorinstallment;
   tenantContract.commission = commission;
   tenantContract.passportpdf = passportpdf;
-  tenantContract.ejari_certificate_doc = ejari_certificate_doc ? ejari_certificate_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : tenantContract.ejari_certificate_doc;
-  tenantContract.tenancy_contract_doc = tenancy_contract_doc ? tenancy_contract_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : tenantContract.tenancy_contract_doc;
-  tenantContract.addendum_doc = addendum_doc ? addendum_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : tenantContract.addendum_doc;
-  tenantContract.key_receipt_doc = key_receipt_doc ? key_receipt_doc.map((data) => data.path.replace(/\\/g, '/')).pop() : tenantContract.key_receipt_doc;
+  tenantContract.ejari_certificate_doc = ejari_certificate_doc ? ejari_certificate_doc.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : tenantContract.ejari_certificate_doc;
+  tenantContract.tenancy_contract_doc = tenancy_contract_doc ? tenancy_contract_doc.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : tenantContract.tenancy_contract_doc;
+  tenantContract.addendum_doc = addendum_doc ? addendum_doc.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : tenantContract.addendum_doc;
+  tenantContract.key_receipt_doc = key_receipt_doc ? key_receipt_doc.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : tenantContract.key_receipt_doc;
   tenantContract.contractupdation = contractupdation;
   tenantContract.createdBy = createdBy;
   tenantContract.updatedBy = updatedBy;
