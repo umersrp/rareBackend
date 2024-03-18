@@ -9,6 +9,7 @@ const dotenv = require('dotenv')
 const bodyParser = require('body-parser')
 const multer = require('multer')
 const upload = multer();
+const handlebars = require('express-handlebars');
 const app = express()
 
 dotenv.config()
@@ -18,6 +19,13 @@ const PORT = process.env.PORT || 3600
 connectDB()
 
 app.use(cors({ origin: "*" }))
+
+app.set('view engine', 'hbs');
+app.engine('hbs', handlebars.engine({
+    layoutsDir: __dirname + '/views/layouts',
+    extname: '.hbs'
+}));
+
 
 // app.use(express.json())
 // app.use(express.json()); 
@@ -60,7 +68,7 @@ app.use('/expense', require('./routes/expenseRoute'))
 app.use('/purpose', require('./routes/purposeRoute'))
 // app.use('/public', express.static(path.join('public')));
 
-
+app.use('/webStyles', express.static(path.join('webStyles')));
 app.use(express.static(path.join(__dirname, "./build")));
 app.get('/*', function (req, res) {
     return res.sendFile(path.resolve(__dirname, './build', 'index.html'));
