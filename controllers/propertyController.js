@@ -1050,7 +1050,7 @@ const createProperty = asyncHandler(async (req, res) => {
         //     // console.log('comming into else portion')
         //     return res.status(200).json({ message: `New Property ${unitnumber} created` })
         // }
-        redisMiddleware.deleteData('allproperty').then((res) => res)
+        await redisMiddleware.deleteData('allproperty')
         return res.status(200).json(createProperty)
     } else {
         return res.status(400).json({ message: 'Invalid Property data received' })
