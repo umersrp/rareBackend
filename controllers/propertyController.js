@@ -934,6 +934,7 @@ const getPropertyByIdConnect = asyncHandler(async (req, res) => {
 
 
 const createProperty = asyncHandler(async (req, res) => {
+    await redisMiddleware.deleteData('allproperty')
     const { 
         usage, propertytype, projectstatus, transactiontype, projectname, propertyType,
         buildingname, subtype, typelayout, tenancystatus, floor, unitnumber, sizearea, 
@@ -1050,7 +1051,7 @@ const createProperty = asyncHandler(async (req, res) => {
         //     // console.log('comming into else portion')
         //     return res.status(200).json({ message: `New Property ${unitnumber} created` })
         // }
-        await redisMiddleware.deleteData('allproperty')
+       
         return res.status(200).json(createProperty)
     } else {
         return res.status(400).json({ message: 'Invalid Property data received' })
