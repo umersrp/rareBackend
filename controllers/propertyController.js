@@ -1285,7 +1285,7 @@ const updateNewProperty = asyncHandler(async (req, res) => {
     updateProperty.OwnerNameAsPerDeed = OwnerNameAsPerDeed ? JSON.parse(OwnerNameAsPerDeed) : []
 
     const updatedPropertyN =  await AddProperty.findByIdAndUpdate( {_id : id } , { $set : updateProperty } , { new : true})
-    redisMiddleware.deleteData('allproperty').then((res) => res)
+     await redisMiddleware.deleteData('allproperty')
     return res.json({ message: `${updatedPropertyN.unitnumber} updated` })
 })
 
