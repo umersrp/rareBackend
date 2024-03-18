@@ -41,6 +41,8 @@ app.use('/public', express.static('public'));
 // app.use(upload.any());
 //app.use(bodyParser.urlencoded({ extended: false }))
 app.use(express.json())
+app.use('/web', require('./routes/webRoutes'));
+
 app.use('/users', require('./routes/userRoutes'))
 app.use('/roles', require('./routes/rolesRoute'))
 app.use('/employees', require('./routes/employeeRoute'))

@@ -3,3 +3,4 @@ node_modules/
 *.bak
 *.ecosystem.config.js
 public/
+web/
