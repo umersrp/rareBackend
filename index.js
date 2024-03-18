@@ -22,11 +22,17 @@ app.use(cors({ origin: "*" }))
 // app.use(express.json())
 // app.use(express.json()); 
 app.use(cookieParser())
-app.use(express.static(path.join(__dirname, '/public')));
+// const imageDirectory = path.join(__dirname, 'public'); 
+// app.use('/public', express.static(imageDirectory));
+
+
+app.use(express.static(path.join(__dirname + '/public')));
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use('/public', express.static('public'));
 
 // app.use(upload.any());
-app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json())
+//app.use(bodyParser.urlencoded({ extended: false }))
+app.use(express.json())
 app.use('/users', require('./routes/userRoutes'))
 app.use('/roles', require('./routes/rolesRoute'))
 app.use('/employees', require('./routes/employeeRoute'))
