@@ -15,7 +15,7 @@ const managementContract = require('../models/managementContract')
 const rentpurchase = require('../models/rentpurchase')
 const tenantContract = require('../models/tenantContract')
 const { default: mongoose } = require('mongoose')
-
+const redisMiddleware = require('../utils/redisClient')
 
 
 
@@ -23,176 +23,199 @@ const { default: mongoose } = require('mongoose')
 const getAllProperty = asyncHandler(async (req, res) => {
     // let filteringfilter = req.query.filteringfilter
     // let sort = parseInt(req.query.sort || 1
-    const allProperties = await AddProperty
-    .find({
-        $and: [
-            // { owner_changed: { $ne: true } },
-            { softdelete: { $ne: true } } 
-        ],
-       
-    })
-    .select("projectname buildingname unitnumber floor communityname")
-    .sort({ _id: -1 })
-    // .sort({ filteringfilter: sort })
-    if (!allProperties?.length) {
-        return res.status(400).json({ message: "No Unit found" })
-    }
-    return res.json(allProperties)
+    let allProperties
+    const cachedData = await redisMiddleware.getData('allproperty');
+        if (cachedData) {
+            allProperties = JSON.parse(cachedData);
+            res.json(allProperties)
+        }
+        else{
+            allProperties = await AddProperty
+           .find({
+               $and: [
+                    { owner_changed: { $ne: true } },
+                   { softdelete: { $ne: true } } 
+               ],
+              
+           })
+           .select("projectname buildingname unitnumber floor communityname")
+           .sort({ _id: -1 })
+           // .sort({ filteringfilter: sort })
+           if (!allProperties?.length) {
+               return res.status(400).json({ message: "No Unit found" })
+           }
+           redisMiddleware.setDataWithExpiration('allproperty', JSON.stringify(allProperties), 86400);
+           return res.json(allProperties)
+        }
 })
 
 const getAllPropertyConnect = asyncHandler(async (req, res) => {
-    const allProperties = await AddProperty.find({
-        $and: [
-            { softdelete: { $ne: true } },
-            { owner_changed: { $ne: true } } // Filter out softdeleted bookings
-        ]
-    }).sort({ createdAt: -1 });
-
-    if (!allProperties?.length) {
-        return res.status(400).json({ message: "No Unit found" });
-    }
-
-    const propertyIds = allProperties.map(property => property.buildingid);
-    const ownerId = allProperties.map(property => property.customerid);
-    const ownerRepresentativeId = allProperties.map(property => property.owner_representative_id);
-    const communityId = allProperties.map(property => property.communityid);
-    const projectnameId = allProperties.map(property => property.projectnameid);
-    const subtypeId = allProperties.map(property => property.subtypeid);
-    const develpoerId = allProperties.map(property => property?.developerid);
-    const availableId = allProperties.map(property => property?.available_id);
-    const employeeCreatedBy = allProperties.map(employee => employee.createdBy);
-    const employeeIdsUpdatedBy = allProperties.map(employee => employee.updatedBy);
-    const propertyIdss = allProperties.map(data => data._id)
-    
-
-    const buildingData = await BuildingName.find({ _id: { $in: propertyIds } });
-    const userData = await User.find({ _id: { $in: ownerId } });
-    const RepresentativeId = await User.find({ _id: { $in: ownerRepresentativeId } });
-    const communityData = await CommunityName.find({ _id: { $in: communityId } });
-    const projectnameData = await ProjectName.find({ _id: { $in: projectnameId } });
-    const subtypeData = await SubType.find({ _id: { $in: subtypeId } });
-    const developerData = await DeveloperName.find({ _id: { $in: develpoerId } });
-    const avaiabilityData = await rentpurchase.find({ _id: { $in: availableId } });
-    const employeeDataCreatedBy = await Employee.find({ _id: { $in: employeeCreatedBy } });
-    const employeeDataUpdatedBy = await Employee.find({ _id: { $in: employeeIdsUpdatedBy } });
-
-
-    // const compareproperty = allProperties.map(data =>({ id : data._id.toString()}))
-    // const tenantDetails = await tenantContract.find({ propertyid: { $in: propertyIdss } }).sort({ createdAt : -1})
-    // const Booking = await  Bookings.find({  propertyid : {$in : propertyIdss }}).sort({ createdAt : -1})
-
-    //     if(!tenantDetails.length) {
-    //         rentpurchase.updateOne({porpertyid : compareproperty.map((data) => data.id).pop()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
-    //     }
-
-    //   await Promise.all(avaiabilityData.map(async(data) => {
-    //         if(data !== undefined && data.status === "Pending"){
-               
-    //             if (tenantDetails && Array.isArray(tenantDetails)) {
-    //                 await Promise.all(tenantDetails.map(async(data) => {
-                        
-    //                     if(data !== undefined && data.propertyid.toString() != undefined && data.softdelete === true){
-                            
-    //                       await  rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Pending" }},{new : true})
-    //                     }
-                    
-    //                     if(data !== undefined && data.propertyid.toString() != undefined && data.softdelete === false ){
-    //                         if(new Date(data.contractenddate) > new Date()){
-    //                           await  rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true})
-    //                         }else if(new Date(data.contractenddate) < new Date()){
-    //                           await  rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true})
-    //                         }
-            
-    //                         // else{
-    //                         //     rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
-    //                         // }
-    //                     }
-                    
-            
-                    
-    //                 }))
-    //             }
-    //         }else{
-    //             return null;
-    //         }
-    //     }))
-
-       
+    try{
+        let allProperties
+        const cachedData = await redisMiddleware.getData('getAllPropertyConnect');
+        if (cachedData) {
+            allProperties = JSON.parse(cachedData);
+            res.json(allProperties)
+        }
+        else{
+            allProperties = await AddProperty.find({
+                $and: [
+                    { softdelete: { $ne: true } },
+                    { owner_changed: { $ne: true } } // Filter out softdeleted bookings
+                ]
+            }).sort({ createdAt: -1 });
         
-        // Booking.forEach((data) => {
-        //     if(data !== undefined && data.propertyid.toString() != undefined ){
-        //         rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Short-term" }},{new : true}).then(res => res)
-        //     }
-        //     // else{
-        //     //     RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Long-term" }},{new : true}).then(res => res)
-        //     // }
-        // })
-
-    const updatedProperties = allProperties.map(property => {
-        const propertyObject = property.toObject();
-        const { buildingid, customerid,status,propertyType, communityid, projectnameid, subtypeid, developerid, unitnumber, createdAt, _id, usage, propertytype, projectstatus, transactiontype, typelayout, tenancystatus, floor, sizearea, plotsize, ownerassociation, nobathroom, halfbathroom, furnished, kitchen, noparking, balcony, dewapremises, district, parkingbay, propertyview, purchasedate, ownernamedeed, purchasevaue, totalbathroom, totalbedroom, streetnumber, maidroom, storeroom, bedroomensuite, bathroomensuite, driverroom, otherroom, ensuite, is_available, available_for, unlisted, available_id, owner_representative_name, owner_representative_id, titledeeddocument, propertyimages, floorplan, typicalfloorplan, buildingelevation, amenitiesimages, unitplanattachment, plotplanattachment, builduparea, youtubelink, measure_units, propertylocation, no_ownernamedeed, createdBy, updatedBy, updatedAt, OwnerNameAsPerDeed } = propertyObject;
-        const updatedProperty = { buildingid, status,propertyType,customerid, communityid, projectnameid, subtypeid, developerid, unitnumber, createdAt, _id, usage, propertytype, projectstatus, transactiontype, typelayout, tenancystatus, floor, sizearea, plotsize, ownerassociation, nobathroom, halfbathroom, furnished, kitchen, noparking, balcony, dewapremises, district, parkingbay, propertyview, purchasedate, ownernamedeed, purchasevaue, totalbathroom, totalbedroom, streetnumber, maidroom, storeroom, bedroomensuite, bathroomensuite, driverroom, otherroom, ensuite, is_available, available_for, unlisted, available_id, owner_representative_name, owner_representative_id, titledeeddocument, propertyimages, floorplan, typicalfloorplan, buildingelevation, amenitiesimages, unitplanattachment, plotplanattachment, builduparea, youtubelink, measure_units, propertylocation, no_ownernamedeed, createdBy, updatedBy, updatedAt, OwnerNameAsPerDeed };
-
-        if (buildingid) {
-            const building = buildingData.find(building => building._id.toHexString() === buildingid.toHexString());
-            updatedProperty.building_name = building?.buildingname;
+            if (!allProperties?.length) {
+                return res.status(400).json({ message: "No Unit found" });
+            }
+        
+            const propertyIds = allProperties.map(property => property.buildingid);
+            const ownerId = allProperties.map(property => property.customerid);
+            const ownerRepresentativeId = allProperties.map(property => property.owner_representative_id);
+            const communityId = allProperties.map(property => property.communityid);
+            const projectnameId = allProperties.map(property => property.projectnameid);
+            const subtypeId = allProperties.map(property => property.subtypeid);
+            const develpoerId = allProperties.map(property => property?.developerid);
+            const availableId = allProperties.map(property => property?.available_id);
+            const employeeCreatedBy = allProperties.map(employee => employee.createdBy);
+            const employeeIdsUpdatedBy = allProperties.map(employee => employee.updatedBy);
+            const propertyIdss = allProperties.map(data => data._id)
+            
+        
+            const buildingData = await BuildingName.find({ _id: { $in: propertyIds } });
+            const userData = await User.find({ _id: { $in: ownerId } });
+            const RepresentativeId = await User.find({ _id: { $in: ownerRepresentativeId } });
+            const communityData = await CommunityName.find({ _id: { $in: communityId } });
+            const projectnameData = await ProjectName.find({ _id: { $in: projectnameId } });
+            const subtypeData = await SubType.find({ _id: { $in: subtypeId } });
+            const developerData = await DeveloperName.find({ _id: { $in: develpoerId } });
+            const avaiabilityData = await rentpurchase.find({ _id: { $in: availableId } });
+            const employeeDataCreatedBy = await Employee.find({ _id: { $in: employeeCreatedBy } });
+            const employeeDataUpdatedBy = await Employee.find({ _id: { $in: employeeIdsUpdatedBy } });
+        
+        
+            // const compareproperty = allProperties.map(data =>({ id : data._id.toString()}))
+            // const tenantDetails = await tenantContract.find({ propertyid: { $in: propertyIdss } }).sort({ createdAt : -1})
+            // const Booking = await  Bookings.find({  propertyid : {$in : propertyIdss }}).sort({ createdAt : -1})
+        
+            //     if(!tenantDetails.length) {
+            //         rentpurchase.updateOne({porpertyid : compareproperty.map((data) => data.id).pop()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
+            //     }
+        
+            //   await Promise.all(avaiabilityData.map(async(data) => {
+            //         if(data !== undefined && data.status === "Pending"){
+                       
+            //             if (tenantDetails && Array.isArray(tenantDetails)) {
+            //                 await Promise.all(tenantDetails.map(async(data) => {
+                                
+            //                     if(data !== undefined && data.propertyid.toString() != undefined && data.softdelete === true){
+                                    
+            //                       await  rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Pending" }},{new : true})
+            //                     }
+                            
+            //                     if(data !== undefined && data.propertyid.toString() != undefined && data.softdelete === false ){
+            //                         if(new Date(data.contractenddate) > new Date()){
+            //                           await  rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Occupied" }},{new : true})
+            //                         }else if(new Date(data.contractenddate) < new Date()){
+            //                           await  rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Vacant" }},{new : true})
+            //                         }
+                    
+            //                         // else{
+            //                         //     rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { status : "Pending" }},{new : true}).then(res => res)
+            //                         // }
+            //                     }
+                            
+                    
+                            
+            //                 }))
+            //             }
+            //         }else{
+            //             return null;
+            //         }
+            //     }))
+        
+               
+                
+                // Booking.forEach((data) => {
+                //     if(data !== undefined && data.propertyid.toString() != undefined ){
+                //         rentpurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Short-term" }},{new : true}).then(res => res)
+                //     }
+                //     // else{
+                //     //     RentPurchase.updateOne({porpertyid : data.propertyid.toString()},{ $set : { propertyType : "Long-term" }},{new : true}).then(res => res)
+                //     // }
+                // })
+        
+            const updatedProperties = allProperties.map(property => {
+                const propertyObject = property.toObject();
+                const { buildingid, customerid,status,propertyType, communityid, projectnameid, subtypeid, developerid, unitnumber, createdAt, _id, usage, propertytype, projectstatus, transactiontype, typelayout, tenancystatus, floor, sizearea, plotsize, ownerassociation, nobathroom, halfbathroom, furnished, kitchen, noparking, balcony, dewapremises, district, parkingbay, propertyview, purchasedate, ownernamedeed, purchasevaue, totalbathroom, totalbedroom, streetnumber, maidroom, storeroom, bedroomensuite, bathroomensuite, driverroom, otherroom, ensuite, is_available, available_for, unlisted, available_id, owner_representative_name, owner_representative_id, titledeeddocument, propertyimages, floorplan, typicalfloorplan, buildingelevation, amenitiesimages, unitplanattachment, plotplanattachment, builduparea, youtubelink, measure_units, propertylocation, no_ownernamedeed, createdBy, updatedBy, updatedAt, OwnerNameAsPerDeed } = propertyObject;
+                const updatedProperty = { buildingid, status,propertyType,customerid, communityid, projectnameid, subtypeid, developerid, unitnumber, createdAt, _id, usage, propertytype, projectstatus, transactiontype, typelayout, tenancystatus, floor, sizearea, plotsize, ownerassociation, nobathroom, halfbathroom, furnished, kitchen, noparking, balcony, dewapremises, district, parkingbay, propertyview, purchasedate, ownernamedeed, purchasevaue, totalbathroom, totalbedroom, streetnumber, maidroom, storeroom, bedroomensuite, bathroomensuite, driverroom, otherroom, ensuite, is_available, available_for, unlisted, available_id, owner_representative_name, owner_representative_id, titledeeddocument, propertyimages, floorplan, typicalfloorplan, buildingelevation, amenitiesimages, unitplanattachment, plotplanattachment, builduparea, youtubelink, measure_units, propertylocation, no_ownernamedeed, createdBy, updatedBy, updatedAt, OwnerNameAsPerDeed };
+        
+                if (buildingid) {
+                    const building = buildingData.find(building => building._id.toHexString() === buildingid.toHexString());
+                    updatedProperty.building_name = building?.buildingname;
+                }
+        
+                if (customerid) {
+                    const user = userData.find(owner => owner._id.toHexString() === customerid.toHexString());
+                    updatedProperty.owner_name = user?.firstname + " " + user?.lastname;
+                    updatedProperty.owner_email = user?.email;
+                }
+        
+                if (owner_representative_id) {
+                    const user = RepresentativeId.find(owner => owner._id.toHexString() === owner_representative_id.toHexString());
+                    updatedProperty.owner_representative_name = user?.firstname + " " + user?.lastname;
+                    updatedProperty.owner_representative_email = user?.email;
+                }
+        
+                if (communityid) {
+                    const community = communityData.find(community => community._id.toHexString() === communityid.toHexString());
+                    updatedProperty.community_name = community?.communityname
+                }
+        
+                if (projectnameid) {
+                    const projectname = projectnameData.find(projectname => projectname._id.toHexString() === projectnameid.toHexString());
+                    updatedProperty.project_name = projectname?.projectName
+                }
+        
+                if (subtypeid) {
+                    const subtype = subtypeData.find(subtype => subtype._id.toHexString() === subtypeid.toHexString());
+                    updatedProperty.subtype_name = subtype?.subtypename
+                }
+        
+                if (developerid) {
+                    const developer = developerData.find(developer => developer._id.toHexString() === developerid.toHexString());
+                    updatedProperty.developer_name = developer?.developername
+                }
+        
+                if (availableId) {
+                    const avaiability  = avaiabilityData.find(avaiability =>avaiability?.porpertyid === _id.toString());
+                    updatedProperty.multivaluation = avaiability?.multivaluation?.filter(data => data.unlisted === false ? data : null);
+                    updatedProperty.propertystatus = avaiability?.propertystatus;
+                    updatedProperty.unlisted = avaiability?.unlisted;
+                    updatedProperty.un_listed = avaiability?.unlisted;
+                    updatedProperty.multi_propertyvaluation = avaiability?.multi_propertyvaluation;
+                    // updatedProperty.status = avaiability?.status;
+                    // updatedProperty.propertyType = avaiability?.propertyType;
+                }
+        
+                const employeeCreatedBy = employeeDataCreatedBy.find(employee => String(employee._id) === String(createdBy));
+                if (employeeCreatedBy) {
+                    updatedProperty.employee_email_createdBy = employeeCreatedBy?.email;
+                }
+                const employeeUpdatedBy = employeeDataUpdatedBy.find(employee => String(employee._id) === String(updatedBy));
+                if (employeeUpdatedBy) {
+                    updatedProperty.employee_email_updatedBy = employeeUpdatedBy?.email;
+                }
+                
+                return updatedProperty;
+            });
+            redisMiddleware.setDataWithExpiration('getAllPropertyConnect', JSON.stringify(updatedProperties), 86400);
+            return res.json(updatedProperties);
         }
-
-        if (customerid) {
-            const user = userData.find(owner => owner._id.toHexString() === customerid.toHexString());
-            updatedProperty.owner_name = user?.firstname + " " + user?.lastname;
-            updatedProperty.owner_email = user?.email;
-        }
-
-        if (owner_representative_id) {
-            const user = RepresentativeId.find(owner => owner._id.toHexString() === owner_representative_id.toHexString());
-            updatedProperty.owner_representative_name = user?.firstname + " " + user?.lastname;
-            updatedProperty.owner_representative_email = user?.email;
-        }
-
-        if (communityid) {
-            const community = communityData.find(community => community._id.toHexString() === communityid.toHexString());
-            updatedProperty.community_name = community?.communityname
-        }
-
-        if (projectnameid) {
-            const projectname = projectnameData.find(projectname => projectname._id.toHexString() === projectnameid.toHexString());
-            updatedProperty.project_name = projectname?.projectName
-        }
-
-        if (subtypeid) {
-            const subtype = subtypeData.find(subtype => subtype._id.toHexString() === subtypeid.toHexString());
-            updatedProperty.subtype_name = subtype?.subtypename
-        }
-
-        if (developerid) {
-            const developer = developerData.find(developer => developer._id.toHexString() === developerid.toHexString());
-            updatedProperty.developer_name = developer?.developername
-        }
-
-        if (availableId) {
-            const avaiability  = avaiabilityData.find(avaiability =>avaiability?.porpertyid === _id.toString());
-            updatedProperty.multivaluation = avaiability?.multivaluation?.filter(data => data.unlisted === false ? data : null);
-            updatedProperty.propertystatus = avaiability?.propertystatus;
-            updatedProperty.unlisted = avaiability?.unlisted;
-            updatedProperty.un_listed = avaiability?.unlisted;
-            updatedProperty.multi_propertyvaluation = avaiability?.multi_propertyvaluation;
-            // updatedProperty.status = avaiability?.status;
-            // updatedProperty.propertyType = avaiability?.propertyType;
-        }
-
-        const employeeCreatedBy = employeeDataCreatedBy.find(employee => String(employee._id) === String(createdBy));
-        if (employeeCreatedBy) {
-            updatedProperty.employee_email_createdBy = employeeCreatedBy?.email;
-        }
-        const employeeUpdatedBy = employeeDataUpdatedBy.find(employee => String(employee._id) === String(updatedBy));
-        if (employeeUpdatedBy) {
-            updatedProperty.employee_email_updatedBy = employeeUpdatedBy?.email;
-        }
-        return updatedProperty;
-    });
-
-    return res.json(updatedProperties);
+        
+    }catch(err){
+        console.log("err")
+    }
 });
 
 const getPaginationProperty = asyncHandler(async (req, res) => {
@@ -1027,6 +1050,7 @@ const createProperty = asyncHandler(async (req, res) => {
         //     // console.log('comming into else portion')
         //     return res.status(200).json({ message: `New Property ${unitnumber} created` })
         // }
+        redisMiddleware.deleteData('allproperty').then((res) => res)
         return res.status(200).json(createProperty)
     } else {
         return res.status(400).json({ message: 'Invalid Property data received' })
@@ -1258,10 +1282,10 @@ const updateNewProperty = asyncHandler(async (req, res) => {
     updateProperty.createdBy = createdBy
     updateProperty.updatedBy = updatedBy
     updateProperty.measure_units = measure_units
-    updateProperty.OwnerNameAsPerDeed = JSON.parse(OwnerNameAsPerDeed)
+    updateProperty.OwnerNameAsPerDeed = OwnerNameAsPerDeed ? JSON.parse(OwnerNameAsPerDeed) : []
 
     const updatedPropertyN =  await AddProperty.findByIdAndUpdate( {_id : id } , { $set : updateProperty } , { new : true})
-
+    redisMiddleware.deleteData('allproperty').then((res) => res)
     return res.json({ message: `${updatedPropertyN.unitnumber} updated` })
 })
 
@@ -1572,7 +1596,224 @@ const ActiveContract = async (req,res,next) => {
         }
     }
 
+    const PropertyOwnerChanged = async (req,res,next) => {
+        try{
+
+            const { 
+                usage, propertytype, projectstatus, transactiontype, projectname, propertyType,
+                buildingname, subtype, typelayout, tenancystatus, floor, unitnumber, sizearea, 
+                plotsize, communityname, ownerassociation, develpoername, amenities, nobathroom, 
+                halfbathroom, propertycountry, propertycity, furnished, kitchen, noparking, balcony, 
+                dewapremises, district, parkingbay, youtubelink, propertyview, propertylocation, 
+                floorplan, typicalfloorplan, buildingelevation, amenitiesimages, plotplanattachment,
+                 builduparea, customerid, measure_units, customername, purchasedate, ownernamedeed, purchasevaue, communityid, 
+                 projectnameid, buildingid, subtypeid, developerid, totalbathroom, bathroomensuite, maidroom, driverroom, storeroom, 
+                 otherroom, ensuite, bedroomensuite, totalbedroom, streetnumber, is_available, available_for, unlisted, available_id,
+                  owner_representative_name, owner_representative_id, createdBy, updatedBy, 
+                  OwnerNameAsPerDeed, no_ownernamedeed ,OwnerChangedList,owner_changed
+                } = req.body
+
+        
+                const {
+                    titledeeddocument,propertyimages,unitplanattachment
+                } = req.files
+
+                let OwnerNameAsPerDeedParse
+
+                if (OwnerNameAsPerDeed) {
+                    OwnerNameAsPerDeedParse = JSON.parse(OwnerNameAsPerDeed)
+                }
+            
+
+                const propertyObject = { 
+                    usage, propertytype, projectstatus, transactiontype, 
+                    projectname, buildingname, subtype, typelayout, tenancystatus, floor, unitnumber, 
+                    sizearea, plotsize, communityname, ownerassociation, develpoername, amenities, nobathroom, 
+                    halfbathroom, propertycountry, propertycity, furnished, kitchen, noparking, balcony, dewapremises, 
+                    district, parkingbay, youtubelink, propertyview, propertylocation, floorplan, 
+                    typicalfloorplan, buildingelevation, amenitiesimages, plotplanattachment, 
+                    builduparea, customerid, measure_units, customername, purchasedate, ownernamedeed, purchasevaue, 
+                    communityid, projectnameid, buildingid, subtypeid, developerid, totalbathroom, bathroomensuite, 
+                    maidroom, driverroom, storeroom, otherroom, ensuite, bedroomensuite, totalbedroom, streetnumber, 
+                    is_available, available_for, unlisted, available_id, owner_representative_name, owner_representative_id, 
+                    createdBy, updatedBy,  no_ownernamedeed, OwnerNameAsPerDeed: OwnerNameAsPerDeedParse,
+                    propertyimages : propertyimages ? req.files.propertyimages.map((data) => "/"+data.path.replace(/\\/g, '/'))  : "" , 
+                    titledeeddocument : titledeeddocument ? req.files.titledeeddocument.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : "" , 
+                    unitplanattachment : unitplanattachment ? req.files.unitplanattachment.map((data) => "/"+data.path.replace(/\\/g, '/')) : "",
+                    propertyType : propertyType ? propertyType : "Long-term",
+                    owner_changed ,
+                    OwnerChangedList  :  JSON.parse(OwnerChangedList)
+                }
+                await User.updateOne({_id : customerid} , { $set:{ subType : "owner"}})
+            
+                 await AddProperty.create(propertyObject)
+
+               res.status(201).json({ message : "proprty created with new owner"})
+            
+           
+        }catch(err){
+            console.log("============>",err)
+            res.status(500).json({
+                message : "No property added",
+                status : false
+            })
+        }
+    }
+
+    const getProprtybyId = async (req,res,next) => {
+        const id = req.params.id
+        try{
+            const property = await AddProperty.findOne({ _id : id}).select("customerid customername unitnumber")
+            res.status(200).json({data : property})
+        }catch(err){
+            res.status(500).json({message:"No data found"})
+        }
+    }
+
+
+    const ownerProperty = async (req,res,next) => {
+        try{
+          const data =  [
+                {
+                  '$match': {
+                    'customerid': new mongoose.Types.ObjectId(req.params.customerid), 
+                    'propertyType': 'Short-term'
+                  }
+                }, {
+                  '$sort': {
+                    'createdAt': -1
+                  }
+                }
+              ]
+              const ownerproperty = await AddProperty.aggregate(data)
+              res.status(200).json({
+                 total : ownerproperty.length , 
+                 message : "Owner Property fetched" , 
+                 status:true ,
+                  data : ownerproperty
+                })
+        }catch(err){
+            res.status(500).json({
+                message : "no Owner Property fetched" , 
+                status:false
+               })
+        }
+    }
+
+
+    const ownerBookings = async (req,res,next) => {
+        try{
+          const data =  [
+                {
+                  '$addFields': {
+                    'ownerid': {
+                      '$toObjectId': [
+                        '$ownerid'
+                      ]
+                    }
+                  }
+                }, {
+                  '$lookup': {
+                    'from': 'users', 
+                    'localField': 'ownerid', 
+                    'foreignField': '_id', 
+                    'as': 'ownerid'
+                  }
+                }, {
+                  '$unwind': {
+                    'path': '$ownerid', 
+                    'preserveNullAndEmptyArrays': true
+                  }
+                }, {
+                  '$project': {
+                    'owneremail': '$ownerid.email', 
+                    'propertyid': 1, 
+                    'unitnumber': 1, 
+                    'buildingname': 1, 
+                    'floor': 1, 
+                    'buildingnumber': 1, 
+                    'communityname': 1, 
+                    'guestname': 1, 
+                    'passportnumber': 1, 
+                    'nationality': 1, 
+                    'mobilenumber': 1, 
+                    'email': 1, 
+                    'checkintype': 1, 
+                    'noadults': 1, 
+                    'totaloccupants': 1, 
+                    'confirmationcode': 1, 
+                    'bookingagent': 1, 
+                    'checkindate': 1, 
+                    'nonight': 1, 
+                    'reservationdate': 1, 
+                    'modepayment': 1, 
+                    'checkoutdate': 1, 
+                    'tourismfee': 1, 
+                    'totalpayout': 1, 
+                    'securitydeposit': 1, 
+                    'hostservicefee': 1, 
+                    'cleaningfee': 1, 
+                    'tourismfeetillmonth': 1, 
+                    'totaladditionalfee': 1, 
+                    'totalcollectall': 1, 
+                    'totalroomrent': 1, 
+                    'roomrentamount': 1, 
+                    'totalguestservices': 1, 
+                    'vatperbookingrent': 1, 
+                    'vatperservicefee': 1, 
+                    'vatpercleaningfee': 1, 
+                    'vatperguestmanagementfee': 1, 
+                    'totalvatper': 1, 
+                    'customertype': 1, 
+                    'passportpdf': 1, 
+                    'ownerid': 1, 
+                    'guestpercentage': 1, 
+                    'hostmanagementfee': 1, 
+                    'firstdays': 1, 
+                    'moremonths': 1, 
+                    'cancelled': 1, 
+                    'hostmanagementpercent': 1, 
+                    'roomrenthostpayable': 1, 
+                    'dtcm_uploaded': 1, 
+                    'passortid_collected': 1, 
+                    'sign_verified': 1, 
+                    'smartcode_provided': 1, 
+                    'payment_collected': 1, 
+                    'payment_received': 1, 
+                    'softdelete': 1, 
+                    'new_customer': 1, 
+                    'other_passports': 1, 
+                    'createdBy': 1, 
+                    'createdAt': 1, 
+                    'updatedAt': 1, 
+                    '__v': 1, 
+                    'bookingnumber': 1
+                  }
+                }, {
+                  '$match': {
+                    'owneremail': `${req.params.owneremail}`
+                  }
+                }, {
+                  '$sort': {
+                    'createdAt': -1
+                  }
+                }
+              ]
+
+            const ownerbookingwithpropertyid = await Bookings.aggregate(data)
+            res.status(200).send(ownerbookingwithpropertyid)
+        }catch(err){
+            console.log("======>",err)
+            res.status(500).json({
+                message : "no Owner Property fetched" , 
+                status:false
+               })
+        }
+    }
+
 module.exports = {
+    ownerProperty,
+    ownerBookings,
     getownerProperty,
     updateNewProperty,
     getAllProperty,
@@ -1596,5 +1837,7 @@ module.exports = {
     ActiveContract,
     allShorttermProperties,
     OwnerShorttermProperties,
-    Softdeleted
+    Softdeleted,
+    PropertyOwnerChanged,
+    getProprtybyId
 }

@@ -41,6 +41,7 @@ router.route('/report/:propertyid').get(tenantContractController.createTenantRep
 router.route('/tenantsummaryreportbydates/:propertyid').get(tenantContractController.tenantSummaryReportByDates)
 router.route('/tenantsummaryreport/:propertyid').get(tenantContractController.tenantSummaryReport)
 router.route('/api/tenant/overview').get(tenantContractController.Tenant_Overview)
+router.route('/api/ownertenant/overview/:ownerid').get(tenantContractController.Tenant_Overview_Owner)
 //router.route('/update').get(tenantContractController.allTenantRequest )
 
 router.route('/')

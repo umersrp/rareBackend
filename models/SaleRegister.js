@@ -36,7 +36,7 @@ const SaleRegisterSchema = new mongoose.Schema({
     },
     buyer_type: {
         type: String,
-        require: true
+        // require: true
     },
     seller_type: {
         type: String,
@@ -76,17 +76,17 @@ const SaleRegisterSchema = new mongoose.Schema({
     },
     trustee_buyer: {
         type: Boolean,
-        require: true,
+        // require: true,
         default: false
     },
     trustee_seller: {
         type: Boolean,
-        require: true,
+        // require: true,
         default: false
     },
     trustee_both: {
         type: Boolean,
-        require: true,
+        // require: true,
         default: false
     },
     transfer_fee_amount: {
@@ -95,42 +95,42 @@ const SaleRegisterSchema = new mongoose.Schema({
     },
     transfer_buyer: {
         type: Boolean,
-        require: true,
+        // require: true,
         default: false
     },
     transfer_seller: {
         type: Boolean,
-        require: true,
+        // require: true,
         default: false
     },
     transfer_both: {
         type: Boolean,
-        require: true,
+        // require: true,
         default: false
     },
     noccharges_buyer: {
         type: Boolean,
-        require: true,
+        // require: true,
         default: false
     },
     noccharges_seller: {
         type: Boolean,
-        require: true,
+        // require: true,
         default: false
     },
     noccharges_both: {
         type: Boolean,
-        require: true,
+        // require: true,
         default: false
     },
     check_option_cash: {
         type: Boolean,
-        require: true,
+        // require: true,
         default: false
     },
     check_option_mortage: {
         type: Boolean,
-        require: true,
+        // require: true,
         default: false
     },
     commission_amount: {
@@ -139,15 +139,18 @@ const SaleRegisterSchema = new mongoose.Schema({
     },
     contract_B_attachment: {
         type: String,
-        require: true,
+        default :""
+        // require: true,
     },
     sales_contract_attachment: {
         type: String,
-        require: true,
+        default :""
+        // require: true,
     },
     contract_A_attachment: {
         type: String,
-        require: true,
+        default :""
+        // require: true,
     },
     title_deed_fee: {
         type: String,
@@ -159,32 +162,34 @@ const SaleRegisterSchema = new mongoose.Schema({
     },
     vat_on_commission: {
         type: Boolean,
-        require: true,
+        // require: true,
         default: false
     },
     buyer_name: {
         type: String,
-        require: true,
+        // require: true,
     },
     buyer_inhouse_agent_name: {
         type: String,
-        require: true,
+        // require: true,
     },
     buyer_outside_agent_name: {
         type: String,
-        require: true,
+        // require: true,
     },
     transaction_type: {
         type: String,
-        require: true,
+        enum : ["Successful" , "InProgress" , "Unsuccessful" , "Not Available" ],
+        default : "Not Available"
+        // require: true,
     },
     exoected_transfer_date: {
         type: String,
-        require: true,
+        // require: true,
     },
     softdelete: {
         type: Boolean,
-        require: true,
+        // require: true,
         default: false
     },
     createdBy: {

@@ -79,7 +79,7 @@ const getAllSaleRegister = asyncHandler(async (req, res) => {
             }
             if (buyer_id) {
                 const customerid = buyers.find(customerid => String(customerid._id) === String(buyer_id)) || "";
-                updateSaleRegister.buyerids = customerid._id
+                updatedallSaleRegister.buyerids = customerid._id
                 updatedallSaleRegister.buyer_name = (customerid?.firstname) + (customerid?.lastname ? " " + customerid?.lastname : "");
                 updatedallSaleRegister.buyer_email = customerid?.email;
                 updatedallSaleRegister.buyer_passportnumber = customerid?.passportidno;
@@ -153,8 +153,13 @@ const createSaleRegister = asyncHandler(async (req, res) => {
        buyer_id ,
        check_option_cash, 
        check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, 
-       contract_B_attachment, title_deed_fee, seller_id, seller_new, seller_type, 
-       contract_A_attachment, sales_contract_attachment, notes } = req.body
+       title_deed_fee, seller_id, seller_new, seller_type, 
+        notes } = req.body
+
+       const {contract_A_attachment , contract_B_attachment , sales_contract_attachment } = req.files;
+       const buyerId = buyer_id || null;
+       const transaction = transaction_type || "Not Available"
+       
     // if (!SaleRegister) {
     //     return res.status(400).json({ message: 'All fields are required' })
     // }
@@ -169,9 +174,15 @@ const createSaleRegister = asyncHandler(async (req, res) => {
       propertyid, property_type, unitnumber, communityname, projectname, buildingname, floor, sold_for, noc_charges, 
       trustee_fee_amount, trustee_buyer, trustee_seller, trustee_both, transfer_fee_amount, transfer_buyer, transfer_seller, 
       transfer_both, commission_amount, vat_on_commission, buyer_name, buyer_inhouse_agent_name, buyer_outside_agent_name, 
-      transaction_type, exoected_transfer_date, createdBy, updatedBy, property_new, buyer_new, buyer_type, buyer_id : buyer_id || "000000000000000000000000" ,  
-      check_option_cash, check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, contract_B_attachment, 
-      title_deed_fee, seller_id, seller_new, seller_type, contract_A_attachment, sales_contract_attachment, notes }
+      transaction_type : transaction, exoected_transfer_date, createdBy, updatedBy, property_new, buyer_new, buyer_type, 
+      buyer_id : buyerId ,  
+      check_option_cash, check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, 
+      title_deed_fee, seller_id, notes,
+      seller_new, seller_type, 
+      contract_A_attachment : contract_A_attachment ? req.files.contract_A_attachment.map((data) =>"/"+data.path.replace(/\\/g, '/')).pop() : "" , 
+      contract_B_attachment : contract_B_attachment ? req.files.contract_B_attachment.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : "" , 
+      sales_contract_attachment : sales_contract_attachment ? req.files.sales_contract_attachment.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : ""
+     }
 
     const createSaleRegister = await SaleRegister.create(SaleRegisterObject)
 
@@ -183,7 +194,25 @@ const createSaleRegister = asyncHandler(async (req, res) => {
 })
 
 const updateSaleRegister = asyncHandler(async (req, res) => {
-    const { _id, propertyid, property_type, unitnumber, communityname, projectname, buildingname, floor, sold_for, noc_charges, trustee_fee_amount, trustee_buyer, trustee_seller, trustee_both, transfer_fee_amount, transfer_buyer, transfer_seller, transfer_both, commission_amount, vat_on_commission, buyer_name, buyer_inhouse_agent_name, buyer_outside_agent_name, transaction_type, exoected_transfer_date, createdBy, updatedBy, property_new, buyer_new, buyer_type, buyer_id, check_option_cash, check_option_mortage, noccharges_both, noccharges_buyer, noccharges_seller, contract_B_attachment, title_deed_fee, seller_id, seller_new, seller_type, contract_A_attachment, sales_contract_attachment, notes } = req.body
+    const { 
+      _id, propertyid, property_type, unitnumber, communityname, projectname, 
+      buildingname, floor, sold_for, noc_charges, trustee_fee_amount, trustee_buyer, 
+      trustee_seller, trustee_both, transfer_fee_amount, transfer_buyer, 
+      transfer_seller, transfer_both, commission_amount, 
+      vat_on_commission, buyer_name, buyer_inhouse_agent_name, 
+      buyer_outside_agent_name, transaction_type, exoected_transfer_date, 
+      createdBy, updatedBy, property_new, buyer_new, buyer_type, buyer_id, 
+      check_option_cash, check_option_mortage, noccharges_both, noccharges_buyer, 
+      noccharges_seller,  title_deed_fee, seller_id, seller_new, seller_type,  notes 
+    } = req.body
+
+      const {contract_A_attachment , contract_B_attachment , sales_contract_attachment } = req.files;
+
+      const buyerId = buyer_id || null;
+      const transaction = transaction_type || "Not Available"
+
+
+     // console.log("contract_A_attachment",contract_A_attachment,contract_B_attachment,sales_contract_attachment)
 
     if (!_id) {
         return res.status(400).json({ message: '_id is required' })
@@ -221,26 +250,26 @@ const updateSaleRegister = asyncHandler(async (req, res) => {
     updateSaleRegister.buyer_name = buyer_name
     updateSaleRegister.buyer_inhouse_agent_name = buyer_inhouse_agent_name
     updateSaleRegister.buyer_outside_agent_name = buyer_outside_agent_name
-    updateSaleRegister.transaction_type = transaction_type
+    updateSaleRegister.transaction_type = transaction_type ? transaction_type : transaction,
     updateSaleRegister.exoected_transfer_date = exoected_transfer_date
     updateSaleRegister.createdBy = createdBy
     updateSaleRegister.updatedBy = updatedBy
     updateSaleRegister.property_new = property_new
     updateSaleRegister.buyer_new = buyer_new
     updateSaleRegister.buyer_type = buyer_type
-    updateSaleRegister.buyer_id = buyer_id
+    updateSaleRegister.buyer_id = buyer_id ? buyer_id : buyerId 
     updateSaleRegister.check_option_cash = check_option_cash
     updateSaleRegister.check_option_mortage = check_option_mortage
     updateSaleRegister.noccharges_buyer = noccharges_buyer
     updateSaleRegister.noccharges_seller = noccharges_seller
     updateSaleRegister.noccharges_both = noccharges_both
-    updateSaleRegister.contract_B_attachment = contract_B_attachment
+    updateSaleRegister.contract_B_attachment = contract_B_attachment ? req.files.contract_B_attachment.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : contract_B_attachment , 
     updateSaleRegister.title_deed_fee = title_deed_fee
     updateSaleRegister.seller_id = seller_id
     updateSaleRegister.seller_new = seller_new
     updateSaleRegister.seller_type = seller_type
-    updateSaleRegister.sales_contract_attachment = sales_contract_attachment
-    updateSaleRegister.contract_A_attachment = contract_A_attachment
+    updateSaleRegister.sales_contract_attachment = sales_contract_attachment ? req.files.sales_contract_attachment.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : sales_contract_attachment
+    updateSaleRegister.contract_A_attachment = contract_A_attachment ? req.files.contract_A_attachment.map((data) =>"/"+data.path.replace(/\\/g, '/')).pop() : contract_A_attachment , 
     updateSaleRegister.notes = notes
 
     await updateSaleRegister.save()
@@ -284,79 +313,79 @@ const deleteSaleRegister = asyncHandler(async (req, res) => {
 })
 
 const SearchSaleRegisterByQuery = async (req, res, next) => {
-    try {
-        const { unitnumber, seller_email, buyer_email, communityid, projectnameid, buildingid , transaction_type } = req.query;
-        console.log(req.query)
-        // Constructing match conditions
-        const matchConditions = {
-            'softdelete': false
-        };
+  try {
+      const { unitnumber, seller_email, buyer_email, communityid, projectnameid, buildingid , transaction_type } = req.query;
+     // console.log(req.query)
+      // Constructing match conditions
+      const matchConditions = {
+          'softdelete': false
+      };
 
-        if (unitnumber) matchConditions['propertyid.unitnumber'] = unitnumber;
-        if (seller_email) matchConditions['seller_id.email'] = seller_email;
-        if (buyer_email) matchConditions['buyer_id.email'] = buyer_email;
-        if (communityid) matchConditions['propertyid.communityid'] = new mongoose.Types.ObjectId(communityid);
-        if (projectnameid) matchConditions['propertyid.projectnameid'] = new mongoose.Types.ObjectId(projectnameid);
-        if (buildingid) matchConditions['propertyid.buildingid'] = new mongoose.Types.ObjectId(buildingid);
-        if (transaction_type) matchConditions['transaction_type'] = transaction_type
+      if (unitnumber) matchConditions['propertyid.unitnumber'] = unitnumber;
+      if (seller_email) matchConditions['seller_id.email'] = seller_email;
+      if (buyer_email) matchConditions['buyer_id.email'] = buyer_email;
+      if (communityid) matchConditions['propertyid.communityid'] = new mongoose.Types.ObjectId(communityid);
+      if (projectnameid) matchConditions['propertyid.projectnameid'] = new mongoose.Types.ObjectId(projectnameid);
+      if (buildingid) matchConditions['propertyid.buildingid'] = new mongoose.Types.ObjectId(buildingid);
+      if (transaction_type) matchConditions['transaction_type'] = transaction_type
 
-        
-        
-        const data = [
-           
-            { '$lookup': { 'from': 'addproperties', 'localField': 'propertyid', 'foreignField': '_id', 'as': 'propertyid' } },
-            { '$lookup': { 'from': 'users', 'localField': 'buyer_id', 'foreignField': '_id', 'as': 'buyer_id' } },
-            { '$lookup': { 'from': 'users', 'localField': 'seller_id', 'foreignField': '_id', 'as': 'seller_id' } },
-            { '$unwind': { 'path': '$propertyid', 'preserveNullAndEmptyArrays': true } },
-            { '$unwind': { 'path': '$buyer_id', 'preserveNullAndEmptyArrays': true } },
-            { '$unwind': { 'path': '$seller_id', 'preserveNullAndEmptyArrays': true } },
-            { '$match': matchConditions },
-            {
-                '$project': {
-                    'unitnumber': '$propertyid.unitnumber',
-                    'communityid': '$propertyid.communityid',
-                    'buildingid': '$propertyid.buildingid',
-                    'projectnameid': '$propertyid.projectnameid',
-                    'seller_name': { '$concat': ['$seller_id.firstname', ' ', '$seller_id.lastname'] },
-                    'seller_email': '$seller_id.email',
-                    'seller_mobilenumber': '$seller_id.contactno',
-                    'seller_nationality': '$seller_id.countryofresidence',
-                    'seller_passportnumber': '$seller_id.passportidno',
-                    'buyer_name': { '$concat': ['$buyer_id.firstname', ' ', '$buyer_id.lastname'] },
-                    'buyer_email': '$buyer_id.email',
-                    'buyer_mobilenumber': '$buyer_id.contactno',
-                    'communityname': 1,
-                    'projectname': 1,
-                    'buildingname': 1,
-                    'floor': 1,
-                    'sold_for': 1,
-                    'noc_charges': 1,
-                    'trustee_fee_amount': 1,
-                    'transaction_type' : 1,
-                    'commission_amount': 1,
-                    'title_deed_fee': 1,
-                    'buyer_inhouse_agent_name': 1,
-                    'buyer_outside_agent_name': 1,
-                    'createdAt': 1
-                }
-            },
-            { '$sort': { 'createdAt': -1 } }
-        ];
+      
+      
+      const data = [
+         
+          { '$lookup': { 'from': 'addproperties', 'localField': 'propertyid', 'foreignField': '_id', 'as': 'propertyid' } },
+          { '$lookup': { 'from': 'users', 'localField': 'buyer_id', 'foreignField': '_id', 'as': 'buyer_id' } },
+          { '$lookup': { 'from': 'users', 'localField': 'seller_id', 'foreignField': '_id', 'as': 'seller_id' } },
+          { '$unwind': { 'path': '$propertyid', 'preserveNullAndEmptyArrays': true } },
+          { '$unwind': { 'path': '$buyer_id', 'preserveNullAndEmptyArrays': true } },
+          { '$unwind': { 'path': '$seller_id', 'preserveNullAndEmptyArrays': true } },
+          { '$match': matchConditions },
+          {
+              '$project': {
+                  'unitnumber': '$propertyid.unitnumber',
+                  'communityid': '$propertyid.communityid',
+                  'buildingid': '$propertyid.buildingid',
+                  'projectnameid': '$propertyid.projectnameid',
+                  'seller_name': { '$concat': ['$seller_id.firstname', ' ', '$seller_id.lastname'] },
+                  'seller_email': '$seller_id.email',
+                  'seller_mobilenumber': '$seller_id.contactno',
+                  'seller_nationality': '$seller_id.countryofresidence',
+                  'seller_passportnumber': '$seller_id.passportidno',
+                  'buyer_name': { '$concat': ['$buyer_id.firstname', ' ', '$buyer_id.lastname'] },
+                  'buyer_email': '$buyer_id.email',
+                  'buyer_mobilenumber': '$buyer_id.contactno',
+                  'communityname': 1,
+                  'projectname': 1,
+                  'buildingname': 1,
+                  'floor': 1,
+                  'sold_for': 1,
+                  'noc_charges': 1,
+                  'trustee_fee_amount': 1,
+                  'transaction_type' : 1,
+                  'commission_amount': 1,
+                  'title_deed_fee': 1,
+                  'buyer_inhouse_agent_name': 1,
+                  'buyer_outside_agent_name': 1,
+                  'createdAt': 1
+              }
+          },
+          { '$sort': { 'createdAt': -1 } }
+      ];
 
-        const search_sale_register = await SaleRegister.aggregate(data);
-        res.status(200).json({
-            total: search_sale_register.length,
-            message: "Search results",
-            status: true,
-            data: search_sale_register
-        });
-    } catch (err) {
-        console.error("Error:", err);
-        res.status(500).json({
-            message: "No Search results",
-            status: false
-        });
-    }
+      const search_sale_register = await SaleRegister.aggregate(data);
+      res.status(200).json({
+          total: search_sale_register.length,
+          message: "Search results",
+          status: true,
+          data: search_sale_register
+      });
+  } catch (err) {
+      console.error("Error:", err);
+      res.status(500).json({
+          message: "No Search results",
+          status: false
+      });
+  }
 };
 
 
