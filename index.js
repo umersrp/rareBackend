@@ -22,7 +22,7 @@ app.use(cors({ origin: "*" }))
 // app.use(express.json())
 // app.use(express.json()); 
 app.use(cookieParser())
-app.use('/public', express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public')));
 // app.use(upload.any());
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
