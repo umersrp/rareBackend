@@ -39,7 +39,7 @@ const redisMiddleware = {
     },
 
     deleteData: (key) => {
-        redisClient.del(key, (err, response) => {
+       return redisClient.del(key, (err, response) => {
             if (err) {
                 console.error('Error deleting value from Redis:', err);
               return  err;

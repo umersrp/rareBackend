@@ -683,7 +683,7 @@ const createTenantContract = asyncHandler(async (req, res) => {
           //         await sendEmail(owner_email, "Your Property Tenancy Contract Added Recently", url, property, contentHeading, contentPara)
           //     }
           // }
-          redisMiddleware.deleteData('alltenants').then((res) => res)
+          await redisMiddleware.deleteData('alltenants')
          return res.status(200).json({ message: `New Tenant Contract created`,status:true })
       } else {
         return  res.status(400).json({ message: 'Invalid Tenant Contract received' , status : false })

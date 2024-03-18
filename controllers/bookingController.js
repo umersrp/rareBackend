@@ -2020,7 +2020,7 @@ const createBooking = asyncHandler(async (req, res) => {
             // return res.status(200).json({ message: `Property ${updatedProperty.unitnumber} updated` })
         }
     }
-    redisMiddleware.deleteData('allbookings').then((res) => res)
+   await redisMiddleware.deleteData('allbookings')
 
     return res.status(200).json({ message: `New Booking` })
 
@@ -2166,7 +2166,7 @@ const updateBooking = asyncHandler(async (req, res) => {
         }
     }
 
-    redisMiddleware.deleteData('allbookings').then((res) => res)
+   await redisMiddleware.deleteData('allbookings')
     return res.json(updatedBookingM)
 })
 
