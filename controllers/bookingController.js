@@ -1914,6 +1914,8 @@ const sendEmailPDF = asyncHandler(async (req, res) => {
 })
 
 const createBooking = asyncHandler(async (req, res) => {
+
+
     let { propertyid, unitnumber, buildingname, floor, buildingnumber, communityname, city, customerid, guestname, passportnumber, nationality, mobilenumber, email, checkintype, nooccupants, noadults, totaloccupants, nochildern, confirmationcode, bookingagent, checkindate, nonight, reservationdate, modepayment, checkoutdate, tourismfee, totalpayout, securitydeposit, hostservicefee, cleaningfee, tourismfeetillmonth, tourismfeeacceleratedmonth, totaladditionalfee, totalcollectall, totalroomrent, roomrentamount, guestservicefee, guestmanagementfee, totalguestservices, vatperbookingrent, vatperservicefee, vatpercleaningfee, vatperguestmanagementfee, totalvatper, totalcollectallincl, totalroomrentvat, auditdiff, customertype, passportpdf, ownerid, guestpercentage, hostmanagementfee, vatperhostmanagementfee, firstdays, moremonths, cancelled, hostmanagementpercent, roomrenthostpayable, guestservicepercent, createdBy, updatedBy, softdelete, dtcm_uploaded, passortid_collected, sign_verified, smartcode_provided, payment_collected, payment_received, other_passports } = req.body
     if (!propertyid || !checkindate || !checkoutdate) {
         return res.status(400).json({ message: 'All fields are required' })
@@ -2018,6 +2020,8 @@ const createBooking = asyncHandler(async (req, res) => {
             // return res.status(200).json({ message: `Property ${updatedProperty.unitnumber} updated` })
         }
     }
+    redisMiddleware.deleteData('allbookings').then((res) => res)
+
     return res.status(200).json({ message: `New Booking` })
 
 })

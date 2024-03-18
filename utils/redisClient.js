@@ -36,6 +36,18 @@ const redisMiddleware = {
              return value
             }
         });
+    },
+
+    deleteData: (key) => {
+        redisClient.del(key, (err, response) => {
+            if (err) {
+                console.error('Error deleting value from Redis:', err);
+              return  err;
+            } else {
+               return response;
+            }
+        });
+       
     }
 };
 
