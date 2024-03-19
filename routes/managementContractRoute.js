@@ -13,4 +13,7 @@ router.route('/')
     .patch(managementContractController.updateManagementContract)
     .delete(managementContractController.deleteManagementContract)
 
+
+router.route('/api/managementconract/overview').get(managementContractController.getAllManagementOverview)
+
 module.exports = router

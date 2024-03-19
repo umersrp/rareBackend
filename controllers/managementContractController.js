@@ -11,6 +11,8 @@ const User = require('../models/User')
 const sendEmail = require('../utils/sendEmail')
 const moment = require('moment-timezone');
 
+const { ManagementContractOverview } = require('../utils/overviewData')
+
 const getAllManagementContract = asyncHandler(async (req, res) => {
     const managementContract = await ManagementContract.find({
         $and: [
@@ -428,6 +430,29 @@ const deleteManagementContract = asyncHandler(async (req, res) => {
     res.json(reply)
 })
 
+
+const getAllManagementOverview = async (req,res,next) => {
+    try{
+
+        const ManagementOverview = await ManagementContract.find({ softdelete : {$ne : true}});
+        const today = new Date();
+        const data =  ManagementContractOverview(today , ManagementOverview)
+
+        res.status(200).json({
+            message : "Management Contract Overview",
+            status : true,
+            data : data
+        })
+
+    }catch(err){
+        console.log(err)
+        res.status(200).json({
+            message : "No Management data found",
+            status : false
+        })
+    }
+}
+
 module.exports = {
     getAllManagementContract,
     getManagementContractById,
@@ -436,5 +461,6 @@ module.exports = {
     updateManagementContract,
     deleteManagementContract,
     getManagementContractProperty,
-    updateManagementContractCancel
+    updateManagementContractCancel,
+    getAllManagementOverview
 }

@@ -297,11 +297,48 @@ const TenantPropertyData = (data) => {
    }
 }
 
+
+const ManagementContractOverview = (today ,data)  => {
+
+   const totalActiveContracts = data.filter((item) => item.contractenddate > today)
+   const totalExpiredContracts = data.filter((item) => item.contractenddate < today)
+   const totallongtermContracts = data.filter((item) => item.contractperiod === "Long Term")
+   const totalshorttermContracts = data.filter((item) => item.contractperiod === "Short Term")
+
+   const next90Days = new Date();
+   next90Days.setDate(today.getDate() + 90);
+   const TotalUpcomingActiveContractin90Days =  data.filter((data) => {
+       const startDate = new Date(data.contractenddate)
+       return startDate > today && startDate <= next90Days;
+   })
+
+   const previous90Days = new Date();
+    previous90Days.setDate(today.getDate() - 90);
+    const Totalexpiredcontractsin90Days =  data.filter((data) => {
+        const startDate = new Date(data.contractenddate)
+       return startDate >= previous90Days && startDate < today;
+    })
+
+   const managementfee =  data.filter((item) => item.managementfee != "" && item.managementfee != undefined ? Number(item.managementfee) : null)
+   const totoalmanagementfee = managementfee.map((data) => Number(data.managementfee)).reduce((acc,data) => acc+ data,0)
+
+
+    return{
+        Total_Active_Contracts : totalActiveContracts.length,
+        Total_Expired_Contracts : totalExpiredContracts.length,
+        Total_LongTerm_Contracts : totallongtermContracts.length,
+        Total_ShortTerm_Contracts : totalshorttermContracts.length,
+        UpcomingActiveContractsIn90Days : TotalUpcomingActiveContractin90Days.slice(0,4),
+        UpcomingExpiredContractsIn90Days : Totalexpiredcontractsin90Days.slice(0,4),
+        TotalManagementFees : totoalmanagementfee
+    }
+}
 module.exports = {
     BookingDataByTomorrow,
     BookingDataByWeekly,
     BookingDataByMonthly,
     BookingDataByYearly,
     TenantDataOverview,
-    TenantPropertyData
+    TenantPropertyData,
+    ManagementContractOverview
 }
