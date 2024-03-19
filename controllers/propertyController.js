@@ -1965,7 +1965,8 @@ const ActiveContract = async (req,res,next) => {
                 data : propertyOverview
             })
         }catch(err){
-            res.status(200).json({
+            console.log(err)
+            res.status(500).json({
                 message : "Property not found",
                 status : false
             })
