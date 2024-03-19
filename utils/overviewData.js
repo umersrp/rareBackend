@@ -372,7 +372,7 @@ const SaleregisterOverview = (data) => {
         Total_Unsuccessful_Transaction : totalUnsuccessfultransaction.length,
         Total_Successful_Transaction : totalsuccessfultransaction.length,
         Total_Inprogress_Transaction : totalinprogresstransaction.length,
-        Total_Seller :   new Set(totalseller) ,
+        Total_Seller :   new Set(totalseller).size ,
         Total_Buyer : totalbuyer.length,
         Yearly_Sold_Amount : soldfor,
         Total_Appartment : totalappartment.length,
