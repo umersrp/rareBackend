@@ -376,10 +376,13 @@ const SaleregisterOverview = (data) => {
         Total_Buyer : totalbuyer.length,
         Yearly_Sold_Amount : soldfor,
         Total_Appartment : totalappartment.length,
-        Appartment : totalappartment.sort((a,b) => b - a).slice(0,4) ,
+        Appartment : totalappartment.sort((a,b) => b - a).slice(0,5) ,
         Total_Townhouse : totaltownhouse.length,
+        Townhouse : totaltownhouse.sort((a,b) => b - a).slice(0,5) ,
         Total_Bunglow : totalbunglow.length,
-        Total_Villa : totalvilla.length
+        Bunglow : totalbunglow.sort((a,b) => b - a).slice(0,5) ,
+        Total_Villa : totalvilla.length,
+        Villa : totalvilla.sort((a,b) => b - a).slice(0,5) ,
 
     }
 }
