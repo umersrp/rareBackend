@@ -373,7 +373,7 @@ const SaleregisterOverview = (data) => {
         Total_Successful_Transaction : totalsuccessfultransaction.length,
         Total_Inprogress_Transaction : totalinprogresstransaction.length,
         Total_Seller :   new Set(totalseller).size ,
-        Total_Buyer : totalbuyer.length,
+        Total_Buyer : new Set(totalbuyer).size ,
         Yearly_Sold_Amount : soldfor,
         Total_Appartment : totalappartment.length,
         Appartment : totalappartment.sort((a,b) => b - a).slice(0,5) ,
