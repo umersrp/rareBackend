@@ -290,13 +290,13 @@ const TenantDataOverview = (today , data) => {
         TotalThreeMonthsRevenue: totalrevnue
     }
 }
+
 const TenantPropertyData = (data) => {
    return {
    propertiesDetails : data.slice(0,4),
    totalProperties : data.length
    }
 }
-
 
 const ManagementContractOverview = (today ,data)  => {
 
@@ -333,6 +333,55 @@ const ManagementContractOverview = (today ,data)  => {
         TotalManagementFees : totoalmanagementfee
     }
 }
+
+const SaleregisterOverview = (data) => {
+   
+
+    const totalUnsuccessfultransaction = data.filter((item) => item.transaction_type === "Unsuccessful");
+    const totalsuccessfultransaction = data.filter((item) => item.transaction_type === "Successful");
+    const totalinprogresstransaction = data.filter((item) => item.transaction_type === "InProgress");
+    const totalseller = data.filter((item) => item.seller_id)
+    const totalbuyer = data.filter((data) => data.buyer_id != undefined && data.buyer_id !== "")
+
+    
+
+    
+    
+
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+
+       const filteredData = data.filter((item) => {
+            if(new Date(item.createdAt).getFullYear() === currentYear){
+                return item
+            }
+            
+        })
+      const totalSOld =  filteredData.filter((data) => data.sold_for != "" && data.sold_for != undefined ?  Number(data.sold_for) : null)
+      const soldfor = totalSOld.map((data) => Number(data.sold_for)).reduce((acc,data) => acc+ data , 0)
+
+
+      const totalappartment = data.filter((item) => item.propertytypesegration === "Residential- Apartment")
+      const totaltownhouse = data.filter((item) => item.propertytypesegration === "Townhouse")
+      const totalbunglow = data.filter((item) => item.propertytypesegration === "Bungalow")
+      const totalvilla = data.filter((item) => item.propertytypesegration === "Villa")
+    
+     
+      
+    return {
+        Total_Unsuccessful_Transaction : totalUnsuccessfultransaction.length,
+        Total_Successful_Transaction : totalsuccessfultransaction.length,
+        Total_Inprogress_Transaction : totalinprogresstransaction.length,
+        Total_Seller : totalseller.length,
+        Total_Buyer : totalbuyer.length,
+        Yearly_Sold_Amount : soldfor,
+        Total_Appartment : totalappartment.length,
+        Total_Townhouse : totaltownhouse.length,
+        Total_Bunglow : totalbunglow.length,
+        Total_Villa : totalvilla.length
+
+    }
+}
 module.exports = {
     BookingDataByTomorrow,
     BookingDataByWeekly,
@@ -340,5 +389,6 @@ module.exports = {
     BookingDataByYearly,
     TenantDataOverview,
     TenantPropertyData,
-    ManagementContractOverview
+    ManagementContractOverview,
+    SaleregisterOverview
 }
