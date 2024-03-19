@@ -16,8 +16,7 @@ const rentpurchase = require('../models/rentpurchase')
 const tenantContract = require('../models/tenantContract')
 const { default: mongoose } = require('mongoose')
 const redisMiddleware = require('../utils/redisClient')
-
-
+const { PropertyOverviewNow } = require('../utils/overviewData')
 
 
 const getAllProperty = asyncHandler(async (req, res) => {
@@ -1952,6 +1951,27 @@ const ActiveContract = async (req,res,next) => {
         }
     }
 
+
+    const PropertyOverview = async (req,res,next) => {
+        try{
+
+            const property = await AddProperty.find([{softdelete : {$ne : true} },{owner_changed : { $ne : true}}]) 
+
+            const propertyOverview = PropertyOverviewNow(property)
+
+            res.status(200).json({
+                message : "Property Overview Data",
+                status : true,
+                data : propertyOverview
+            })
+        }catch(err){
+            res.status(200).json({
+                message : "Property not found",
+                status : false
+            })
+        }
+    }
+
 module.exports = {
     ownerProperty,
     ownerBookings,
@@ -1981,5 +2001,6 @@ module.exports = {
     Softdeleted,
     PropertyOwnerChanged,
     getProprtybyId,
-    getWebListing
+    getWebListing,
+    PropertyOverview
 }

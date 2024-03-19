@@ -386,6 +386,30 @@ const SaleregisterOverview = (data) => {
 
     }
 }
+
+const PropertyOverviewNow = (data) => {
+
+    const totalappartment = data.filter((item) => item.propertytype === "Residential- Apartment")
+    const totaltownhouse = data.filter((item) => item.propertytype === "Townhouse")
+    const totalbunglow = data.filter((item) => item.propertytype === "Bungalow")
+    const totalvilla = data.filter((item) => item.propertytype === "Villa")
+    const totalshortterm = data.filter((item) => item.propertyType === "Short-term")
+    const totallongterm = data.filter((item) => item.propertyType === "Long-term")
+    const totalPropertiesWithOwner = data.filter((item) => item.customerid && item.customername )
+    const totalPropertiesWithoutOwner = data.filter((item) => !item.customerid && !item.customername)
+
+    return{
+        Total_Appartment : totalappartment.length,
+        Total_Townhouse : totaltownhouse.length,
+        Total_Bunglow : totalbunglow.length,
+        Total_Villa : totalvilla.length,
+        Total_Shortterm_Properties : totalshortterm.length,
+        Total_Longterm_Properties : totallongterm.length,
+        TotalPropertiesWithOwner : totalPropertiesWithOwner.length,
+        TotalPropertiesWithoutOwner : totalPropertiesWithoutOwner.length 
+    }
+
+}
 module.exports = {
     BookingDataByTomorrow,
     BookingDataByWeekly,
@@ -394,5 +418,6 @@ module.exports = {
     TenantDataOverview,
     TenantPropertyData,
     ManagementContractOverview,
-    SaleregisterOverview
+    SaleregisterOverview,
+    PropertyOverviewNow
 }
