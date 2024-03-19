@@ -308,14 +308,14 @@ const ManagementContractOverview = (today ,data)  => {
    const next90Days = new Date();
    next90Days.setDate(today.getDate() + 90);
    const TotalUpcomingActiveContractin90Days =  data.filter((data) => {
-       const startDate = new Date(data.contractenddate)
+       const startDate = new Date(data.contractstartdate)
        return startDate > today && startDate <= next90Days;
    })
 
    const previous90Days = new Date();
     previous90Days.setDate(today.getDate() - 90);
     const Totalexpiredcontractsin90Days =  data.filter((data) => {
-        const startDate = new Date(data.contractenddate)
+        const startDate = new Date(data.contractstartdate)
        return startDate >= previous90Days && startDate < today;
     })
 
