@@ -376,6 +376,7 @@ const SaleregisterOverview = (data) => {
         Total_Buyer : totalbuyer.length,
         Yearly_Sold_Amount : soldfor,
         Total_Appartment : totalappartment.length,
+        Appartment : totalappartment.sort((a,b) => b - a).slice(0,4) ,
         Total_Townhouse : totaltownhouse.length,
         Total_Bunglow : totalbunglow.length,
         Total_Villa : totalvilla.length
