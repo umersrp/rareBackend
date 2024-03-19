@@ -1955,7 +1955,7 @@ const ActiveContract = async (req,res,next) => {
     const PropertyOverview = async (req,res,next) => {
         try{
 
-            const property = await AddProperty.find({$and : [{softdelete : {$ne : true} },{owner_changed : { $ne : true}}]}) 
+            const property = await AddProperty.find({$and : [{softdelete : {$ne : true} },{owner_changed : false}]}) 
 
             const propertyOverview = PropertyOverviewNow(property)
 
