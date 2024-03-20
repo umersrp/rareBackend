@@ -2223,7 +2223,7 @@ const deleteBooking = asyncHandler(async (req, res) => {
     if (!_id) {
         return res.status(400).json({ message: "Id is required" })
     }
-
+    await redisMiddleware.deleteData('allbookings')
     const deletedBooking = await Booking.findById(_id).exec()
 
     if (!deletedBooking) {
@@ -2231,7 +2231,7 @@ const deleteBooking = asyncHandler(async (req, res) => {
     }
 
     const result = await deletedBooking.deleteOne()
-    await redisMiddleware.deleteData('allbookings')
+   
     const reply = `Booking ${result?.propertyid} with Id ${result?._id} deleted`
 
     
