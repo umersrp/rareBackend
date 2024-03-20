@@ -434,7 +434,41 @@ const deleteManagementContract = asyncHandler(async (req, res) => {
 const getAllManagementOverview = async (req,res,next) => {
     try{
 
-        const ManagementOverview = await ManagementContract.find({ softdelete : {$ne : true}});
+        const admin = [
+            {
+                '$match': {
+                  'softdelete': {
+                    '$ne': true
+                  }
+                }
+            },
+            {
+              '$lookup': {
+                'from': 'addproperties', 
+                'localField': 'propertyid', 
+                'foreignField': '_id', 
+                'as': 'propertyid'
+              }
+            }, {
+              '$unwind': {
+                'path': '$propertyid', 
+                'preserveNullAndEmptyArrays': true
+              }
+            }, {
+              '$project': {
+                'contractperiod': 1, 
+                'contractstartdate': 1, 
+                'contractenddate': 1, 
+                'managementfee': 1, 
+                'minimum_managementfee': 1, 
+                'createdAt': 1, 
+                'updatedAt': 1, 
+                'ownerid': '$propertyid.customerid',
+                'unitNumber' : '$propertyid.unitnumber'
+              }
+            }
+          ]
+        const ManagementOverview = await ManagementContract.aggregate(admin);
         const today = new Date();
         const data =  ManagementContractOverview(today , ManagementOverview)
 
@@ -478,7 +512,8 @@ const getownerManagementOverview = async (req,res,next) => {
                 'minimum_managementfee': 1, 
                 'createdAt': 1, 
                 'updatedAt': 1, 
-                'ownerid': '$propertyid.customerid'
+                'ownerid': '$propertyid.customerid',
+                'unitNumber' : '$propertyid.unitnumber'
               }
             }, {
               '$match': {
