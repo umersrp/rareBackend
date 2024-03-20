@@ -2229,15 +2229,16 @@ const deleteBooking = asyncHandler(async (req, res) => {
     if (!deletedBooking) {
         return res.status(400).json({ message: 'Booking not found' })
     }
-    const redisdeleeted = await redisMiddleware.deleteData('allbookings')
+   
     const result = await deletedBooking.deleteOne()
    
     const reply = `Booking ${result?.propertyid} with Id ${result?._id} deleted`
 
-    setTimeout(async() => {
-        await Promise.all([redisdeleeted ,result])
-        return res.json(reply)
-    },2000)
+    await redisMiddleware.deleteData('allbookings')
+    
+    return res.status(200).send(reply)
+    
+
 })
 
 const getBookingSearch = asyncHandler(async (req, res) => {
