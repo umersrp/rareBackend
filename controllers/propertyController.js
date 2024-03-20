@@ -1973,6 +1973,36 @@ const ActiveContract = async (req,res,next) => {
         }
     }
 
+    const OwnerPropertyOverview = async (req,res,next) => {
+        try{
+
+            const data = [
+                {
+                  '$match': {
+                    'softdelete': {
+                      '$ne': true
+                    }, 
+                    'owner_changed': false, 
+                    'customerid': mongoose.Types.ObjectId(req.params.customerid), 
+                  }
+                }
+              ]
+
+            const property = await AddProperty.aggregate(data)
+
+            const propertyOverview = PropertyOverviewNow(property)
+
+            res.status(200).json({
+                message : "Property Overview Data",
+                status : true,
+                data : propertyOverview
+            })   
+
+        }catch(err){
+
+        }
+    }
+
 module.exports = {
     ownerProperty,
     ownerBookings,
@@ -2003,5 +2033,6 @@ module.exports = {
     PropertyOwnerChanged,
     getProprtybyId,
     getWebListing,
-    PropertyOverview
+    PropertyOverview,
+    OwnerPropertyOverview
 }

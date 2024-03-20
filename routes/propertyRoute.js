@@ -56,5 +56,6 @@ router.route('/')
     router.route('/api/ownerbookingdbyowneremail/:owneremail').get(propertyController.ownerBookings)
 
     router.route('/api/propertyoverview').get(propertyController.PropertyOverview)
+    router.route('/api/propertyoverview/:customerid').get(propertyController.OwnerPropertyOverview)
 
 module.exports = router
