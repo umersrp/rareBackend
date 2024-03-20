@@ -2232,7 +2232,9 @@ const deleteBooking = asyncHandler(async (req, res) => {
 
     const result = await deletedBooking.deleteOne()
     const reply = `Booking ${result?.propertyid} with Id ${result?._id} deleted`
-    redisMiddleware.deleteData('allbookings').then((res) => res)
+
+    await redisMiddleware.deleteData('allbookings')
+    
     return res.json(reply)
 })
 
