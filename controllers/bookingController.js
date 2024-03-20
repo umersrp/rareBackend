@@ -2213,7 +2213,7 @@ const updateBookingCancel = asyncHandler(async (req, res) => {
     Object.assign(existingBooking, updateData);
 
     const updatedBooking = await existingBooking.save();
-
+    await redisMiddleware.deleteData('allbookings')
     return res.json({ message: `${updatedBooking._id} updated` });
 });
 
@@ -2235,7 +2235,7 @@ const deleteBooking = asyncHandler(async (req, res) => {
     const reply = `Booking ${result?.propertyid} with Id ${result?._id} deleted`
 
     await redisMiddleware.deleteData('allbookings')
-    
+
     return res.status(200).send(reply)
     
 
