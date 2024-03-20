@@ -10,7 +10,7 @@ const Employee = require('../models/employee')
 const User = require('../models/User')
 const sendEmail = require('../utils/sendEmail')
 const moment = require('moment-timezone');
-
+const mongoose = require('mongoose')
 const { ManagementContractOverview } = require('../utils/overviewData')
 
 const getAllManagementContract = asyncHandler(async (req, res) => {
@@ -453,8 +453,66 @@ const getAllManagementOverview = async (req,res,next) => {
     }
 }
 
+
+const getownerManagementOverview = async (req,res,next) => {
+    try{
+        const owner = [
+            {
+              '$lookup': {
+                'from': 'addproperties', 
+                'localField': 'propertyid', 
+                'foreignField': '_id', 
+                'as': 'propertyid'
+              }
+            }, {
+              '$unwind': {
+                'path': '$propertyid', 
+                'preserveNullAndEmptyArrays': true
+              }
+            }, {
+              '$project': {
+                'contractperiod': 1, 
+                'contractstartdate': 1, 
+                'contractenddate': 1, 
+                'managementfee': 1, 
+                'minimum_managementfee': 1, 
+                'createdAt': 1, 
+                'updatedAt': 1, 
+                'ownerid': '$propertyid.customerid'
+              }
+            }, {
+              '$match': {
+                'ownerid':  mongoose.Types.ObjectId(req.params.ownerid), 
+                'softdelete': {
+                  '$ne': true
+                }
+              }
+            }
+          ]
+        const ManagementOverview = await ManagementContract.aggregate(owner);
+        const today = new Date();
+        const data =  ManagementContractOverview(today , ManagementOverview)
+
+        res.status(200).json({
+            message : "Management Contract Overview",
+            status : true,
+            data : data
+        })
+
+    }catch(err){
+        console.log(err)
+        res.status(500).json({
+            message : "No Management data found",
+            status : false
+        })
+    }
+}
+
+
+
 module.exports = {
     getAllManagementContract,
+    getownerManagementOverview,
     getManagementContractById,
     getOwnerContract,
     createManagementContract,

@@ -15,5 +15,6 @@ router.route('/')
 
 
 router.route('/api/managementconract/overview').get(managementContractController.getAllManagementOverview)
+router.route('/api/managementconract/overview/:ownerid').get(managementContractController.getownerManagementOverview)
 
 module.exports = router
