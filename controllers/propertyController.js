@@ -945,7 +945,7 @@ const createProperty = asyncHandler(async (req, res) => {
          projectnameid, buildingid, subtypeid, developerid, totalbathroom, bathroomensuite, maidroom, driverroom, storeroom, 
          otherroom, ensuite, bedroomensuite, totalbedroom, streetnumber, is_available, available_for, unlisted, available_id,
           owner_representative_name, owner_representative_id, createdBy, updatedBy, 
-          OwnerNameAsPerDeed, no_ownernamedeed 
+          OwnerNameAsPerDeed, no_ownernamedeed ,marketValue, valuation_date
         } = req.body
 
         const {
@@ -1006,7 +1006,8 @@ const createProperty = asyncHandler(async (req, res) => {
         propertyimages : propertyimages ? req.files.propertyimages.map((data) => "/"+data.path.replace(/\\/g, '/'))  : "" , 
         titledeeddocument : titledeeddocument ? req.files.titledeeddocument.map((data) => "/"+data.path.replace(/\\/g, '/')).pop() : "" , 
         unitplanattachment : unitplanattachment ? req.files.unitplanattachment.map((data) => "/"+data.path.replace(/\\/g, '/')) : "",
-        propertyType : propertyType ? propertyType : "Long-term"
+        propertyType : propertyType ? propertyType : "Long-term",
+        marketValue, valuation_date
     }
     await User.updateOne({_id : customerid} , { $set:{ subType : "owner"}})
 
@@ -1069,7 +1070,7 @@ const updateProperty = asyncHandler(async (req, res) => {
         ownernamedeed, purchasevaue, communityid, projectnameid, buildingid, subtypeid, developerid, 
         totalbathroom, bathroomensuite, maidroom, driverroom, storeroom, otherroom, ensuite, 
         bedroomensuite, totalbedroom, streetnumber, is_available, available_for, unlisted, 
-        available_id, owner_representative_name, owner_representative_id, createdBy, 
+        available_id, owner_representative_name, owner_representative_id, createdBy, marketValue, valuation_date,
         updatedBy,  owner_changed, no_ownernamedeed, OwnerNameAsPerDeed } = req.body
 
         const {
@@ -1164,6 +1165,8 @@ const updateProperty = asyncHandler(async (req, res) => {
     updateProperty.no_ownernamedeed = no_ownernamedeed
     updateProperty.createdBy = createdBy
     updateProperty.updatedBy = updatedBy
+    updateProperty.updatedBy = marketValue, 
+    updateProperty.updatedBy = valuation_date
     updateProperty.measure_units = measure_units
     updateProperty.OwnerNameAsPerDeed = JSON.parse(OwnerNameAsPerDeed)
 

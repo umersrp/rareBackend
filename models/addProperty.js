@@ -317,6 +317,8 @@ const addPropertySchema = new mongoose.Schema({
         require: true,
         ref: 'employee'
     },
+    marketValue: {type :  Number},
+    valuation_date: { type : Date},
     updatedBy: {
         type: mongoose.Schema.Types.ObjectId,
         // type: String,
