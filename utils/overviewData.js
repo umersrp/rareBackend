@@ -328,6 +328,8 @@ const ManagementContractOverview = (today ,data)  => {
         Total_Expired_Contracts : totalExpiredContracts.length,
         Total_LongTerm_Contracts : totallongtermContracts.length,
         Total_ShortTerm_Contracts : totalshorttermContracts.length,
+        Total_UpcomingActiveContractsIn90Days : TotalUpcomingActiveContractin90Days.length,
+        Total_UpcomingExpiredContractsIn90Days : Totalexpiredcontractsin90Days.length,
         UpcomingActiveContractsIn90Days : TotalUpcomingActiveContractin90Days.slice(0,4),
         UpcomingExpiredContractsIn90Days : Totalexpiredcontractsin90Days.slice(0,4),
         TotalManagementFees : totoalmanagementfee
