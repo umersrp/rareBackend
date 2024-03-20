@@ -290,6 +290,7 @@ const TenantDataOverview = (today , data) => {
         TotalThreeMonthsRevenue: totalrevnue
     }
 }
+
 const TenantPropertyData = (data) => {
    return {
    propertiesDetails : data.slice(0,4),
@@ -297,11 +298,128 @@ const TenantPropertyData = (data) => {
    }
 }
 
+const ManagementContractOverview = (today ,data)  => {
+
+   const totalActiveContracts = data.filter((item) => item.contractenddate > today)
+   const totalExpiredContracts = data.filter((item) => item.contractenddate < today)
+   const totallongtermContracts = data.filter((item) => item.contractperiod === "Long Term")
+   const totalshorttermContracts = data.filter((item) => item.contractperiod === "Short Term")
+
+   const next90Days = new Date();
+   next90Days.setDate(today.getDate() + 90);
+   const TotalUpcomingActiveContractin90Days =  data.filter((data) => {
+       const startDate = new Date(data.contractstartdate)
+       return startDate > today && startDate <= next90Days;
+   })
+
+   const previous90Days = new Date();
+    previous90Days.setDate(today.getDate() - 90);
+    const Totalexpiredcontractsin90Days =  data.filter((data) => {
+        const startDate = new Date(data.contractstartdate)
+       return startDate >= previous90Days && startDate < today;
+    })
+
+   const managementfee =  data.filter((item) => item.managementfee != "" && item.managementfee != undefined ? Number(item.managementfee) : null)
+   const totoalmanagementfee = managementfee.map((data) => Number(data.managementfee)).reduce((acc,data) => acc+ data,0)
+
+
+    return{
+        Total_Active_Contracts : totalActiveContracts.length,
+        Total_Expired_Contracts : totalExpiredContracts.length,
+        Total_LongTerm_Contracts : totallongtermContracts.length,
+        Total_ShortTerm_Contracts : totalshorttermContracts.length,
+        Total_UpcomingActiveContractsIn90Days : TotalUpcomingActiveContractin90Days.length,
+        Total_UpcomingExpiredContractsIn90Days : Totalexpiredcontractsin90Days.length,
+        UpcomingActiveContractsIn90Days : TotalUpcomingActiveContractin90Days.slice(0,4),
+        UpcomingExpiredContractsIn90Days : Totalexpiredcontractsin90Days.slice(0,4),
+        TotalManagementFees : totoalmanagementfee
+    }
+}
+
+const SaleregisterOverview = (data) => {
+   
+
+    const totalUnsuccessfultransaction = data.filter((item) => item.transaction_type === "Unsuccessful");
+    const totalsuccessfultransaction = data.filter((item) => item.transaction_type === "Successful");
+    const totalinprogresstransaction = data.filter((item) => item.transaction_type === "InProgress");
+    const totalseller = data.filter((item) => item.seller_id)
+    const totalbuyer = data.filter((data) => data.buyer_id != undefined && data.buyer_id !== "")
+
+    
+
+    
+    
+
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+
+       const filteredData = data.filter((item) => {
+            if(new Date(item.createdAt).getFullYear() === currentYear){
+                return item
+            }
+            
+        })
+      const totalSOld =  filteredData.filter((data) => data.sold_for != "" && data.sold_for != undefined ?  Number(data.sold_for) : null)
+      const soldfor = totalSOld.map((data) => Number(data.sold_for)).reduce((acc,data) => acc+ data , 0)
+
+
+      const totalappartment = data.filter((item) => item.propertytypesegration === "Residential- Apartment")
+      const totaltownhouse = data.filter((item) => item.propertytypesegration === "Townhouse")
+      const totalbunglow = data.filter((item) => item.propertytypesegration === "Bungalow")
+      const totalvilla = data.filter((item) => item.propertytypesegration === "Villa")
+    
+     
+      
+    return {
+        Total_Unsuccessful_Transaction : totalUnsuccessfultransaction.length,
+        Total_Successful_Transaction : totalsuccessfultransaction.length,
+        Total_Inprogress_Transaction : totalinprogresstransaction.length,
+        Total_Seller :   new Set(totalseller).size ,
+        Total_Buyer : new Set(totalbuyer).size ,
+        Yearly_Sold_Amount : soldfor,
+        Total_Appartment : totalappartment.length,
+        Appartment : totalappartment.sort((a,b) => b - a).slice(0,5) ,
+        Total_Townhouse : totaltownhouse.length,
+        Townhouse : totaltownhouse.sort((a,b) => b - a).slice(0,5) ,
+        Total_Bunglow : totalbunglow.length,
+        Bunglow : totalbunglow.sort((a,b) => b - a).slice(0,5) ,
+        Total_Villa : totalvilla.length,
+        Villa : totalvilla.sort((a,b) => b - a).slice(0,5) ,
+
+    }
+}
+
+const PropertyOverviewNow = (data) => {
+
+    const totalappartment = data.filter((item) => item.propertytype === "Residential- Apartment")
+    const totaltownhouse = data.filter((item) => item.propertytype === "Townhouse")
+    const totalbunglow = data.filter((item) => item.propertytype === "Bungalow")
+    const totalvilla = data.filter((item) => item.propertytype === "Villa")
+    const totalshortterm = data.filter((item) => item.propertyType === "Short-term")
+    const totallongterm = data.filter((item) => item.propertyType === "Long-term")
+    const totalPropertiesWithOwner = data.filter((item) => item.customerid && item.customername )
+    const totalPropertiesWithoutOwner = data.filter((item) => !item.customerid && !item.customername)
+
+    return{
+        Total_Appartment : totalappartment.length,
+        Total_Townhouse : totaltownhouse.length,
+        Total_Bunglow : totalbunglow.length,
+        Total_Villa : totalvilla.length,
+        Total_Shortterm_Properties : totalshortterm.length,
+        Total_Longterm_Properties : totallongterm.length,
+        TotalPropertiesWithOwner : totalPropertiesWithOwner.length,
+        TotalPropertiesWithoutOwner : totalPropertiesWithoutOwner.length 
+    }
+
+}
 module.exports = {
     BookingDataByTomorrow,
     BookingDataByWeekly,
     BookingDataByMonthly,
     BookingDataByYearly,
     TenantDataOverview,
-    TenantPropertyData
+    TenantPropertyData,
+    ManagementContractOverview,
+    SaleregisterOverview,
+    PropertyOverviewNow
 }

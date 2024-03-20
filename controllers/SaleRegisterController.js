@@ -7,7 +7,9 @@ const BuildingName = require('../models/buildingName')
 const ProjectName = require('../models/projectName')
 const CommunityName = require('../models/communityname')
 const SubType = require('../models/subType');
-const Employee = require('../models/employee')
+const Employee = require('../models/employee');
+
+const {SaleregisterOverview} =  require('../utils/overviewData')
 
 const getAllSaleRegister = asyncHandler(async (req, res) => {
     const allSaleRegister = await SaleRegister.find({
@@ -495,6 +497,89 @@ const AllCounts = async (req, res, next) => {
     }
 };
 
+const SaleRegisterOverview = async (req,res,next) => {
+try{
+
+  const datas = [
+    {
+      '$match': {
+        'softdelete': {
+          '$ne': true
+        }
+      }
+    }, {
+      '$lookup': {
+        'from': 'addproperties', 
+        'localField': 'propertyid', 
+        'foreignField': '_id', 
+        'as': 'propertyid'
+      }
+    }, {
+      '$unwind': {
+        'path': '$propertyid', 
+        'preserveNullAndEmptyArrays': true
+      }
+    }, {
+      '$project': {
+        'propertytypesegration': '$propertyid.propertytype', 
+        'buyer_id': 1, 
+        'seller_id': 1, 
+        'property_new': 1, 
+        'buyer_new': 1, 
+        'seller_new': 1, 
+        'property_type': 1, 
+        'buyer_type': 1, 
+        'seller_type': 1, 
+        'sold_for': 1, 
+        'noc_charges': 1, 
+        'trustee_fee_amount': 1, 
+        'trustee_buyer': 1, 
+        'trustee_seller': 1, 
+        'trustee_both': 1, 
+        'transfer_fee_amount': 1, 
+        'transfer_buyer': 1, 
+        'transfer_seller': 1, 
+        'transfer_both': 1, 
+        'noccharges_buyer': 1, 
+        'noccharges_seller': 1, 
+        'noccharges_both': 1, 
+        'check_option_cash': 1, 
+        'check_option_mortage': 1, 
+        'commission_amount': 1, 
+        'contract_B_attachment': 1, 
+        'sales_contract_attachment': 1, 
+        'contract_A_attachment': 1, 
+        'title_deed_fee': 1, 
+        'notes': 1, 
+        'vat_on_commission': 1, 
+        'buyer_inhouse_agent_name': 1, 
+        'buyer_outside_agent_name': 1, 
+        'transaction_type': 1, 
+        'exoected_transfer_date': 1, 
+        'softdelete': 1, 
+        'createdAt': 1, 
+        'updatedAt': 1
+      }
+    }
+  ]
+
+  const allSaleregister = await SaleRegister.aggregate(datas)
+  const data = SaleregisterOverview(allSaleregister)
+
+  res.status(200).json({
+    message : "Sale Register Overview",
+    status : true,
+    data : data
+  })
+
+}catch(err){
+  console.log("=====>",err)
+  res.status(200).json({
+    message : "No Sale Register data found",
+    status : false
+  })
+}
+}
 
 module.exports = {
     getAllSaleRegister,
@@ -504,7 +589,8 @@ module.exports = {
     deleteSaleRegister,
     updateSaleRegisterSoftDelete,
     SearchSaleRegisterByQuery,
-    AllCounts
+    AllCounts,
+    SaleRegisterOverview
 }
 
 //deploying on dev-rare that's why changing in this

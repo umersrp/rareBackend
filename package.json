@@ -37,6 +37,7 @@
     "redis": "^4.6.13",
     "text-encoding": "^0.7.0",
     "text-encoding-utf-8": "^1.0.2",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "express-handlebars": "^7.1.2"
   }
 }

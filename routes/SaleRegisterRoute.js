@@ -13,4 +13,7 @@ router.route('/')
     .patch(upload , SaleRegisterController.updateSaleRegister)
     .delete(SaleRegisterController.deleteSaleRegister)
 
+
+router.route('/api/saleregister/overview').get(SaleRegisterController.SaleRegisterOverview)
+
 module.exports = router

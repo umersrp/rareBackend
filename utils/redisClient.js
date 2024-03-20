@@ -44,6 +44,7 @@ const redisMiddleware = {
                 console.error('Error deleting value from Redis:', err);
               return  err;
             } else {
+                console.log("eeee",response)
                return response;
             }
         });

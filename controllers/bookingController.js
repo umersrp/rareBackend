@@ -2213,7 +2213,7 @@ const updateBookingCancel = asyncHandler(async (req, res) => {
     Object.assign(existingBooking, updateData);
 
     const updatedBooking = await existingBooking.save();
-
+    await redisMiddleware.deleteData('allbookings')
     return res.json({ message: `${updatedBooking._id} updated` });
 });
 
@@ -2223,17 +2223,22 @@ const deleteBooking = asyncHandler(async (req, res) => {
     if (!_id) {
         return res.status(400).json({ message: "Id is required" })
     }
-
+    
     const deletedBooking = await Booking.findById(_id).exec()
 
     if (!deletedBooking) {
         return res.status(400).json({ message: 'Booking not found' })
     }
-
+   
     const result = await deletedBooking.deleteOne()
+   
     const reply = `Booking ${result?.propertyid} with Id ${result?._id} deleted`
-    redisMiddleware.deleteData('allbookings').then((res) => res)
-    return res.json(reply)
+
+    await redisMiddleware.deleteData('allbookings')
+
+    return res.status(200).send(reply)
+    
+
 })
 
 const getBookingSearch = asyncHandler(async (req, res) => {
