@@ -399,7 +399,25 @@ const PropertyOverviewNow = (data) => {
     const totallongterm = data.filter((item) => item.propertyType === "Long-term")
     const totalPropertiesWithOwner = data.filter((item) => item.customerid && item.customername )
     const totalPropertiesWithoutOwner = data.filter((item) => !item.customerid && !item.customername)
+    const currentYear = new Date().getFullYear()
+    const previousYear = new Date().getFullYear() - 1
 
+    const o2024 = data.filter((item) => {
+        const { createdAt } = item
+        const created = new Date(createdAt).getFullYear()
+        if(created == currentYear){
+            return item
+        }
+    })
+
+    const o2023 = data.filter((item) => {
+        const { createdAt } = item
+        const created = new Date(createdAt).getFullYear()
+        if(created == previousYear){
+            return item
+        }
+    })
+   
     return{
         Total_Appartment : totalappartment.length,
         Total_Townhouse : totaltownhouse.length,
@@ -408,7 +426,9 @@ const PropertyOverviewNow = (data) => {
         Total_Shortterm_Properties : totalshortterm.length,
         Total_Longterm_Properties : totallongterm.length,
         TotalPropertiesWithOwner : totalPropertiesWithOwner.length,
-        TotalPropertiesWithoutOwner : totalPropertiesWithoutOwner.length 
+        TotalPropertiesWithoutOwner : totalPropertiesWithoutOwner.length,
+        "2024" : o2024.length,
+        "2023" : o2023.length
     }
 
 }
