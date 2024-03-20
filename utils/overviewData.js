@@ -427,8 +427,8 @@ const PropertyOverviewNow = (data) => {
         Total_Longterm_Properties : totallongterm.length,
         TotalPropertiesWithOwner : totalPropertiesWithOwner.length,
         TotalPropertiesWithoutOwner : totalPropertiesWithoutOwner.length,
-        "2024" : o2024.length,
-        "2023" : o2023.length
+        n2024 : o2024.length,
+        n2023 : o2023.length
     }
 
 }
