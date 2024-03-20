@@ -2231,11 +2231,13 @@ const deleteBooking = asyncHandler(async (req, res) => {
     }
     const redisdeleeted = await redisMiddleware.deleteData('allbookings')
     const result = await deletedBooking.deleteOne()
-   await Promise.all([redisdeleeted ,result])
+   
     const reply = `Booking ${result?.propertyid} with Id ${result?._id} deleted`
 
-    
-    return res.json(reply)
+    setTimeout(async() => {
+        await Promise.all([redisdeleeted ,result])
+        return res.json(reply)
+    },2000)
 })
 
 const getBookingSearch = asyncHandler(async (req, res) => {
