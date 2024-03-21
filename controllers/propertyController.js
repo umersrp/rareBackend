@@ -2006,7 +2006,96 @@ const ActiveContract = async (req,res,next) => {
         }
     }
 
+    const PropertyLinked = async (req,res,next) => {
+       const id = req.params.id
+        try{
+
+        const management =  [
+                {
+                  '$match': {
+                    'propertyid': mongoose.Types.ObjectId(id),
+                  }
+                }, {
+                  '$sort': {
+                    'createdAt': -1
+                  }
+                },
+                {
+                    '$count': 'total'
+                  }
+              ]
+        const booking = [
+                {
+                  '$match': {
+                    'propertyid': mongoose.Types.ObjectId(id),
+                  }
+                }, {
+                  '$sort': {
+                    'createdAt': -1
+                  }
+                },
+                {
+                    '$count': 'total'
+                  }
+              ]
+        const tenant = [
+            {
+              '$match': {
+                'propertyid': mongoose.Types.ObjectId(id),
+              }
+            }, {
+              '$sort': {
+                'createdAt': -1
+              }
+            },
+            {
+                '$count': 'total'
+              }
+          ]
+        const rentpur = [
+            {
+              '$match': {
+                'porpertyid': id
+              }
+            }, {
+              '$sort': {
+                'createdAt': -1
+              }
+            },
+            {
+                '$count': 'total'
+              }
+          ]
+        
+          const allmanagement = await managementContract.aggregate(management)
+          const allbooking = await Bookings.aggregate(booking)
+          const alltenant = await TenantContract.aggregate(tenant)
+          const allavaiblitysheet = await rentpurchase.aggregate(rentpur)
+
+         const combinedData = await Promise.all([allmanagement,allbooking,alltenant,allavaiblitysheet])
+
+         const [managements , bookings , tenants , avaiblitysheets ] = combinedData
+
+         res.status(200).json({
+            message : "Property Linked Data",
+            status : true,
+            data : {
+                managements , bookings , tenants , avaiblitysheets
+            }
+         })
+
+
+
+        }catch(err){
+            res.status(500).json({
+                message : "Property not found",
+                status : false
+             })
+        }
+    }
+
 module.exports = {
+    PropertyLinked,
     ownerProperty,
     ownerBookings,
     getownerProperty,
