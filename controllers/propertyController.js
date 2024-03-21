@@ -1360,7 +1360,7 @@ const updatePropertyAvailability = asyncHandler(async (req, res) => {
         //     // console.log('comming into else portion')
         //       return res.status(200).json({ message: `Property ${updatedProperty.unitnumber} updated` })
         // }
-        
+        await redisMiddleware.deleteData('allproperty')
         return res.status(200).json({ message: `Property ${updatedProperty.unitnumber} updated` })
     } else {
         return res.status(400).json({ message: 'Invalid Property data received' })
