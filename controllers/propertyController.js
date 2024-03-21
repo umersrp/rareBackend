@@ -2014,6 +2014,7 @@ const ActiveContract = async (req,res,next) => {
                 {
                   '$match': {
                     'propertyid': mongoose.Types.ObjectId(id),
+                    'softdelete' : false
                   }
                 }, {
                   '$sort': {
@@ -2028,6 +2029,7 @@ const ActiveContract = async (req,res,next) => {
                 {
                   '$match': {
                     'propertyid': mongoose.Types.ObjectId(id),
+                    'softdelete' : false
                   }
                 }, {
                   '$sort': {
@@ -2042,6 +2044,7 @@ const ActiveContract = async (req,res,next) => {
             {
               '$match': {
                 'propertyid': mongoose.Types.ObjectId(id),
+                'softdelete' : false
               }
             }, {
               '$sort': {
@@ -2055,7 +2058,8 @@ const ActiveContract = async (req,res,next) => {
         const rentpur = [
             {
               '$match': {
-                'porpertyid': id
+                'porpertyid': id,
+                'softdelete' : false
               }
             }, {
               '$sort': {
