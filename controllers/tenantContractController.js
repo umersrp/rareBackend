@@ -110,6 +110,7 @@ const Alltenants = async (req,res,next) => {
     // }
 })
 
+
         
     } 
     catch (error) {
@@ -687,6 +688,8 @@ const createTenantContract = asyncHandler(async (req, res) => {
           //     }
           // }
           await redisMiddleware.deleteData('alltenants')
+          await redisMiddleware.deleteData('getAllPropertyConnect')
+          
          return res.status(200).json({ message: `New Tenant Contract created`,status:true })
       } else {
         return  res.status(400).json({ message: 'Invalid Tenant Contract received' , status : false })
@@ -769,6 +772,8 @@ const updateTenantContract = asyncHandler(async (req, res) => {
 
   // Save the updated tenant contract
   const updatedTenantContract = await tenantContract.save();
+
+  await redisMiddleware.deleteData('alltenants')
 
   res.json({ message: `Tenant Contract ${updatedTenantContract._id} updated` });
 });
