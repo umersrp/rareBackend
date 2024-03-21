@@ -61,7 +61,9 @@ const Alltenants = async (req,res,next) => {
     }
 
     if(data.propertyid.status === "Vacant"){
-      console.log("222222")
+      if(new Date(data.contractenddate ) > new Date()){
+        await AddProperty.updateOne({_id : data.propertyid._id.toString()},{ $set : { status : "Occupied" }},{new : true})
+       }
       return;
     }
 
