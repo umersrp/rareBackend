@@ -61,6 +61,7 @@ const Alltenants = async (req,res,next) => {
     }
 
     if(data.propertyid.status === "Vacant"){
+      console.log("222222")
       return;
     }
 
