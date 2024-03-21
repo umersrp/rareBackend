@@ -50,6 +50,7 @@ const upload = multer({
 
 router.route("/search/:key").get(userController.SearchByEmail)
 router.route("/:id").get(userController.getUser)
+router.route("/api/user/:email").get(userController.getUserByEmail)
 router.route("/api/verified/").get(userController.getAllUsersVerified)
 router.route("/api/verified/search/:key").get(userController.getUsersVerifiedSearch)
 router.route("/api/allusers").get(userController.getAllUsersWP)
