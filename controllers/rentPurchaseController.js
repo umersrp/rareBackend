@@ -300,7 +300,8 @@ const getAllRentpurchaseSearchApp = asyncHandler(async (req, res) => {
 const getAllRentpurchase = asyncHandler(async (req, res) => {
     const rentPurchase = await RentPurchase.find({
         $and: [
-            { softdelete: { $ne: true } } // Filter out softdeleted bookings
+            { softdelete: { $ne: true } }, // Filter out softdeleted bookings
+            { unlisted: { $ne: true } }
         ]
     }).sort({ _id: "descending" })
     if (!rentPurchase?.length) {
@@ -571,7 +572,8 @@ const getSearchRentpurchase = asyncHandler(async (req, res) => {
     try {
         const rentpurchase = await RentPurchase.find({
             $and: [
-                { softdelete: { $ne: true } }
+                { softdelete: { $ne: true } }, // Filter out softdeleted bookings
+                { unlisted: { $ne: true } }
             ],
             "$or": [
                 req.query,
