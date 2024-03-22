@@ -1011,8 +1011,9 @@ const createProperty = asyncHandler(async (req, res) => {
     }
     await User.updateOne({_id : customerid} , { $set:{ subType : "owner"}})
 
+    
+    await redisMiddleware.deleteData('getAllPropertyConnect')
     const createProperty = await AddProperty.create(propertyObject)
-
     if (createProperty) {
         // console.log('createProperty me araha hai')
         // if (createProperty?.customerid) {
@@ -1051,7 +1052,7 @@ const createProperty = asyncHandler(async (req, res) => {
         //     // console.log('comming into else portion')
         //     return res.status(200).json({ message: `New Property ${unitnumber} created` })
         // }
-        await redisMiddleware.deleteData('allproperty')
+       
         return res.status(200).json(createProperty)
     } else {
         return res.status(400).json({ message: 'Invalid Property data received' })
@@ -1288,7 +1289,7 @@ const updateNewProperty = asyncHandler(async (req, res) => {
     updateProperty.OwnerNameAsPerDeed = OwnerNameAsPerDeed ? JSON.parse(OwnerNameAsPerDeed) : []
 
     const updatedPropertyN =  await AddProperty.findByIdAndUpdate( {_id : id } , { $set : updateProperty } , { new : true})
-     await redisMiddleware.deleteData('allproperty')
+    await redisMiddleware.deleteData('getAllPropertyConnect')
     return res.json({ message: `${updatedPropertyN.unitnumber} updated` })
 })
 
@@ -1360,7 +1361,7 @@ const updatePropertyAvailability = asyncHandler(async (req, res) => {
         //     // console.log('comming into else portion')
         //       return res.status(200).json({ message: `Property ${updatedProperty.unitnumber} updated` })
         // }
-        await redisMiddleware.deleteData('allproperty')
+        await redisMiddleware.deleteData('getAllPropertyConnect')
         return res.status(200).json({ message: `Property ${updatedProperty.unitnumber} updated` })
     } else {
         return res.status(400).json({ message: 'Invalid Property data received' })
