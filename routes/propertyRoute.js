@@ -58,4 +58,6 @@ router.route('/')
     router.route('/api/propertyoverview').get(propertyController.PropertyOverview)
     router.route('/api/propertyoverview/:customerid').get(propertyController.OwnerPropertyOverview)
 
+    router.route('/api/propertylink/:id').get(propertyController.PropertyLinked)
+
 module.exports = router

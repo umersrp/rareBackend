@@ -604,19 +604,63 @@ const getPaginationBookingOwnerRep = asyncHandler(async (req, res) => {
     const page = parseInt(req.query.page || 0)
     const perPage = req.query.perPage || 10
     const sort = req.query.sort
+    const ownerid = req.query.ownerid
     // console.log(req.query)
     try {
-        const count = await Booking.countDocuments(req.query)
-        const booking = await Booking.find({
-            $and: [
-                req.query,
-                { softdelete: false } // Filter out softdeleted bookings
-            ]
-            // propertyid: req.query.propertyid
-        })
-            .sort({ _id: -1 })
-            .skip(perPage * page)
-            .limit(parseInt(perPage))
+
+        const data = [
+            {
+              '$match': {
+                '$and': [
+                  {
+                    'softdelete': false
+                  }, {
+                    'ownerid': ownerid
+                  }
+                ]
+              }
+            }, {
+              '$lookup': {
+                'from': 'tenantcontracts', 
+                'localField': 'propertyid', 
+                'foreignField': 'propertyid', 
+                'as': 'tenants'
+              }
+            }, {
+              '$addFields': {
+                'containsRareHoliday': {
+                  '$in': [
+                    'Rare Holiday', '$tenants.guestname'
+                  ]
+                }
+              }
+            }, {
+              '$match': {
+                'containsRareHoliday': false
+              }
+            }, {
+              '$sort': {
+                '_id': -1
+              }
+            }, {
+              '$skip': perPage * page
+            }, {
+              '$limit': parseInt(perPage)
+            }
+          ]
+          const booking = await Booking.aggregate(data)
+        // const count = await Booking.countDocuments(req.query)
+        // const booking = await Booking.find({
+        //     $and: [
+        //         req.query,
+        //         { softdelete: false } // Filter out softdeleted bookings
+        //     ]
+        //     // propertyid: req.query.propertyid
+        // })
+        //     .sort({ _id: -1 })
+        //     .skip(perPage * page)
+        //     .limit(parseInt(perPage))
+
         return res.status(200).json(
             // {
             // count: Math.ceil(count / perPage),

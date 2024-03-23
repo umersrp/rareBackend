@@ -300,7 +300,8 @@ const getAllRentpurchaseSearchApp = asyncHandler(async (req, res) => {
 const getAllRentpurchase = asyncHandler(async (req, res) => {
     const rentPurchase = await RentPurchase.find({
         $and: [
-            { softdelete: { $ne: true } } // Filter out softdeleted bookings
+            { softdelete: { $ne: true } }, // Filter out softdeleted bookings
+            { unlisted: { $ne: true } }
         ]
     }).sort({ _id: "descending" })
     if (!rentPurchase?.length) {
@@ -571,7 +572,8 @@ const getSearchRentpurchase = asyncHandler(async (req, res) => {
     try {
         const rentpurchase = await RentPurchase.find({
             $and: [
-                { softdelete: { $ne: true } }
+                { softdelete: { $ne: true } }, // Filter out softdeleted bookings
+                // { unlisted: { $ne: true } }
             ],
             "$or": [
                 req.query,
@@ -653,7 +655,8 @@ const getSearchRentpurchase = asyncHandler(async (req, res) => {
                    
 
                     const tenant = tenantDetails.find(tenant => String(tenant.propertyid) === String(porpertyid) && tenant.contractupdation !== "terminated" && tenant.softdelete === false);
-
+                    
+                      
                         if (tenant) {
                             updatedAvailability.contract_startdate = tenant.contractstartdate;
                             updatedAvailability.contract_enddate = tenant.contractenddate;
@@ -803,6 +806,10 @@ const getSearchRentpurchase = asyncHandler(async (req, res) => {
         const updateAvailabilityAgain = updatedRentPurchase.filter(item => {
             return !(item.propertystatus === 'Multiple' && !item.multivaluation?.length);
         });
+
+
+        
+
         res.json(updateAvailabilityAgain);
         // res.status(200).json(rentPurchaseWithBuilding)
     } catch (err) {

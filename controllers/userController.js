@@ -565,6 +565,16 @@ const getUser = asyncHandler(async (req, res) => {
     res.json(user)
 })
 
+const getUserByEmail = async (req,res,next) => {
+    try{
+        const userEmail = await User.findOne({ email : req.params.email});
+        res.status(200).send(userEmail);
+
+    }catch(err){
+        res.status(500).json({ message : "No User Found"})
+    }
+}
+
 const createNewUser = asyncHandler(async (req, res) => {
     // let passportpdf = (req.file) ? req.file.filename : null
     // let nationalidpdf = (req.file) ? req.file.filename : null
@@ -1143,6 +1153,7 @@ try{
 }
 
 module.exports = {
+    getUserByEmail,
     allOwners,
     getAllUsers,
     getAllUserRedux,
