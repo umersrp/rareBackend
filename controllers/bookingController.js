@@ -611,10 +611,15 @@ const getPaginationBookingOwnerRep = asyncHandler(async (req, res) => {
         const data = [
             {
               '$match': {
-                '$and': [
+                  '$or':[
                     req.query,
-                  { 'softdelete': false},
-                  { 'ownerid': ownerid }
+                    {
+                        '$and': [
+                          { 'softdelete': false},
+                          { 'ownerid': ownerid }
+                        ]
+
+                    }
                 ]
               }
             }, {
