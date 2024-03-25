@@ -1,10 +1,6 @@
 const { createClient } = require('redis');
 
-console.log("process.env.STAGING_REDIS_PASSWORD",process.env.STAGING_REDIS_PASSWORD,
-"process.env.STAGING_REDIS_HOST",process.env.STAGING_REDIS_HOST,
-"process.env.STAGING_REDIS_PORT",process.env.STAGING_REDIS_PORT
 
-)
     const redisClient = createClient({
         password: process.env.STAGING_REDIS_PASSWORD,
         socket: {
