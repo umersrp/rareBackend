@@ -10,6 +10,7 @@ router.route('/api/search/owner/').get(rentPurchaseController.getSearchRentpurch
 router.route('/api/property').patch(rentPurchaseController.updatePropertyAvailability)
 router.route('/api/propertydelete').get(rentPurchaseController.getRentPurchaseProperty)
 router.route('/api/app/search/:key').get(rentPurchaseController.getAllRentpurchaseSearchApp)
+router.route('/api/apps').get(rentPurchaseController.getAllRentpurchasetesting)
 
 router.route('/')
     .get(rentPurchaseController.getAllRentpurchase)

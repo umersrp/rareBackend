@@ -301,7 +301,7 @@ const getAllRentpurchase = asyncHandler(async (req, res) => {
     const rentPurchase = await RentPurchase.find({
         $and: [
             { softdelete: { $ne: true } }, // Filter out softdeleted bookings
-            { unlisted: { $ne: true } }
+            // { unlisted: { $ne: true } }
         ]
     }).sort({ _id: "descending" })
     if (!rentPurchase?.length) {
@@ -361,19 +361,216 @@ const getAllRentpurchase = asyncHandler(async (req, res) => {
 
           
                 
-                    const tenant = tenantDetails.find((tenant) => String(tenant.propertyid) === String(porpertyid) && tenant.contractupdation !== "terminated" && tenant.softdelete === false);
-                    
+                    const tenant = tenantDetails.find((tenant) => String(tenant.propertyid) === String(porpertyid) && tenant.contractupdation !== "terminated" && tenant.softdelete === false );
+                        // && 
                         if (tenant) {
                            
-                            updatedAvailability.contract_startdate = tenant.contractstartdate;
-                            updatedAvailability.contract_enddate = tenant.contractenddate;
-                            updatedAvailability.tenantid = tenant._id;
-                            updatedAvailability.rental_amount = tenant.rentalamount;
-                            updatedAvailability.tenat_email = tenant.email;
-                            updatedAvailability.tenant_name = tenant.guestname;
-                            updatedAvailability.tenant_passport = tenant.passportnumber;
-                            updatedAvailability.tenant_nationality = tenant.nationality;
-                            updatedAvailability.tenant_mobilenumber = tenant.mobilenumber;
+                            if(new Date(tenant.contractenddate) > new Date()){
+                                updatedAvailability.contract_startdate = tenant.contractstartdate;
+                                updatedAvailability.contract_enddate = tenant.contractenddate;
+                                updatedAvailability.tenantid = tenant._id;
+                                updatedAvailability.rental_amount = tenant.rentalamount;
+                                updatedAvailability.tenat_email = tenant.email;
+                                updatedAvailability.tenant_name = tenant.guestname;
+                                updatedAvailability.tenant_passport = tenant.passportnumber;
+                                updatedAvailability.tenant_nationality = tenant.nationality;
+                                updatedAvailability.tenant_mobilenumber = tenant.mobilenumber;
+                            }
+                        }
+
+
+                    
+
+                    const building = buildings.find(building => String(building._id) === String(property.buildingid));
+                    if (building) {
+                        updatedAvailability.building_name = building.buildingname;
+                        updatedAvailability.buildingid = building._id;
+                    }
+
+                    const projectname = projectnames.find(project => String(project._id) === String(property.projectnameid));
+                    if (projectname) {
+                        updatedAvailability.project_name = projectname.projectName;
+                        updatedAvailability.projectnameid = projectname._id;
+                    }
+
+                    const community = communityData.find(community => String(community._id) === String(property.communityid));
+                    if (community) {
+                        updatedAvailability.community_name = community.communityname;
+                        updatedAvailability.communityid = community._id;
+                    }
+
+                    const subtype = subtypeData.find(subtype => String(subtype._id) === String(property.subtypeid));
+                    if (subtype) {
+                        updatedAvailability.subtype_name = subtype.subtypename;
+                    }
+
+                    const customerid = userData.find(customerid => String(customerid._id) === String(property?.customerid));
+                    if (customerid) {
+                        updatedAvailability.property_owner_name = (customerid?.firstname) + (customerid?.lastname ? " " + customerid?.lastname : "") + (customerid?.email ? " | " + customerid?.email : "");
+                        updatedAvailability.property_owner_email = customerid?.email;
+                        updatedAvailability.property_owner_id = customerid?._id;
+                    }
+
+                    const employee = employeeData.find(employee => String(employee._id) === String(employeeid));
+                    if (employee) {
+                        updatedAvailability.employee_email = employee?.softdelete === false ? employee?.email : "";
+                    }
+
+                    const employeeCreatedBy = employeeDataCreatedBy.find(employee => String(employee._id) === String(createdBy));
+                    if (employeeCreatedBy) {
+                        updatedAvailability.employee_email_createdBy = employeeCreatedBy?.email;
+                    }
+                    const employeeUpdatedBy = employeeDataUpdatedBy.find(employee => String(employee._id) === String(updatedBy));
+                    if (employeeUpdatedBy) {
+                        updatedAvailability.employee_email_updatedBy = employeeUpdatedBy?.email;
+                    }
+                }
+
+            }
+
+            return updatedAvailability;
+        });
+
+        const employeeIdsMultiValuation = [];
+
+        for (const rent of rentPurchase) {
+            if (rent.multivaluation && Array.isArray(rent.multivaluation)) {
+                for (const valuation of rent.multivaluation) {
+                    if (valuation.employeeid) {
+                        employeeIdsMultiValuation.push(valuation.employeeid); // Corrected line
+                    }
+                }
+            }
+        }
+
+        const employeeDataMultiValuation = await Employee.find({ _id: { $in: employeeIdsMultiValuation } });
+        const rentPurchaseWithEmail = rentPurchaseWithBuilding.map(rent => {
+            const updatedRent = { ...rent };
+
+            if (updatedRent.multivaluation) {
+                updatedRent.multivaluation = updatedRent.multivaluation.map(valuation => {
+                    const updatedValuation = { ...valuation };
+
+                    if (valuation.employeeid) {
+                        const employee = employeeDataMultiValuation.find(employee => String(employee._id) === String(valuation.employeeid));
+                        if (employee && employee.softdelete === false) {
+                            updatedValuation.employee_email = employee.email;
+                        }
+                    }
+
+                    if (valuation.propertystatus === "Rent") {
+                        const tenant = tenantDetails.find(tenant => String(tenant.propertyid) === String(rent?.porpertyid) && tenant.contractupdation !== "terminated" && tenant.softdelete === false);
+                        if (tenant) {
+                            updatedValuation.contract_startdate = tenant.contractstartdate;
+                            updatedValuation.contract_enddate = tenant.contractenddate;
+                            updatedValuation.tenantid = tenant._id;
+                            updatedValuation.rental_amount = tenant.rentalamount;
+                            updatedValuation.tenat_email = tenant.email;
+                            updatedValuation.tenant_name = tenant.guestname;
+                            updatedValuation.tenant_passport = tenant.passportnumber;
+                            updatedValuation.tenant_nationality = tenant.nationality;
+                            updatedValuation.tenant_mobilenumber = tenant.mobilenumber;
+                        }
+                    }
+
+
+
+                    return updatedValuation;
+                });
+            }
+
+            return updatedRent;
+        });
+
+        res.json(rentPurchaseWithEmail);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server Error" });
+    }
+});
+
+const getAllRentpurchasetesting = asyncHandler(async (req, res) => {
+    const rentPurchase = await RentPurchase.find({
+        $and: [
+            {porpertyid : "65364723489507069f82f1c5"},
+            { softdelete: { $ne: true } }, // Filter out softdeleted bookings
+            // { unlisted: { $ne: true } }
+        ]
+    }).sort({ _id: "descending" })
+    if (!rentPurchase?.length) {
+        return res.status(400).json({ message: "No Project Name found" });
+    }
+    
+    const propertyIds = rentPurchase.map(property => property.porpertyid);
+    const employeeIds = rentPurchase.map(employee => employee.employeeid);
+    const employeeCreatedBy = rentPurchase.map(employee => employee.createdBy);
+    const employeeIdsUpdatedBy = rentPurchase.map(employee => employee.updatedBy);
+
+    try {
+        const properties = await AddProperty.find({ _id: { $in: propertyIds } });
+        const buildingIds = properties.map(property => property?.buildingid);
+        const projectnameId = properties.map(property => property?.projectnameid);
+        const communityId = properties.map(property => property?.communityid);
+        const subtypeId = properties.map(property => property?.subtypeid);
+        const ownerId = properties.map(property => property.customerid);
+
+        const buildings = await BuildingName.find({ _id: { $in: buildingIds } });
+        const projectnames = await ProjectName.find({ _id: { $in: projectnameId } });
+        const communityData = await CommunityName.find({ _id: { $in: communityId } });
+        const subtypeData = await SubType.find({ _id: { $in: subtypeId } });
+        const employeeData = await Employee.find({ _id: { $in: employeeIds } });
+        const employeeDataCreatedBy = await Employee.find({ _id: { $in: employeeCreatedBy } });
+        const employeeDataUpdatedBy = await Employee.find({ _id: { $in: employeeIdsUpdatedBy } });
+        const userData = await User.find({ _id: { $in: ownerId } });
+        const tenantDetails = await tenantContract.find({ propertyid: { $in: propertyIds } }).sort({ createdAt : -1})
+        const Booking = await  Bookings.find({  propertyid : {$in : propertyIds }}).sort({ createdAt : -1})
+
+        
+        const rentPurchaseWithBuilding = rentPurchase.map((rent) => {
+           
+            
+            const availabilityObject = rent.toObject();
+            const { porpertyid, employeeid, propertyvaluation, maintenance ,listingtype, keylocation, numberkeys, listingsource, createdAt, _id, propertystatus, unlisted, again_available, createdBy, updatedBy, updatedAt, multi_propertyvaluation, multivaluation, property_reference, transaction_status } = availabilityObject;
+            const updatedAvailability = { porpertyid, employeeid, propertyvaluation , maintenance, listingtype, keylocation, numberkeys, listingsource, createdAt, _id, propertystatus, unlisted, again_available, createdBy, updatedBy, updatedAt, multi_propertyvaluation, multivaluation, property_reference, transaction_status };
+        
+            if (porpertyid) {
+                const property = properties.find(property => String(property._id) === String(rent.porpertyid));
+                if (property) {
+                    updatedAvailability.unitnumber = property.unitnumber;
+                    updatedAvailability.floor = property.floor;
+                    updatedAvailability.balcony = property.balcony;
+                    updatedAvailability.kitchen = property.kitchen;
+                    updatedAvailability.projectstatus = property.projectstatus;
+                    updatedAvailability.furnished = property.furnished;
+                    updatedAvailability.halfbathroom = property.halfbathroom;
+                    updatedAvailability.nobathroom = property.nobathroom;
+                    updatedAvailability.plotsize = property.plotsize;
+                    updatedAvailability.projectstatus = property.projectstatus;
+                    updatedAvailability.propertytype = property.propertytype;
+                    updatedAvailability.noparking = property.noparking;
+                    updatedAvailability.builduparea = property.builduparea;
+                    updatedAvailability.measure_units = property.measure_units;
+                   
+
+                   
+                
+                    const tenant = tenantDetails.find((tenant) => String(tenant.propertyid) === String(porpertyid) && tenant.contractupdation !== "terminated" && tenant.softdelete === false );
+                        // && 
+                        if (tenant) {
+                           
+                            if(new Date(tenant.contractenddate) > new Date()){
+                                updatedAvailability.contract_startdate = tenant.contractstartdate;
+                                updatedAvailability.contract_enddate = tenant.contractenddate;
+                                updatedAvailability.tenantid = tenant._id;
+                                updatedAvailability.rental_amount = tenant.rentalamount;
+                                updatedAvailability.tenat_email = tenant.email;
+                                updatedAvailability.tenant_name = tenant.guestname;
+                                updatedAvailability.tenant_passport = tenant.passportnumber;
+                                updatedAvailability.tenant_nationality = tenant.nationality;
+                                updatedAvailability.tenant_mobilenumber = tenant.mobilenumber;
+                                // meaning in this cocdition that if tenant contract is active
+                            }
                         }
 
 
@@ -654,10 +851,11 @@ const getSearchRentpurchase = asyncHandler(async (req, res) => {
                     
                    
 
-                    const tenant = tenantDetails.find(tenant => String(tenant.propertyid) === String(porpertyid) && tenant.contractupdation !== "terminated" && tenant.softdelete === false);
-                    
-                      
-                        if (tenant) {
+                    const tenant = tenantDetails.find((tenant) => String(tenant.propertyid) === String(porpertyid) && tenant.contractupdation !== "terminated" && tenant.softdelete === false );
+                    // && 
+                    if (tenant) {
+                       
+                        if(new Date(tenant.contractenddate) > new Date()){
                             updatedAvailability.contract_startdate = tenant.contractstartdate;
                             updatedAvailability.contract_enddate = tenant.contractenddate;
                             updatedAvailability.tenantid = tenant._id;
@@ -666,8 +864,10 @@ const getSearchRentpurchase = asyncHandler(async (req, res) => {
                             updatedAvailability.tenant_name = tenant.guestname;
                             updatedAvailability.tenant_passport = tenant.passportnumber;
                             updatedAvailability.tenant_nationality = tenant.nationality;
-                            updatedAvailability.tenant_mobilenumber = tenant.mobilenumber
+                            updatedAvailability.tenant_mobilenumber = tenant.mobilenumber;
+                            // meaning in this cocdition that if tenant contract is active
                         }
+                    }
 
                     const building = buildings.find(building => String(building._id) === String(property.buildingid));
                     if (building) {
@@ -1286,6 +1486,7 @@ const deleteRentpurchase = asyncHandler(async (req, res) => {
 })
 
 module.exports = {
+    getAllRentpurchasetesting,
     getAllRentpurchase,
     getRentpurchaseById,
     createRentpurchase,
