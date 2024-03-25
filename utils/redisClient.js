@@ -2,10 +2,10 @@ const { createClient } = require('redis');
 
 
     const redisClient = createClient({
-        password: 'p4JXuPZBdE7oCvaprOLzpDQ728oIUsr9',
+        password: process.env.STAGING_REDIS_PASSWORD,
         socket: {
-            host: 'redis-16849.c325.us-east-1-4.ec2.cloud.redislabs.com',
-            port: 16849
+            host: process.env.STAGING_REDIS_HOST,
+            port: process.env.STAGING_REDIS_PORT
         }
     });
     
