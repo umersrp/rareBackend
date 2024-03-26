@@ -520,10 +520,31 @@ try{
         'preserveNullAndEmptyArrays': true
       }
     }, {
+      '$lookup': {
+        'from': 'users', 
+        'localField': 'seller_id', 
+        'foreignField': '_id', 
+        'as': 'seller_id'
+      }
+    }, {
+      '$unwind': {
+        'path': '$seller_id', 
+        'preserveNullAndEmptyArrays': true
+      }
+    }, {
       '$project': {
         'propertytypesegration': '$propertyid.propertytype', 
+        'unitnumber': '$propertyid.unitnumber', 
+        'projectname': '$propertyid.projectname', 
+        'comunityname': '$propertyid.communityname', 
+        'buildingname': '$propertyid.buildingname', 
+        'seller_name': {
+          '$concat': [
+            '$seller_id.firstname', ' ', '$seller_id.lastname'
+          ]
+        }, 
         'buyer_id': 1, 
-        'seller_id': 1, 
+        'seller_id': '$seller_id._id', 
         'property_new': 1, 
         'buyer_new': 1, 
         'seller_new': 1, 
