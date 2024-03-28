@@ -11,12 +11,15 @@ const { createClient } = require('redis');
     });
     
     // Handle Redis client errors
-    redisClient.connect('error', err => {
+    redisClient
+    .connect('error', err => {
         if(err){
             console.log('Redis Client Error', err);
             return ;
         }
-    }).then((res) => res)
+    })
+    .then((res) => res)
+    .catch((err) => console.log("error is coming in redis"))
     
     // Set up middleware functions
 const redisMiddleware = {
