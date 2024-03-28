@@ -5,13 +5,17 @@ const { createClient } = require('redis');
         password: process.env.STAGING_REDIS_PASSWORD || 'p4JXuPZBdE7oCvaprOLzpDQ728oIUsr9',
         socket: {
             host: process.env.STAGING_REDIS_HOST || 'redis-16849.c325.us-east-1-4.ec2.cloud.redislabs.com',
-            port: process.env.STAGING_REDIS_PORT || '16849'
+            port: process.env.STAGING_REDIS_PORT || '16849',
+            connect_timeout: 30000,
         }
     });
     
     // Handle Redis client errors
     redisClient.connect('error', err => {
-        console.error('Redis Client Error', err);
+        if(err){
+            console.log('Redis Client Error', err);
+            return ;
+        }
     }).then((res) => res)
     
     // Set up middleware functions
