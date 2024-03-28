@@ -15,6 +15,11 @@ const SaleRegisterSchema = new mongoose.Schema({
         require: true,
         ref: 'User'
     },
+    employeeid: { // seller agent 
+        type: mongoose.Schema.Types.ObjectId,
+        require: true,
+        ref: 'employee'
+    },
     property_new: {
         type: Boolean,
         require: true,

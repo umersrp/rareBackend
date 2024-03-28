@@ -316,7 +316,7 @@ const deleteSaleRegister = asyncHandler(async (req, res) => {
 
 const SearchSaleRegisterByQuery = async (req, res, next) => {
   try {
-      const { unitnumber, seller_email, buyer_email, communityid, projectnameid, buildingid , transaction_type } = req.query;
+      const { unitnumber, seller_email, buyer_email, communityid, projectnameid, buildingid , transaction_type , employee_email, startDate, endDate } = req.query;
      // console.log(req.query)
       // Constructing match conditions
       const matchConditions = {
@@ -326,11 +326,17 @@ const SearchSaleRegisterByQuery = async (req, res, next) => {
       if (unitnumber) matchConditions['propertyid.unitnumber'] = unitnumber;
       if (seller_email) matchConditions['seller_id.email'] = seller_email;
       if (buyer_email) matchConditions['buyer_id.email'] = buyer_email;
+      if(employee_email) matchConditions['employeeid.email'] = employee_email;
       if (communityid) matchConditions['propertyid.communityid'] = new mongoose.Types.ObjectId(communityid);
       if (projectnameid) matchConditions['propertyid.projectnameid'] = new mongoose.Types.ObjectId(projectnameid);
       if (buildingid) matchConditions['propertyid.buildingid'] = new mongoose.Types.ObjectId(buildingid);
       if (transaction_type) matchConditions['transaction_type'] = transaction_type
-
+      if (startDate && endDate) {
+        matchConditions['createdAt'] = {
+            '$gte': new Date(startDate),
+            '$lte': new Date(endDate)
+        };
+    }
       
       
       const data = [
@@ -338,6 +344,7 @@ const SearchSaleRegisterByQuery = async (req, res, next) => {
           { '$lookup': { 'from': 'addproperties', 'localField': 'propertyid', 'foreignField': '_id', 'as': 'propertyid' } },
           { '$lookup': { 'from': 'users', 'localField': 'buyer_id', 'foreignField': '_id', 'as': 'buyer_id' } },
           { '$lookup': { 'from': 'users', 'localField': 'seller_id', 'foreignField': '_id', 'as': 'seller_id' } },
+          { '$lookup': { 'from': 'employee', 'localField': 'employeeid', 'foreignField': '_id', 'as': 'employeeid' } },
           { '$unwind': { 'path': '$propertyid', 'preserveNullAndEmptyArrays': true } },
           { '$unwind': { 'path': '$buyer_id', 'preserveNullAndEmptyArrays': true } },
           { '$unwind': { 'path': '$seller_id', 'preserveNullAndEmptyArrays': true } },
@@ -356,6 +363,8 @@ const SearchSaleRegisterByQuery = async (req, res, next) => {
                   'buyer_name': { '$concat': ['$buyer_id.firstname', ' ', '$buyer_id.lastname'] },
                   'buyer_email': '$buyer_id.email',
                   'buyer_mobilenumber': '$buyer_id.contactno',
+                  'employee_name': { '$concat': ['$employeeid.firstname', ' ', '$employeeid.lastname'] },
+                  'employee_email': '$employeeid.email',
                   'communityname': 1,
                   'projectname': 1,
                   'buildingname': 1,
